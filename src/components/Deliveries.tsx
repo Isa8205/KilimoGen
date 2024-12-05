@@ -1,4 +1,4 @@
-import { ArrowDownAZIcon, ArrowDownUp, ArrowDownZA, ChevronDown, FilterIcon, Plus, SortDesc } from "lucide-react";
+import { ArrowDownAZIcon, ArrowDownZA, ChevronDown, FilterIcon, Plus, X } from "lucide-react";
 import { useState } from "react";
 
 export function Deliveries() {
@@ -13,9 +13,74 @@ export function Deliveries() {
 
     const [sortType, setSortType] = useState('descending')
 
+    const [modalDisp, setModalDisp] = useState(false)
+    const Modal = () => {
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 text-black">
+                <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
+                    {/* Dialog Header */}
+                    <div className="border-b p-4">
+                        <span className="flex items-center justify-between">
+                            <h2 className="text-lg font-semibold">Add New Delivery</h2>
+                            <X className="bg-gray-100 cursor-pointer hover:bg-red-500 hover:text-white rounded-sm" onClick={() => (setModalDisp(false))} />
+                        </span>
+                        <p className="text-sm text-gray-600">Enter the details for the new delivery.</p>
+                    </div>
+
+                    {/* Dialog Content */}
+                    <div className="p-4">
+                        <div className="grid gap-4">
+                            {/* Product Input */}
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <label htmlFor="product" className="text-right font-medium text-sm text-gray-700">
+                                    Product
+                                </label>
+                                <input
+                                    id="product"
+                                    className="col-span-3 p-2 border rounded-md focus:outline-none focus:ring focus:ring-pink-500"
+                                />
+                            </div>
+                            {/* Quantity Input */}
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <label htmlFor="quantity" className="text-right font-medium text-sm text-gray-700">
+                                    Quantity
+                                </label>
+                                <input
+                                    id="quantity"
+                                    type="number"
+                                    className="col-span-3 p-2 border rounded-md focus:outline-none focus:ring focus:ring-pink-500"
+                                />
+                            </div>
+                            {/* Destination Input */}
+                            <div className="grid grid-cols-4 items-center gap-4">
+                                <label htmlFor="destination" className="text-right font-medium text-sm text-gray-700">
+                                    Destination
+                                </label>
+                                <input
+                                    id="destination"
+                                    className="col-span-3 p-2 border rounded-md focus:outline-none focus:ring focus:ring-pink-500"
+                                />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Dialog Footer */}
+                    <div className="border-t p-4 flex justify-end">
+                        <button
+                            className="bg-black text-white py-2 px-4 rounded-md hover:bg-pink-600 focus:outline-none focus:ring focus:ring-pink-300"
+                        >
+                            Add Delivery
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
 
     return (
         <div className="w-full">
+            {modalDisp && <Modal />}
             <h2 className="mb-2 text-2xl">Delivery summary</h2>
 
             <div className="mb-4 flex justify-between items-baseline">
@@ -51,7 +116,12 @@ export function Deliveries() {
                     <button className="flex gap-4 bg-teal-500 dark:bg-gray-600 text-white p-2 rounded-md"><FilterIcon />This month <ChevronDown /></button>
                     <button className="flex bg-teal-500 dark:bg-gray-600 text-white p-2 rounded-md" onClick={() => (setSortType(sortType === 'ascending' ? 'descending' : 'ascending'))}>{sortType === 'ascending' ? <ArrowDownAZIcon /> : <ArrowDownZA />}</button>
                 </span>
-                <button className="p-2 rounded-md bg-white text-black flex"><Plus /> Add a delivery</button>
+                <button
+                    className="p-2 rounded-md bg-white text-black flex hover:bg-pink-500 hover:text-white"
+                    onClick={() => (setModalDisp(true))}
+                >
+                    <Plus /> Add a delivery
+                </button>
             </div>
 
             <table className="w-full my-2">

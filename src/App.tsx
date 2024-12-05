@@ -1,5 +1,5 @@
-import { BarChart, BellIcon, ChevronDown, ChevronLeft, ChevronRight, DollarSign, FileTextIcon, LayoutDashboard, Leaf, MessageSquareShare, Package, PersonStanding, Settings, Store, Truck, User } from "lucide-react";
-import { useEffect, useState } from "react";
+import { BarChart, BellIcon, ChevronDown, ChevronLeft, ChevronRight, DollarSign, FileTextIcon, LayoutDashboard, Leaf, MessageSquareShare, Package, Settings, Store, Truck, User } from "lucide-react";
+import { useState } from "react";
 import { Routes, Route, NavLink } from "react-router-dom";
 import Dashboard from "./components/Dashboard";
 import Reports from "./components/Reports";
@@ -10,38 +10,23 @@ import Messaging from "./components/Messaging";
 function App() {
 
     const navItems = [
-        { icon: <LayoutDashboard />, label: 'Dashboard', link: <NavLink to="/dashboard">Dashboard</NavLink> },
-        { icon: <User />, label: 'Members', link: <NavLink to="/dashboard">Farmers</NavLink> },
-        { icon: <Package />, label: 'Production', link: <NavLink to="/production">Production</NavLink> },
-        { icon: <Truck />, label: 'Deliveries', link: <NavLink to="/deliveries">Deliveries</NavLink> },
-        { icon: <Store />, label: 'Inventory', link: <NavLink to="/inventory">Inventory</NavLink> },
-        { icon: <BarChart />, label: 'Analytics', link: <NavLink to="/analytics">Analytics</NavLink> },
-        { icon: <DollarSign />, label: 'Financials', link: <NavLink to="/financials">Financials</NavLink> },
-        { icon: <FileTextIcon />, label: 'Reports', link: <NavLink to="/reports">Reports</NavLink> },
-        { icon: <MessageSquareShare />, label: 'Messaging', link: <NavLink to="/messaging">Messaging</NavLink> },
-    ];
-
-    // Responds to when the navigation items are clicked and activates them
-    // When reviewing indexes can be added also
-    useEffect(() => {
-        const navlist = document.querySelectorAll('.navlink')!
-        const locationDisp = document.getElementById('current-location')!
-        navlist.forEach((nav) => {
-            nav.addEventListener('click', () => {
-                navlist.forEach((nav) => {
-                    nav.classList.remove('bg-pink-500')
-                })
-                nav.classList.add('bg-pink-500')
-                locationDisp.textContent = nav.textContent
-            })
-        })
-    }, [])
+        { icon: <LayoutDashboard />, label: 'Dashboard', route: "/" },
+        { icon: <User />, label: 'Members', route: "/dashboard" },
+        { icon: <Package />, label: 'Production', route: "/production" },
+        { icon: <Truck />, label: 'Deliveries', route: "/deliveries" },
+        { icon: <Store />, label: 'Inventory', route: "/inventory" },
+        { icon: <BarChart />, label: 'Analytics', route: "/analytics" },
+        { icon: <DollarSign />, label: 'Financials', route: "/financials" },
+        { icon: <FileTextIcon />, label: 'Reports', route: "/report " },
+        { icon: <MessageSquareShare />, label: 'Messaging', route: "/messaging" },
+    ]
+    // The active tab
+    const [activeTab, setActiveTab] = useState('Dashboard')
 
     const Navbar = () => {
         const [isExpanded, setExpanded] = useState(false)
         // The list has the navlinks to be used to navigate the site
-        // They will be activated on clicing the corresponding item
-        // const navlist = [1]
+        // They will be activated on clicking the corresponding item
         return (
             <nav className={`navigation flex justify-start flex-col p-3 bg-teal-900 text-white gap-10 md:w-fit relative dark:bg-gray-900 transition-all duration-1000`}>
                 <span className="flex gap-2 items-center mt-2">
@@ -55,10 +40,12 @@ function App() {
                             navItems.map((nav) => (
                                 <li
                                     key={nav.label}
-                                    onClick={() => { setExpanded(true) }}
-                                    className="navlink flex gap-2 rounded-md py-2 mt-1 ps-2 cursor-pointer hover:bg-gray-50 hover:text-black"
+                                    onClick={() => {
+                                        setActiveTab(nav.label)
+                                    }}
+                                    className={`navlink flex gap-2 rounded-md py-2 mt-1 ps-2 cursor-pointer hover:bg-gray-50 hover:text-black ${nav.label === activeTab ? 'bg-pink-500' : ''}`}
                                 >
-                                    <span className="pe-2">{nav.icon}</span> {isExpanded && <p>{nav.label}</p>}
+                                    <NavLink to={nav.route} className="flex"><span className="pe-2">{nav.icon}</span> {isExpanded && <p>{nav.label}</p>}</NavLink>
                                 </li>
                             ))
                         }
@@ -80,7 +67,7 @@ function App() {
             <section className="content w-full text-white max-h-screen  py-2 pr-2">
                 {/* The header of the right section */}
                 <div className="flex justify-between items-center  bg-teal-900 p-4 rounded-lg sticky top-0 left-0 right-0 dark:bg-gray-900">
-                    <h2 className="text-2xl font-bold" id="current-location">Dashboard</h2>
+                    <h2 className="text-2xl font-bold">{activeTab}</h2>
 
                     <div className="profile rounded-lg flex justify-between items-center gap-4">
                         <span className="notifications relative bg-teal-600 dark:bg-gray-600 rounded-full p-1">
@@ -99,7 +86,7 @@ function App() {
                 {/* The different contents of the nav */}
                 <div className="container bg-teal-900 mt-6 p-8 rounded-lg dark:bg-gray-900 overflow-y-scroll" style={{ maxHeight: '85vh' }}>
                     <Routes>
-                        <Route path="/" Component={Deliveries} />
+                        <Route path="/" Component={Dashboard} />
                         <Route path="/deliveries" Component={Deliveries} />
                         <Route path="/inventory" Component={Inventory} />
                         <Route path="/reports" Component={Reports} />
