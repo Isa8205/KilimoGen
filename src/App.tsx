@@ -6,60 +6,105 @@ import Reports from "./components/Reports";
 import { Deliveries } from "./components/Deliveries";
 import { Inventory } from "./components/Inventory";
 import Messaging from "./components/Messaging";
+import { motion } from "framer-motion";
 
 function App() {
 
-    const navItems = [
-        { icon: <LayoutDashboard />, label: 'Dashboard', route: "/" },
-        { icon: <User />, label: 'Members', route: "/dashboard" },
-        { icon: <Package />, label: 'Production', route: "/production" },
-        { icon: <Truck />, label: 'Deliveries', route: "/deliveries" },
-        { icon: <Store />, label: 'Inventory', route: "/inventory" },
-        { icon: <BarChart />, label: 'Analytics', route: "/analytics" },
-        { icon: <DollarSign />, label: 'Financials', route: "/financials" },
-        { icon: <FileTextIcon />, label: 'Reports', route: "/report " },
-        { icon: <MessageSquareShare />, label: 'Messaging', route: "/messaging" },
-    ]
     // The active tab
     const [activeTab, setActiveTab] = useState('Dashboard')
 
     const Navbar = () => {
-        const [isExpanded, setExpanded] = useState(false)
-        // The list has the navlinks to be used to navigate the site
-        // They will be activated on clicking the corresponding item
+        const [isExpanded, setExpanded] = useState(true);
+
+        const navItems = [
+            { icon: <LayoutDashboard />, label: "Dashboard", route: "/" },
+            { icon: <User />, label: "Members", route: "/dashboard" },
+            { icon: <Package />, label: "Production", route: "/production" },
+            { icon: <Truck />, label: "Deliveries", route: "/deliveries" },
+            { icon: <Store />, label: "Inventory", route: "/inventory" },
+            { icon: <BarChart />, label: "Analytics", route: "/analytics" },
+            { icon: <DollarSign />, label: "Financials", route: "/financials" },
+            { icon: <FileTextIcon />, label: "Reports", route: "/report" },
+            { icon: <MessageSquareShare />, label: "Messaging", route: "/messaging" },
+        ];
+
         return (
-            <nav className={`navigation flex justify-start flex-col p-3 bg-teal-900 text-white gap-10 md:w-fit relative dark:bg-gray-900 transition-all duration-1000`}>
+            <nav
+                className={`navigation flex justify-start flex-col p-3 bg-teal-900 text-white gap-10 md:w-fit relative dark:bg-gray-900`}
+            >
                 <span className="flex gap-2 items-center mt-2">
-                    {isExpanded && <h2 className="text-3xl text-nowrap"><Leaf className="inline" /> Olmismis FCS</h2>}
-                    <button className="hover:bg-gray-100 hover:text-black rounded-lg px-2 py-2" onClick={() => { setExpanded(isExpanded ? false : true) }}>{isExpanded ? <ChevronLeft className="text-2xl" /> : <ChevronRight className="text-2xl" />}</button>
+                    <motion.h2
+                        className="text-3xl text-nowrap overflow-hidden"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1, width: isExpanded ? "auto" : 0 }}
+                        transition={{ duration: .15, ease: "easeInOut" }}
+                        exit={{ opacity: 0 }}
+                    >
+                        <Leaf className="inline" /> KilimoGen
+                    </motion.h2>
+                    <button
+                        className="hover:bg-gray-100 hover:text-black rounded-lg px-2 py-2"
+                        onClick={() => setExpanded((prev) => !prev)}
+                    >
+                        {isExpanded ? (
+                            <ChevronLeft className="text-2xl" />
+                        ) : (
+                            <ChevronRight className="text-2xl" />
+                        )}
+                    </button>
                 </span>
 
                 <div className="mid">
                     <ul className="list-none">
-                        {
-                            navItems.map((nav) => (
-                                <li
-                                    key={nav.label}
-                                    onClick={() => {
-                                        setActiveTab(nav.label)
-                                    }}
-                                    className={`navlink flex gap-2 rounded-md py-2 mt-1 ps-2 cursor-pointer hover:bg-gray-50 hover:text-black ${nav.label === activeTab ? 'bg-pink-500' : ''}`}
+                        {navItems.map((nav) => (
+                            <li
+                                key={nav.label}
+                                onClick={() => {
+                                    setExpanded(true);
+                                    setActiveTab(nav.label);
+                                }}
+                                className={`navlink rounded-md mt-1 cursor-pointer hover:bg-gray-50 hover:text-black ${nav.label === activeTab ? "bg-pink-500" : ""
+                                    }`}
+                            >
+                                <NavLink
+                                    to={nav.route}
+                                    className="flex py-2 ps-2 gap-1"
                                 >
-                                    <NavLink to={nav.route} className="flex"><span className="pe-2">{nav.icon}</span> {isExpanded && <p>{nav.label}</p>}</NavLink>
-                                </li>
-                            ))
-                        }
+                                    <span>{nav.icon}</span>
+                                    <motion.p
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1, width: isExpanded ? "auto" : 0 }}
+                                        className="overflow-hidden"
+                                        exit={{ opacity: 0 }}
+                                    >
+                                        {nav.label}
+                                    </motion.p>
+                                </NavLink>
+                            </li>
+                        ))}
                     </ul>
                 </div>
 
                 <div className="absolute bottom-3 right-3 left-3">
                     <ul className="list-none">
-                        <li className="navlink flex gap-2 rounded-sm py-1 cursor-pointer"><Settings /> {isExpanded && <p>Settings</p>}</li>
+                        <li className="navlink flex gap-2 rounded-sm py-1 cursor-pointer">
+                            <Settings />{" "}
+                            {isExpanded && (
+                                <motion.p
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                >
+                                    Settings
+                                </motion.p>
+                            )}
+                        </li>
                     </ul>
                 </div>
             </nav>
-        )
-    }
+        );
+    };
+
     return (
         <div className="h-screen flex gap-4 bg-gray-200 dark:bg-gray-700" >
             <Navbar />

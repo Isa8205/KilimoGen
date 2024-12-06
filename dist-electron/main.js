@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, ipcMain } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -40,6 +40,7 @@ app.on("activate", () => {
     createWindow();
   }
 });
+ipcMain.handle("send-data", () => "Hi there");
 app.whenReady().then(createWindow);
 export {
   MAIN_DIST,

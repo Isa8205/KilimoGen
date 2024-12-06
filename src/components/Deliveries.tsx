@@ -1,17 +1,19 @@
 import { ArrowDownAZIcon, ArrowDownZA, ChevronDown, FilterIcon, Plus, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 
 export function Deliveries() {
 
     const deliveries = [
-        { product: 'Mbuni', quantity: 70, date: '2024-1-1', state: 'Delivered' },
-        { product: 'Cherry', quantity: 50, date: '2024-12-1', state: 'Delivered' },
-        { product: 'Mbuni', quantity: 45, date: '2024-12-12', state: 'Delivered' },
-        { product: 'Cherry', quantity: 30, date: '2024-12-4', state: 'Delivered' },
-        { product: 'Mbuni', quantity: 10, date: '2024-11-1', state: 'Delivered' },
+        { farmer: 'Wesley Too (17)', served_by: 'Chepkwony', product: 'Mbuni', quantity: 70, date: '2024-1-1', state: 'Delivered' },
+        { farmer: 'Sammy Cheruiyot (17)', served_by: 'Chepkwony', product: 'Cherry', quantity: 50, date: '2024-12-1', state: 'Delivered' },
+        { farmer: 'Wesley Too (17)', served_by: 'Chepkwony', product: 'Mbuni', quantity: 45, date: '2024-12-12', state: 'Delivered' },
+        { farmer: 'Paul Too (17)', served_by: 'Chepkwony', product: 'Cherry', quantity: 30, date: '2024-12-4', state: 'Delivered' },
+        { farmer: 'Wesley Too (17)', served_by: 'Chepkwony', product: 'Mbuni', quantity: 10, date: '2024-11-1', state: 'Delivered' },
     ]
 
     const [sortType, setSortType] = useState('descending')
+    // const [searchFilter, setSearchFilter] = useState(false)
 
     const [modalDisp, setModalDisp] = useState(false)
     const Modal = () => {
@@ -77,6 +79,51 @@ export function Deliveries() {
         )
     }
 
+    const DropDown = () => {
+        const [isOpen, setIsOpen] = useState(false);
+        const dropRef = useRef<HTMLSpanElement>(null);
+        const dropMenuRef = useRef<HTMLDivElement>(null);
+
+        useEffect(() => {
+            if (dropRef.current && dropMenuRef.current) {
+                const rect = dropRef.current.getBoundingClientRect();
+                dropMenuRef.current.style.position = "absolute";
+                dropMenuRef.current.style.top = `${rect.height}px`;
+                dropMenuRef.current.style.width = `${rect.width}px`;
+            }
+        }, []);
+
+        return (
+            <span className="relative inline-flex items-center gap-1">
+                {/* Dropdown Trigger */}
+                <span ref={dropRef} className="inline-flex items-center gap-1">
+                    <p>Example DropDown</p>
+                    <motion.button
+                        className="p-0"
+                        animate={{ rotate: isOpen ? 180 : 0 }}
+                        transition={{ duration: 0.2, ease: "linear" }}
+                        onClick={() => setIsOpen(!isOpen)}
+                        aria-expanded={isOpen}
+                    >
+                        <ChevronDown />
+                    </motion.button>
+                </span>
+
+                {/* Dropdown Menu */}
+                <motion.div
+                    ref={dropMenuRef}
+                    animate={{ height: isOpen ? "auto" : 0 }}
+                    className="dropdown top-0 overflow-hidden bg-blue-500"
+                    initial={false}
+                >
+                    {Array.from({ length: 7 }, (_, i) => (
+                        <span key={i}>January <br /></span>
+                    ))}
+                </motion.div>
+            </span>
+        );
+    };
+
 
     return (
         <div className="w-full">
@@ -105,7 +152,16 @@ export function Deliveries() {
                 </div>
 
                 <span className=" flex items-baseline">
-                    <input type="search" name="search" id="search" placeholder="eg. 123 or Jane Doe" className="p-2 text-black rounded-l-md" style={{ minWidth: 0 }} />
+                    <input
+                        type="search"
+                        name="search"
+                        id="search"
+                        placeholder="eg. 123 or Jane Doe"
+                        className="p-2 text-black rounded-l-md"
+                        style={{ minWidth: 0 }}
+
+                    />
+
                     <button className="py-2 px-2 bg-gray-50 hover:bg-pink-500 text-black hover:text-white border-l-2 rounded-r-md">Search</button>
                 </span>
 
@@ -122,16 +178,19 @@ export function Deliveries() {
                 >
                     <Plus /> Add a delivery
                 </button>
+
+                <DropDown />
             </div>
 
             <table className="w-full my-2">
                 <thead className="border-b-2 font-bold text-center">
                     <tr>
                         <td>No.</td>
-                        <td>Product</td>
-                        <td className="flex justify-center">Quantity(Kgs) <FilterIcon className="text-transparent hover:text-white" /> <ChevronDown className="cursor-pointer text-transparent  hover:text-white" /></td>
+                        <td>Farmer</td>
+                        <td className="flex justify-center">Quantity(Kgs) <span className="inline-flex text-transparent hover:text-white"> <FilterIcon className="" /> <ChevronDown className="cursor-pointer text-transparent  hover:text-white" /></span></td>
+                        <td>Berry Type</td>
                         <td>Date</td>
-                        <td>State</td>
+                        <td>Served By</td>
                     </tr>
                 </thead>
 
@@ -148,10 +207,11 @@ export function Deliveries() {
                         .map((delivery, index) => (
                             <tr className="even:bg-teal-700 even:dark:bg-gray-700 hover:bg-cyan-400 cursor-pointer">
                                 <td className="py-3 text-center">{index + 1}</td>
-                                <td className="py-3 text-center">{delivery.product}</td>
+                                <td className="py-3 text-center">{delivery.farmer}</td>
                                 <td className="py-3 text-center">{delivery.quantity}</td>
+                                <td className="py-3 text-center">{delivery.product}</td>
                                 <td className="py-3 text-center">{delivery.date}</td>
-                                <td className="py-3 text-center"><span className="p-1 rounded-sm text-green-900 bg-green-400 text-sm font-semibold">{delivery.state}</span></td>
+                                <td className="py-3 text-center">{delivery.served_by}</td>
                             </tr>
                         ))}
                 </tbody>
