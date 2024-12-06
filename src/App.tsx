@@ -60,7 +60,6 @@ function App() {
                             <li
                                 key={nav.label}
                                 onClick={() => {
-                                    setExpanded(true);
                                     setActiveTab(nav.label);
                                 }}
                                 className={`navlink rounded-md mt-1 cursor-pointer hover:bg-gray-50 hover:text-black ${nav.label === activeTab ? "bg-pink-500" : ""

@@ -1,11 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@/controllers/*": [
-        "./database/controllers/*"
-      ]
-    },
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "target": "ES2020",
@@ -35,7 +29,6 @@
   "include": [
     "src",
     "electron",
-    "database/**/*"
   ],
   "references": [
     {

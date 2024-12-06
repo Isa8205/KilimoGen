@@ -1,4 +1,4 @@
-import { ArrowDownAZIcon, ArrowDownZA, ChevronDown, FilterIcon, Plus, X } from "lucide-react";
+import { ArrowDownAZIcon, ArrowDownZA, ChevronDown, FilterIcon, FilterX, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
@@ -84,12 +84,17 @@ export function Deliveries() {
         const dropRef = useRef<HTMLSpanElement>(null);
         const dropMenuRef = useRef<HTMLDivElement>(null);
 
+        const dropDownItems = [
+            { label: 'Mbuni' },
+            { label: 'Cherry' },
+        ]
+
         useEffect(() => {
             if (dropRef.current && dropMenuRef.current) {
                 const rect = dropRef.current.getBoundingClientRect();
                 dropMenuRef.current.style.position = "absolute";
                 dropMenuRef.current.style.top = `${rect.height}px`;
-                dropMenuRef.current.style.width = `${rect.width}px`;
+                dropMenuRef.current.style.width = `auto`;
             }
         }, []);
 
@@ -97,7 +102,7 @@ export function Deliveries() {
             <span className="relative inline-flex items-center gap-1">
                 {/* Dropdown Trigger */}
                 <span ref={dropRef} className="inline-flex items-center gap-1">
-                    <p>Example DropDown</p>
+                    <p className="flex"><FilterX /></p>
                     <motion.button
                         className="p-0"
                         animate={{ rotate: isOpen ? 180 : 0 }}
@@ -113,12 +118,14 @@ export function Deliveries() {
                 <motion.div
                     ref={dropMenuRef}
                     animate={{ height: isOpen ? "auto" : 0 }}
-                    className="dropdown top-0 overflow-hidden bg-blue-500"
+                    className="dropdown top-0 overflow-hidden bg-gray-500"
                     initial={false}
                 >
-                    {Array.from({ length: 7 }, (_, i) => (
-                        <span key={i}>January <br /></span>
-                    ))}
+                    {
+                        dropDownItems.map((item, i) => (
+                            <span key={i} className="block m-1 p-1 rounded-sm cursor-pointer hover:bg-gray-800">{item.label}</span>
+                        ))
+                    }
                 </motion.div>
             </span>
         );
@@ -135,19 +142,12 @@ export function Deliveries() {
                 <div className="inline-flex gap-3 items-baseline">
                     <span>
                         <label htmlFor="season">Season</label><br />
-                        <select name="season" id="season" className="text-white px-10 rounded-sm bg-teal-500 dark:bg-gray-600">
-                            <option value="24/25">2024/2025</option>
-                            <option value="24/25">2024/2025</option>
-                            <option value="24/25">2024/2025</option>
-                        </select>
+                        <DropDown />
                     </span>
 
                     <span>
                         <label htmlFor="season">Harvest</label><br />
-                        <select name="season" id="season" className="text-white px-10 rounded-sm bg-teal-500 dark:bg-gray-600">
-                            <option value="24/25">Harvest 1</option>
-                            <option value="24/25">Harvest 2</option>
-                        </select>
+                        <DropDown />
                     </span>
                 </div>
 
@@ -178,8 +178,6 @@ export function Deliveries() {
                 >
                     <Plus /> Add a delivery
                 </button>
-
-                <DropDown />
             </div>
 
             <table className="w-full my-2">
@@ -187,8 +185,8 @@ export function Deliveries() {
                     <tr>
                         <td>No.</td>
                         <td>Farmer</td>
-                        <td className="flex justify-center">Quantity(Kgs) <span className="inline-flex text-transparent hover:text-white"> <FilterIcon className="" /> <ChevronDown className="cursor-pointer text-transparent  hover:text-white" /></span></td>
-                        <td>Berry Type</td>
+                        <td><span className="inline-flex justify-center">Quantity(kgs) <DropDown /></span></td>
+                        <td><span className="inline-flex justify-center">Berry Type <DropDown /></span></td>
                         <td>Date</td>
                         <td>Served By</td>
                     </tr>
