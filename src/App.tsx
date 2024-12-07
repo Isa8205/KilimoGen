@@ -35,23 +35,23 @@ function App() {
                 <span className="flex gap-2 items-center mt-2">
                     <motion.h2
                         className="text-3xl text-nowrap overflow-hidden"
-                        initial={{ opacity: 0 }}
                         animate={{ opacity: 1, width: isExpanded ? "auto" : 0 }}
                         transition={{ duration: .15, ease: "easeInOut" }}
                         exit={{ opacity: 0 }}
                     >
                         <Leaf className="inline" /> KilimoGen
                     </motion.h2>
-                    <button
-                        className="hover:bg-gray-100 hover:text-black rounded-lg px-2 py-2"
+                    <span
+                        className="hover:bg-gray-100 hover:text-black rounded-lg inline-flex items-center px-2 py-2"
                         onClick={() => setExpanded((prev) => !prev)}
                     >
-                        {isExpanded ? (
-                            <ChevronLeft className="text-2xl" />
-                        ) : (
-                            <ChevronRight className="text-2xl" />
-                        )}
-                    </button>
+                        <motion.button
+                            animate={{ rotate: isExpanded ? 0 : 180 }}
+                            transition={{ duration: .5, ease: 'easeInOut' }}
+                        >
+                            <ChevronLeft />
+                        </motion.button>
+                    </span>
                 </span>
 
                 <div className="mid">
@@ -62,16 +62,15 @@ function App() {
                                 onClick={() => {
                                     setActiveTab(nav.label);
                                 }}
-                                className={`navlink rounded-md mt-1 cursor-pointer hover:bg-gray-50 hover:text-black ${nav.label === activeTab ? "bg-pink-500" : ""
-                                    }`}
+                                className={`navlink rounded-md mt-1 cursor-pointer hover:bg-gray-50 hover:text-black ${nav.label === activeTab ? "bg-pink-500" : ""}`}
                             >
                                 <NavLink
+                                    onClick={() => setExpanded((prev) => !prev)}
                                     to={nav.route}
                                     className="flex py-2 ps-2 gap-1"
                                 >
                                     <span>{nav.icon}</span>
                                     <motion.p
-                                        initial={{ opacity: 0 }}
                                         animate={{ opacity: 1, width: isExpanded ? "auto" : 0 }}
                                         className="overflow-hidden"
                                         exit={{ opacity: 0 }}
@@ -87,16 +86,14 @@ function App() {
                 <div className="absolute bottom-3 right-3 left-3">
                     <ul className="list-none">
                         <li className="navlink flex gap-2 rounded-sm py-1 cursor-pointer">
-                            <Settings />{" "}
-                            {isExpanded && (
-                                <motion.p
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                >
-                                    Settings
-                                </motion.p>
-                            )}
+                            <Settings />
+                            <motion.p
+                                className="overflow-hidden"
+                                animate={{ opacity: 1, width: isExpanded ? "auto" : 0 }}
+                                exit={{ opacity: 0 }}
+                            >
+                                Settings
+                            </motion.p>
                         </li>
                     </ul>
                 </div>
