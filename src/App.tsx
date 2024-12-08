@@ -5,8 +5,9 @@ import Dashboard from "./components/Dashboard";
 import Reports from "./components/Reports";
 import { Deliveries } from "./components/Deliveries";
 import { Inventory } from "./components/Inventory";
-import Messaging from "./components/Messaging";
+import { Messaging } from "./components/Messaging";
 import { motion } from "framer-motion";
+import { DropDown } from "./components/DropDown";
 
 function App() {
 
@@ -101,6 +102,11 @@ function App() {
         );
     };
 
+    // The items for the profile dropdown
+    const ProfileItems = [
+        { label: 'Log out', onClick: () => (0) }
+    ]
+
     return (
         <div className="h-screen flex gap-4 bg-gray-200 dark:bg-gray-700" >
             <Navbar />
@@ -116,11 +122,13 @@ function App() {
                             <span className="badge absolute bg-red-600 px-2 -top-2 -right-2 rounded-full text-sm">3</span>
                         </span>
 
-                        <span className="flex flex-row-reverse gap-2 items-center justify-between bg-teal-600 dark:bg-gray-600 rounded-full p-1 relative">
-                            <ChevronDown />
-                            <p className="text-sm">Chepkwony</p>
-                            <img src="https://picsum.photos/450/350" alt="Profile" className="rounded-full object-cover h-10 w-10" />
-                        </span>
+                        <DropDown styles="" dropItems={ProfileItems} text={
+                            <span className="flex flex-row-reverse gap-2 items-center justify-between bg-teal-600 dark:bg-gray-600 rounded-full p-1 relative">
+                                <ChevronDown />
+                                <p className="text-sm">Chepkwony</p>
+                                <img src="https://picsum.photos/450/350" alt="Profile" className="rounded-full object-cover h-10 w-10" />
+                            </span>
+                        } />
                     </div>
                 </div>
 

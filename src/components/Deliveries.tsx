@@ -1,53 +1,53 @@
 import { ArrowDownAZIcon, ArrowDownZA, ChevronDown, FilterIcon, FilterX, Plus, X } from "lucide-react";
-import { MouseEventHandler, ReactElement, useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { useState } from "react";
 import Fuse from "fuse.js";
+import { DropDown } from "./DropDown";
 
 export function Deliveries() {
 
-    const fetchedDeliveries = [
-        { farmer: 'Wesley Too ', farmerNumber: 10, served_by: 'Chepkwony', product: 'Mbuni', quantity: 7000, date: '2024-1-1', harvest: 2, season: '2022/23' },
-        { farmer: 'Sammy Cheruiyot ', farmerNumber: 17, served_by: 'Chepkwony', product: 'Cherry', quantity: 50, date: '2024-12-1', harvest: 1, season: '2024/25' },
-        { farmer: 'Wesley Too ', farmerNumber: 87, served_by: 'Chepkwony', product: 'Mbuni', quantity: 10, date: '2024-11-1', harvest: 3, season: '2024/25' },
-        { farmer: 'Wesley Too ', farmerNumber: 67, served_by: 'Chepkwony', product: 'Mbuni', quantity: 100, date: '2024-11-1', harvest: 3, season: '2022/25' },
-        { farmer: 'Sammy Cheruiyot ', farmerNumber: 37, served_by: 'Chepkwony', product: 'Cherry', quantity: 5000, date: '2024-12-1', harvest: 1, season: '2021/22' },
-        { farmer: 'Sammy Cheruiyot ', farmerNumber: 17, served_by: 'Chepkwony', product: 'Cherry', quantity: 50, date: '2024-12-1', harvest: 1, season: '2024/25' },
-        { farmer: 'Wesley Too ', farmerNumber: 157, served_by: 'Chepkwony', product: 'Mbuni', quantity: 4500, date: '2024-12-12', harvest: 2, season: '2024/25' },
-        { farmer: 'Paul Too ', farmerNumber: 17, served_by: 'Chepkwony', product: 'Cherry', quantity: 30, date: '2024-12-4', harvest: 1, season: '2023/24' },
-        { farmer: 'Wesley Too ', farmerNumber: 417, served_by: 'Chepkwony', product: 'Mbuni', quantity: 1034, date: '2024-11-1', harvest: 3, season: '2024/25' },
-        { farmer: 'Sammy Cheruiyot ', farmerNumber: 27, served_by: 'Chepkwony', product: 'Cherry', quantity: 50, date: '2024-12-1', harvest: 1, season: '2024/25' },
-        { farmer: 'Wesley Too ', farmerNumber: 17, served_by: 'Chepkwony', product: 'Mbuni', quantity: 120, date: '2024-11-1', harvest: 3, season: '2023/24' },
-        { farmer: 'Wesley Too ', farmerNumber: 17, served_by: 'Chepkwony', product: 'Mbuni', quantity: 10, date: '2024-11-1', harvest: 3, season: '2022/23' },
-        { farmer: 'Sammy Cheruiyot ', farmerNumber: 17, served_by: 'Chepkwony', product: 'Cherry', quantity: 50, date: '2024-12-1', harvest: 1, season: '2024/25' },
-        { farmer: 'Wesley Too ', farmerNumber: 17, served_by: 'Chepkwony', product: 'Mbuni', quantity: 1000, date: '2024-11-1', harvest: 3, season: '2022/23' },
-        { farmer: 'Wesley Too ', farmerNumber: 17, served_by: 'Chepkwony', product: 'Mbuni', quantity: 25600, date: '2024-11-1', harvest: 3, season: '2024/25' },
-        { farmer: 'Sammy Cheruiyot ', farmerNumber: 17, served_by: 'Chepkwony', product: 'Cherry', quantity: 50000, date: '2024-12-1', harvest: 1, season: '2024/25' },
-        { farmer: 'Wesley Too ', farmerNumber: 7, served_by: 'Chepkwony', product: 'Mbuni', quantity: 10, date: '2024-11-1', harvest: 3, season: '2021/22' },
-        { farmer: 'Wesley Too ', farmerNumber: 17, served_by: 'Chepkwony', product: 'Mbuni', quantity: 10, date: '2024-11-1', harvest: 3, season: '2024/25' },
-    ]
+    const data = [
+        { farmer: 'Jane Doe', farmerNumber: 21, served_by: 'Kimani', product: 'Mbuni', quantity: 8000, date: '2024-2-1', harvest: 2, season: '2023/24' },
+        { farmer: 'John Smith', farmerNumber: 42, served_by: 'Mwangi', product: 'Cherry', quantity: 100, date: '2024-11-15', harvest: 1, season: '2024/25' },
+        { farmer: 'Mary Wanjiku', farmerNumber: 89, served_by: 'Kimani', product: 'Mbuni', quantity: 20, date: '2024-10-20', harvest: 3, season: '2024/25' },
+        { farmer: 'Paul Kariuki', farmerNumber: 35, served_by: 'Mwangi', product: 'Mbuni', quantity: 150, date: '2024-10-20', harvest: 3, season: '2023/24' },
+        { farmer: 'Grace Njeri', farmerNumber: 45, served_by: 'Kimani', product: 'Cherry', quantity: 6000, date: '2024-11-30', harvest: 1, season: '2022/23' },
+        { farmer: 'Jane Doe', farmerNumber: 25, served_by: 'Kimani', product: 'Cherry', quantity: 75, date: '2024-11-15', harvest: 1, season: '2024/25' },
+        { farmer: 'Michael Otieno', farmerNumber: 153, served_by: 'Mwangi', product: 'Mbuni', quantity: 3500, date: '2024-11-18', harvest: 2, season: '2024/25' },
+        { farmer: 'Lucy Nyambura', farmerNumber: 78, served_by: 'Kimani', product: 'Cherry', quantity: 40, date: '2024-11-19', harvest: 1, season: '2023/24' },
+        { farmer: 'John Smith', farmerNumber: 200, served_by: 'Mwangi', product: 'Mbuni', quantity: 1200, date: '2024-10-10', harvest: 3, season: '2024/25' },
+        { farmer: 'Peter Kamau', farmerNumber: 33, served_by: 'Kimani', product: 'Cherry', quantity: 100, date: '2024-11-15', harvest: 1, season: '2024/25' },
+        { farmer: 'Jane Doe', farmerNumber: 18, served_by: 'Kimani', product: 'Mbuni', quantity: 180, date: '2024-10-20', harvest: 3, season: '2023/24' },
+        { farmer: 'Michael Otieno', farmerNumber: 95, served_by: 'Mwangi', product: 'Mbuni', quantity: 15, date: '2024-10-15', harvest: 3, season: '2023/24' },
+        { farmer: 'John Smith', farmerNumber: 24, served_by: 'Kimani', product: 'Cherry', quantity: 600, date: '2024-11-15', harvest: 1, season: '2024/25' },
+        { farmer: 'Grace Njeri', farmerNumber: 57, served_by: 'Kimani', product: 'Mbuni', quantity: 900, date: '2024-10-20', harvest: 3, season: '2023/24' },
+        { farmer: 'Jane Doe', farmerNumber: 12, served_by: 'Mwangi', product: 'Mbuni', quantity: 27000, date: '2024-10-10', harvest: 3, season: '2024/25' },
+        { farmer: 'Lucy Nyambura', farmerNumber: 24, served_by: 'Kimani', product: 'Cherry', quantity: 52000, date: '2024-11-15', harvest: 1, season: '2024/25' },
+        { farmer: 'Paul Kariuki', farmerNumber: 67, served_by: 'Mwangi', product: 'Mbuni', quantity: 15, date: '2024-10-10', harvest: 3, season: '2021/22' },
+        { farmer: 'Mary Wanjiku', farmerNumber: 59, served_by: 'Kimani', product: 'Mbuni', quantity: 25, date: '2024-10-20', harvest: 3, season: '2024/25' },
+    ];
 
     const [sortType, setSortType] = useState('descending')
 
     // The search functionality
     const [query, setQuery] = useState('')
-    const fuse = new Fuse(fetchedDeliveries, {
+    const fuse = new Fuse(data, {
         keys: [
             'farmer',
             'farmerNumber'
-        ]
+        ],
+        includeScore: true,
+        // distance: 0
     })
     const results = fuse.search(query)
-    const searchResulsts = results.map(result => result.item)
+    const searchResulsts = results.filter(result => result.score <= .3).map(result => result.item)
 
-    const [deliveries, setDeliveries] = useState(query !== '' ? searchResulsts : fetchedDeliveries)
-    useEffect(() => {
-        const searchBar = document.querySelector('input[type="search"]')!
-        searchBar.addEventListener('input', ({ target }: Event) => {
-            const inputVal = target.value
-            console.log(inputVal)
-            setQuery(inputVal)
-        })
-    }, [])
+    // Set the data to be displayed
+    const deliveries = query ? searchResulsts : data
+
+    const handleSearch = ({ currentTarget = {} }) => {
+        const { value } = currentTarget
+        setQuery(value)
+    }
 
 
     // Modal body and box
@@ -132,75 +132,22 @@ export function Deliveries() {
         { label: 'Cherry', onClick: () => setBerryFilter(berryFilter === 'Mbuni' ? 'Cherry' : 'Mbuni') },
     ]
 
-    const [seasonFilter, setSeasonFilter] = useState('')
+    const [seasonFilter, setSeasonFilter] = useState('All')
     const seasonFilterItems = [
+        { label: 'All', onClick: () => setSeasonFilter('All') },
         { label: '2024/25', onClick: () => setSeasonFilter('2024/25') },
         { label: '2023/24', onClick: () => setSeasonFilter('2023/24') },
         { label: '2022/23', onClick: () => setSeasonFilter('2022/23') },
         { label: '2021/22', onClick: () => setSeasonFilter('2021/22') },
     ]
 
-    type DropDownTypes = {
-        dropItems: {
-            label: string,
-            onClick: MouseEventHandler,
-        }[],
-        text: ReactElement | string,
-        styles: string
-    }
-
-    const DropDown = ({ dropItems, text, styles }: DropDownTypes) => {
-        const [isOpen, setIsOpen] = useState(false);
-        const dropRef = useRef<HTMLSpanElement>(null);
-        const dropMenuRef = useRef<HTMLDivElement>(null);
-
-
-        useEffect(() => {
-            if (dropRef.current && dropMenuRef.current) {
-                const rect = dropRef.current.getBoundingClientRect();
-                dropMenuRef.current.style.position = "absolute";
-                dropMenuRef.current.style.top = `${rect.height}px`;
-                dropMenuRef.current.style.width = `auto`;
-            }
-        }, []);
-
-        return (
-            <span className={`relative inline-flex z-0 items-center gap-1 `}>
-                {/* Dropdown Trigger */}
-                <span ref={dropRef} className={`inline-flex items-center ${styles}`}>
-                    <p className="flex">{text}</p>
-                    <motion.button
-                        animate={{ rotate: isOpen ? 180 : 0 }}
-                        transition={{ duration: 0.2, ease: "linear" }}
-                        onClick={() => setIsOpen(!isOpen)}
-                        aria-expanded={isOpen}
-                    >
-                        <ChevronDown />
-                    </motion.button>
-                </span>
-
-                {/* Dropdown Menu */}
-                <motion.div
-                    ref={dropMenuRef}
-                    animate={{ height: isOpen ? "auto" : 0 }}
-                    className="dropdown top-0 overflow-hidden bg-teal-500 dark:bg-gray-500"
-                    initial={false}
-                >
-                    {
-                        dropItems.map((item, i) => (
-                            <span
-                                key={i}
-                                onClick={item.onClick}
-                                className="block m-1 px-2 py-1 rounded-md cursor-pointer hover:dark:bg-gray-800 hover:bg-teal-800 text-nowrap"
-                            >{item.label}
-                            </span>
-                        ))
-                    }
-                </motion.div>
-            </span>
-        );
-    };
-
+    const [harvestFilter, setHarvestFilter] = useState(['All', 0])
+    const harvestFilterItems = [
+        { label: 'All', onClick: () => setHarvestFilter(['All', 0]) },
+        { label: 'Harvest 1', onClick: () => setHarvestFilter(['Harvest 1', 1]) },
+        { label: 'Harvest 2', onClick: () => setHarvestFilter(['Harvest 2', 2]) },
+        { label: 'Harvest 3', onClick: () => setHarvestFilter(['Harvest 3', 3]) },
+    ]
 
     return (
         <div className="w-full">
@@ -218,14 +165,15 @@ export function Deliveries() {
 
                     <span>
                         <label htmlFor="season">Harvest</label><br />
-                        <DropDown styles="" dropItems={seasonFilterItems} text={seasonFilter !== '' ? <FilterIcon /> : <FilterX />} />
+                        <DropDown dropItems={harvestFilterItems} text={harvestFilter[0]} styles='px-2 py-1 bg-gray-600 rounded-md' />
                     </span>
                 </div>
 
                 <span className=" flex items-baseline">
                     <input
-                        type="search"
-                        name="search"
+                        type="text"
+                        value={query}
+                        onChange={handleSearch}
                         placeholder="eg. 123 or Jane Doe"
                         className="p-2 text-black rounded-l-md"
 
@@ -270,15 +218,16 @@ export function Deliveries() {
                                 return a.date.toString().localeCompare(b.date.toString()); // Ascending order
                             }
                         })
-                        .filter(delivery => delivery.season === seasonFilter)
-                        .filter(delivery => delivery.product === berryFilter)
+                        .filter(delivery => seasonFilter === 'All' ? delivery.season === delivery.season : delivery.season === seasonFilter)
+                        .filter(delivery => harvestFilter[1] === 0 ? delivery.harvest === delivery.harvest : delivery.harvest === harvestFilter[1])
+                        .filter(delivery => delivery.product !== berryFilter)
                         .filter(delivery => delivery.quantity >= quantityFilterValue)
                         .map((delivery, index) => (
                             <tr key={index} className="even:bg-teal-700 even:dark:bg-gray-700 hover:bg-cyan-400 cursor-pointer">
                                 <td className="py-3 text-center">{index + 1}</td>
                                 <td className="py-3 text-center">{delivery.farmer} {`(${delivery.farmerNumber})`}</td>
-                                <td className="py-3 text-center">{delivery.quantity} {delivery.season}</td>
-                                <td className="py-3 text-center">{delivery.product}</td>
+                                <td className="py-3 text-center">{delivery.quantity} - {delivery.season}</td>
+                                <td className="py-3 text-center">{delivery.product} - {delivery.harvest}</td>
                                 <td className="py-3 text-center">{delivery.date}</td>
                                 <td className="py-3 text-center">{delivery.served_by}</td>
                             </tr>
