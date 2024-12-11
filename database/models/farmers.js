@@ -14,17 +14,10 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   Farmers.init({
-    f_name: DataTypes.STRING,
-    l_name: DataTypes.STRING,
-    phone: DataTypes.NUMBER,
-    ID: DataTypes.NUMBER,
-    email: DataTypes.STRING,
-    produce: DataTypes.STRING,
-    payment_mode: DataTypes.STRING
+    name: DataTypes.STRING
   }, {
     sequelize,
     modelName: 'Farmers',
-    underscored: true,
   });
   return Farmers;
 };

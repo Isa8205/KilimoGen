@@ -1,14 +1,16 @@
-export default {
-  developement: {
+const path = require('node:path')
+
+module.exports = {
+  development: {
     dialect: 'sqlite',
-    Storage: './database_dev.sqlite'
+    storage: path.join(__dirname, '../database.sqlite'), // Path to your SQLite database file
   },
-  developement: {
+  test: {
     dialect: 'sqlite',
-    Storage: './database_test.sqlite'
+    storage: ':memory:', // In-memory database for testing
   },
-  developement: {
+  production: {
     dialect: 'sqlite',
-    Storage: './database_prod.sqlite'
+    storage: './database.sqlite',
   },
-}
+};

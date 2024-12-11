@@ -82,8 +82,6 @@ app.on('activate', () => {
   }
 })
 
-ipcMain.handle('send-data', (event, { name, age, sex }) => (
-  fs.writeFileSync('./electron/data.txt', `${name}  ${age}  ${sex}`)
-))
+ipcMain.handle('send-data', () => "Hello there")
 
 app.whenReady().then(createWindow)

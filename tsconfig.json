@@ -6,6 +6,8 @@
         "./src/*"
       ]
     },
+    "allowJs": false,
+    "checkJs": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "target": "ES2020",
@@ -35,6 +37,7 @@
   "include": [
     "src",
     "electron",
+    "database"
   ],
   "references": [
     {

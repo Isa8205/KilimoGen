@@ -9,32 +9,14 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      f_name: {
+      name: {
         type: Sequelize.STRING
       },
-      l_name: {
-        type: Sequelize.STRING
-      },
-      phone: {
-        type: Sequelize.NUMBER
-      },
-      ID: {
-        type: Sequelize.NUMBER
-      },
-      email: {
-        type: Sequelize.STRING
-      },
-      produce: {
-        type: Sequelize.STRING
-      },
-      payment_mode: {
-        type: Sequelize.STRING
-      },
-      created_at: {
+      createdAt: {
         allowNull: false,
         type: Sequelize.DATE
       },
-      updated_at: {
+      updatedAt: {
         allowNull: false,
         type: Sequelize.DATE
       }
