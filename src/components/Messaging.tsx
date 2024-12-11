@@ -174,7 +174,7 @@ export function Messaging() {
                         value={query}
                         onChange={handleSearch}
                         placeholder="eg. 123 or Jane Doe"
-                        className="bg-transparent p-1 text-white focus:border-none"
+                        className="bg-transparent p-1 text-white focus-visible:outline-none"
 
                     />
 

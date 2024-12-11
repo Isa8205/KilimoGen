@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron'
 // import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
+import fs from 'node:fs'
 
 // Things to do with the database using sequelize
 // import { Sequelize } from 'sequelize'
@@ -81,6 +82,8 @@ app.on('activate', () => {
   }
 })
 
-ipcMain.handle('send-data', () => ('Hi there'))
+ipcMain.handle('send-data', (event, { name, age, sex }) => (
+  fs.writeFileSync('./electron/data.txt', `${name}  ${age}  ${sex}`)
+))
 
 app.whenReady().then(createWindow)

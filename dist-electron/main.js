@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain } from "electron";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
+import fs from "node:fs";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 process.env.APP_ROOT = path.join(__dirname, "..");
 const VITE_DEV_SERVER_URL = process.env["VITE_DEV_SERVER_URL"];
@@ -40,7 +41,7 @@ app.on("activate", () => {
     createWindow();
   }
 });
-ipcMain.handle("send-data", () => "Hi there");
+ipcMain.handle("send-data", (event, { name, age, sex }) => fs.writeFileSync("./electron/data.txt", `${name}  ${age}  ${sex}`));
 app.whenReady().then(createWindow);
 export {
   MAIN_DIST,

@@ -1,4 +1,4 @@
-import { ArrowDownAZIcon, ArrowDownZA, ChevronDown, FilterIcon, FilterX, Plus, X } from "lucide-react";
+import { ArrowDownAZIcon, ArrowDownZA, ChevronDown, FilterIcon, FilterX, LucideScanSearch, Plus, Search, X } from "lucide-react";
 import { useState } from "react";
 import Fuse from "fuse.js";
 import { DropDown } from "./DropDown";
@@ -36,19 +36,17 @@ export function Deliveries() {
             'farmerNumber'
         ],
         includeScore: true,
-        // distance: 0
+        includeMatches: true,
     })
     const results = fuse.search(query)
     const searchResulsts = results.filter(result => result.score <= .3).map(result => result.item)
 
     // Set the data to be displayed
     const deliveries = query ? searchResulsts : data
-
-    const handleSearch = ({ currentTarget = {} }) => {
-        const { value } = currentTarget
-        setQuery(value)
-    }
-
+    const handleSearch = ({ currentTarget }: { currentTarget: EventTarget & { value?: string } }) => {
+        const { value }: { value?: string } = currentTarget
+        setQuery(value as string)
+    };
 
     // Modal body and box
     const [modalDisp, setModalDisp] = useState(false)
@@ -152,7 +150,7 @@ export function Deliveries() {
     return (
         <div className="w-full">
             {modalDisp && <Modal />}
-            <h2 className="mb-2 text-2xl">Delivery summary</h2>
+            <h2 className="mb-2 text-2xl">Messaging summary</h2>
 
             <div className="mb-4 flex justify-between items-baseline">
 
@@ -169,17 +167,17 @@ export function Deliveries() {
                     </span>
                 </div>
 
-                <span className=" flex items-baseline">
+                <span className="flex border-b-2 border-b-gray-400">
                     <input
                         type="text"
                         value={query}
                         onChange={handleSearch}
                         placeholder="eg. 123 or Jane Doe"
-                        className="p-2 text-black rounded-l-md"
+                        className="bg-transparent p-1 text-white focus-visible:outline-none"
 
                     />
 
-                    <button className="py-2 px-2 bg-gray-50 hover:bg-pink-500 text-black hover:text-white border-l-2 rounded-r-md">Search</button>
+                    <button className="px-2"><Search className="text-gray-400" /></button>
                 </span>
 
             </div>
@@ -190,7 +188,7 @@ export function Deliveries() {
                     <button className="flex bg-teal-500 dark:bg-gray-600 text-white p-2 rounded-md" onClick={() => (setSortType(sortType === 'ascending' ? 'descending' : 'ascending'))}>{sortType === 'ascending' ? <ArrowDownAZIcon /> : <ArrowDownZA />}</button>
                 </span>
                 <button
-                    className="p-2 rounded-md bg-white text-black flex hover:bg-pink-500 hover:text-white"
+                    className="p-2 rounded-md bg-gray-200 text-black flex hover:bg-pink-500 hover:text-white"
                     onClick={() => (setModalDisp(true))}
                 >
                     <Plus /> Add a delivery
@@ -226,8 +224,8 @@ export function Deliveries() {
                             <tr key={index} className="even:bg-teal-700 even:dark:bg-gray-700 hover:bg-cyan-400 cursor-pointer">
                                 <td className="py-3 text-center">{index + 1}</td>
                                 <td className="py-3 text-center">{delivery.farmer} {`(${delivery.farmerNumber})`}</td>
-                                <td className="py-3 text-center">{delivery.quantity} - {delivery.season}</td>
-                                <td className="py-3 text-center">{delivery.product} - {delivery.harvest}</td>
+                                <td className="py-3 text-center">{delivery.quantity}</td>
+                                <td className="py-3 text-center">{delivery.product}</td>
                                 <td className="py-3 text-center">{delivery.date}</td>
                                 <td className="py-3 text-center">{delivery.served_by}</td>
                             </tr>

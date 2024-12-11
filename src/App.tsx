@@ -108,7 +108,7 @@ function App() {
     ]
 
     return (
-        <div className="h-screen flex gap-4 bg-gray-200 dark:bg-gray-700" >
+        <div className="h-screen w-screen overflow-hidden flex gap-4 bg-gray-200 dark:bg-gray-700" >
             <Navbar />
 
             <section className="content w-full text-white max-h-screen  py-2 pr-2">
