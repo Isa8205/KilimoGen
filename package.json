@@ -14,6 +14,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@google-cloud/spanner": "^5.18.0",
     "@shadcn/ui": "^0.0.4",
     "autoprefixer": "^10.4.20",
     "class-variance-authority": "^0.7.1",
@@ -25,14 +26,15 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.28.0",
-    "sequelize": "^6.37.5",
-    "sequelize-cli": "^6.6.2",
+    "reflect-metadata": "^0.2.2",
     "sqlite3": "^5.1.7",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
+    "typeorm": "^0.3.20",
     "vite-tsconfig-paths": "^5.1.2"
   },
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.1",
     "@types/node": "^22.10.2",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
@@ -47,7 +49,8 @@
     "eslint-plugin-react-refresh": "^0.4.5",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.14",
-    "typescript": "^5.2.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2",
     "vite": "^5.1.6",
     "vite-plugin-electron": "^0.28.6",
     "vite-plugin-electron-renderer": "^0.14.5"

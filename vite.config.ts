@@ -6,6 +6,14 @@ import tsConfigPaths from "vite-tsconfig-paths"
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      external: [
+        'electron',
+        '@google-cloud/spanner'
+      ]
+    }
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

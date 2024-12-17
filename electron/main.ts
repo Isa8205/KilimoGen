@@ -2,7 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron'
 // import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
-import fs from 'node:fs'
+// import Init from '../database'
 
 // Things to do with the database using sequelize
 // import { Sequelize } from 'sequelize'
@@ -59,9 +59,6 @@ function createWindow() {
 
   win.webContents.openDevTools()
 
-  // Sequelize.sync().then(() => {
-  //   console.log('connection established with the database')
-  // })
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
@@ -82,6 +79,6 @@ app.on('activate', () => {
   }
 })
 
-ipcMain.handle('send-data', () => "Hello there")
+// ipcMain.handle('send-data', async () => await Init())
 
 app.whenReady().then(createWindow)

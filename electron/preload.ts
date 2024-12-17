@@ -24,5 +24,5 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 })
 
 contextBridge.exposeInMainWorld('electron', {
-  sendData: () => (ipcRenderer.send('send-data', { name: 'Isa', age: 19, sex: 'male' }))
+  sendData: () => (ipcRenderer.invoke('send-data'))
 })

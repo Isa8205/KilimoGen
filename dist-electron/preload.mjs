@@ -21,5 +21,5 @@ electron.contextBridge.exposeInMainWorld("ipcRenderer", {
   // ...
 });
 electron.contextBridge.exposeInMainWorld("electron", {
-  sendData: () => electron.ipcRenderer.send("send-data", { name: "Isa", age: 19, sex: "male" })
+  sendData: () => electron.ipcRenderer.invoke("send-data")
 });

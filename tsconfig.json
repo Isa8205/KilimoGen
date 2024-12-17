@@ -6,8 +6,6 @@
         "./src/*"
       ]
     },
-    "allowJs": false,
-    "checkJs": false,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "target": "ES2020",
@@ -21,6 +19,7 @@
     "skipLibCheck": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false,
     /* Bundler mode */
     "moduleResolution": "node",
     "allowImportingTsExtensions": true,
