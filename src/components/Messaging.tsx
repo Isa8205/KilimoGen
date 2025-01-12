@@ -1,7 +1,7 @@
 import { ArrowDownAZIcon, ArrowDownZA, ChevronDown, FilterIcon, FilterX, LucideScanSearch, Plus, Search, X } from "lucide-react";
 import { useState } from "react";
 import Fuse from "fuse.js";
-import { DropDown } from "./DropDown";
+import { DropDown } from "./Widgets/DropDown";
 
 export function Messaging() {
 

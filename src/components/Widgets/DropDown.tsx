@@ -27,13 +27,13 @@ export function DropDown({ dropItems, text, styles }: DropDownTypes) {
     }, []);
 
     return (
-        <span className={`relative inline-flex z-0 items-center gap-1 `}>
+        <span className="relative inline-flex z-auto items-center gap-1" >
             {/* Dropdown Trigger */}
             <span ref={dropRef} className={`inline-flex items-center ${styles}`}>
                 <p className="flex">{text}</p>
                 <motion.button
                     animate={{ rotate: isOpen ? 180 : 0 }}
-                    transition={{ duration: 0.2, ease: "linear" }}
+                    transition={{ duration: .3, ease: "linear" }}
                     onClick={() => setIsOpen(!isOpen)}
                     aria-expanded={isOpen}
                 >
@@ -45,7 +45,7 @@ export function DropDown({ dropItems, text, styles }: DropDownTypes) {
             <motion.div
                 ref={dropMenuRef}
                 animate={{ height: isOpen ? "auto" : 0 }}
-                className="dropdown top-0 overflow-hidden bg-teal-500 dark:bg-gray-500"
+                className="dropdown reltive top-0 overflow-hidden bg-teal-500 dark:bg-gray-500"
                 initial={false}
             >
                 {

@@ -7,7 +7,8 @@ import { Deliveries } from "./components/Deliveries";
 import { Inventory } from "./components/Inventory";
 import { Messaging } from "./components/Messaging";
 import { motion } from "framer-motion";
-import { DropDown } from "./components/DropDown";
+import { DropDown } from "./components/Widgets/DropDown";
+import Production from "./components/Production";
 
 function App() {
 
@@ -25,18 +26,18 @@ function App() {
             { icon: <Store />, label: "Inventory", route: "/inventory" },
             { icon: <BarChart />, label: "Analytics", route: "/analytics" },
             { icon: <DollarSign />, label: "Financials", route: "/financials" },
-            { icon: <FileTextIcon />, label: "Reports", route: "/report" },
+            { icon: <FileTextIcon />, label: "Reports", route: "/reports" },
             { icon: <MessageSquareShare />, label: "Messaging", route: "/messaging" },
         ];
 
         return (
             <nav
-                className={`navigation flex justify-start flex-col p-3 bg-teal-900 text-white gap-10 md:w-fit relative dark:bg-gray-900`}
+                className={`navigation flex justify-start flex-col p-3 bg-teal-950 text-white gap-10 md:w-fit relative`}
             >
                 <span className="flex gap-2 items-center mt-2">
                     <motion.h2
-                        className="text-3xl text-nowrap overflow-hidden"
-                        animate={{ opacity: 1, width: isExpanded ? "auto" : 0 }}
+                        className="text-3xl text-nowrap"
+                        animate={{ opacity: 1, width: isExpanded ? "" : 0 }}
                         transition={{ duration: .15, ease: "easeInOut" }}
                         exit={{ opacity: 0 }}
                     >
@@ -70,10 +71,10 @@ function App() {
                                     to={nav.route}
                                     className="flex py-2 ps-2 gap-1"
                                 >
-                                    <span>{nav.icon}</span>
+                                    <span className="">{nav.icon}</span>
                                     <motion.p
                                         animate={{ opacity: 1, width: isExpanded ? "auto" : 0 }}
-                                        className="overflow-hidden"
+                                        className="overflow-hidden text-sm"
                                         exit={{ opacity: 0 }}
                                     >
                                         {nav.label}
@@ -103,40 +104,38 @@ function App() {
     };
 
     // The items for the profile dropdown
-    const ProfileItems = [
-        { label: 'Log out', onClick: () => (0) }
-    ]
+    // const ProfileItems = [
+    //     { label: 'Log out', onClick: () => (0) }
+    // ]
 
     return (
-        <div className="h-screen w-screen overflow-hidden flex gap-4 bg-gray-200 dark:bg-gray-700" >
+        <div className="h-screen w-screen overflow-hidden flex bg-teal-500" >
             <Navbar />
 
-            <section className="content w-full text-white max-h-screen  py-2 pr-2">
+            <section className="content w-full text-white max-h-screen">
                 {/* The header of the right section */}
-                <div className="flex justify-between items-center  bg-teal-900 p-4 rounded-lg sticky top-0 left-0 right-0 dark:bg-gray-900">
+                <div className="flex justify-between items-center  bg-teal-900 p-4 sticky top-0 left-0 right-0 ">
                     <h2 className="text-2xl font-bold">{activeTab}</h2>
 
                     <div className="profile rounded-lg flex justify-between items-center gap-4">
-                        <span className="notifications relative bg-teal-600 dark:bg-gray-600 rounded-full p-1">
+                        <span className="relative notifications bg-teal-600 dark:bg-gray-600 rounded-full p-1">
                             <BellIcon />
-                            <span className="badge absolute bg-red-600 px-2 -top-2 -right-2 rounded-full text-sm">3</span>
-                        </span>
-
-                        <DropDown styles="" dropItems={ProfileItems} text={
+                            <span className="absolute bg-orange-600 px-2  rounded-full text-sm">3</span>
+                        </span> 
                             <span className="flex flex-row-reverse gap-2 items-center justify-between bg-teal-600 dark:bg-gray-600 rounded-full p-1 relative">
                                 <ChevronDown />
                                 <p className="text-sm">Chepkwony</p>
                                 <img src="https://picsum.photos/450/350" alt="Profile" className="rounded-full object-cover h-10 w-10" />
                             </span>
-                        } />
                     </div>
                 </div>
 
                 {/* The different contents of the nav */}
-                <div className="container bg-teal-900 mt-6 p-8 rounded-lg dark:bg-gray-900 overflow-y-scroll" style={{ maxHeight: '85vh' }}>
+                <div className="container  mt-6 p-8 rounded-lg overflow-y-scroll" style={{ maxHeight: '85vh' }}>
                     <Routes>
                         <Route path="/" Component={Dashboard} />
                         <Route path="/deliveries" Component={Deliveries} />
+                        <Route path="/production" Component={Production} />
                         <Route path="/inventory" Component={Inventory} />
                         <Route path="/reports" Component={Reports} />
                         <Route path="/messaging" Component={Messaging} />

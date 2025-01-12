@@ -1,7 +1,7 @@
-import { ArrowDownAZIcon, ArrowDownZA, ChevronDown, FilterIcon, FilterX, LucideScanSearch, Plus, Search, X } from "lucide-react";
+import { ArrowDownAZIcon, ArrowDownZA, ChevronDown, FilterIcon, FilterX, Plus, Search, X } from "lucide-react";
 import { useState } from "react";
-import Fuse, { FuseResult } from "fuse.js";
-import { DropDown } from "./DropDown";
+import Fuse from "fuse.js";
+import { DropDown } from "./Widgets/DropDown";
 
 export function Deliveries() {
 
@@ -38,7 +38,7 @@ export function Deliveries() {
         includeScore: true,
         includeMatches: true,
     })
-    const results: unknown = fuse.search(query)
+    const results = fuse.search(query)
     const searchResulsts = results.filter(result => result.score <= .3).map(result => result.item)
 
     // Set the data to be displayed
@@ -150,7 +150,7 @@ export function Deliveries() {
     return (
         <div className="w-full">
             {modalDisp && <Modal />}
-            <h2 className="mb-2 text-2xl">Delivery summary</h2>
+            <h2 className="mb-8 text-2xl">Delivery summary</h2>
 
             <div className="mb-4 flex justify-between items-baseline">
 
