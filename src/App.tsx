@@ -1,4 +1,4 @@
-import { BarChart, BellIcon, ChevronDown, ChevronLeft, ChevronRight, DollarSign, FileTextIcon, LayoutDashboard, Leaf, MessageSquareShare, Package, Settings, Store, Truck, User } from "lucide-react";
+import { BarChart, BellIcon, ChevronDown, ChevronLeft, DollarSign, FileTextIcon, LayoutDashboard, Leaf, MessageSquareShare, Package, Settings, Store, Truck, User } from "lucide-react";
 import { useState } from "react";
 import { Routes, Route, NavLink } from "react-router-dom";
 import Dashboard from "./components/Dashboard";
@@ -7,8 +7,8 @@ import { Deliveries } from "./components/Deliveries";
 import { Inventory } from "./components/Inventory";
 import { Messaging } from "./components/Messaging";
 import { motion } from "framer-motion";
-import { DropDown } from "./components/Widgets/DropDown";
 import Production from "./components/Production";
+import { Members } from "./components/Members";
 
 function App() {
 
@@ -20,7 +20,7 @@ function App() {
 
         const navItems = [
             { icon: <LayoutDashboard />, label: "Dashboard", route: "/" },
-            { icon: <User />, label: "Members", route: "/dashboard" },
+            { icon: <User />, label: "Members", route: "/members" },
             { icon: <Package />, label: "Production", route: "/production" },
             { icon: <Truck />, label: "Deliveries", route: "/deliveries" },
             { icon: <Store />, label: "Inventory", route: "/inventory" },
@@ -109,20 +109,20 @@ function App() {
     // ]
 
     return (
-        <div className="h-screen w-screen overflow-hidden flex bg-teal-500" >
+        <div className="h-screen w-screen overflow-hidden flex bg-gray-600" >
             <Navbar />
 
             <section className="content w-full text-white max-h-screen">
                 {/* The header of the right section */}
-                <div className="flex justify-between items-center  bg-teal-900 p-4 sticky top-0 left-0 right-0 ">
+                <div className="flex justify-between items-center  bg-gray-900 p-4 sticky top-0 left-0 right-0 ">
                     <h2 className="text-2xl font-bold">{activeTab}</h2>
 
                     <div className="profile rounded-lg flex justify-between items-center gap-4">
-                        <span className="relative notifications bg-teal-600 dark:bg-gray-600 rounded-full p-1">
+                        <span className="relative notifications bg-gray-600 dark:bg-gray-600 rounded-full p-1">
                             <BellIcon />
                             <span className="absolute bg-orange-600 px-2  rounded-full text-sm">3</span>
                         </span> 
-                            <span className="flex flex-row-reverse gap-2 items-center justify-between bg-teal-600 dark:bg-gray-600 rounded-full p-1 relative">
+                            <span className="flex flex-row-reverse gap-2 items-center justify-between bg-gray-600 dark:bg-gray-600 rounded-full p-1 relative">
                                 <ChevronDown />
                                 <p className="text-sm">Chepkwony</p>
                                 <img src="https://picsum.photos/450/350" alt="Profile" className="rounded-full object-cover h-10 w-10" />
@@ -135,6 +135,7 @@ function App() {
                     <Routes>
                         <Route path="/" Component={Dashboard} />
                         <Route path="/deliveries" Component={Deliveries} />
+                        <Route path="/members" Component={Members} />
                         <Route path="/production" Component={Production} />
                         <Route path="/inventory" Component={Inventory} />
                         <Route path="/reports" Component={Reports} />
