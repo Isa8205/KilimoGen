@@ -4,6 +4,6 @@ export const theme = {
   extend: {},
 };
 export const variants = {
-  extend: {},
+  extend: { },
 };
 export const plugins = [];

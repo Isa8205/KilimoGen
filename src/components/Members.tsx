@@ -1,26 +1,37 @@
+
 import { useEffect } from "react"
 
 export function Members() {
 
-    useEffect(()=> {
-        const form = document.querySelector('form')
-        form?.addEventListener('submit', async (e) => {
-            e.preventDefault()
+  useEffect(()=> {
+      const form = document.querySelector('form')
+      form?.addEventListener('submit', async (e) => {
+          e.preventDefault()
 
-            const formData = new FormData(form)
-            console.log(formData.values())
+          const formData = new FormData(form)
+          const data = Object.fromEntries(formData.entries())
+          console.log(data)
 
-            await fetch('http://192.168.56.1:3000/api/add-clerk', {
-                method: 'POST',
-                headers: {
-                    "content-type": 'application/json'
-                },
-                body: JSON.stringify(formData)
-            })
-        })
-    }, [])
+          try {
+            const response = await fetch('http://localhost:3000/api/add-clerk', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data),
+            });
+            if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const result = await response.json();
+            console.log(result);
+          } catch (error) {
+            console.error('Error:', error);
+            // Display an error message to the user if needed
+          }
 
-    return (
+      })
+  }, [])
+
+    return (    
   <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-fit">
     <h1 className="text-2xl font-bold text-blue-600 text-center mb-6">Signup Form</h1>
     <form action="#" method="POST" className="space-y-4 text-black">

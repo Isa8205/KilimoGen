@@ -14,9 +14,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@google-cloud/spanner": "^7.16.0",
+    "@google-cloud/spanner": "^5.18.0",
     "@shadcn/ui": "^0.0.4",
     "autoprefixer": "^10.4.20",
+    "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "custom-electron-titlebar": "^4.2.8",
