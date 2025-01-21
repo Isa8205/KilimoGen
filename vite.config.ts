@@ -8,10 +8,7 @@ import tsConfigPaths from "vite-tsconfig-paths"
 export default defineConfig({
   build: {
     rollupOptions: {
-      external: [
-        'typeorm',
-        'sqlite3'
-      ]
+      external: []
     }
   },
   resolve: {

@@ -1,5 +1,7 @@
 
+import axios from "axios"
 import { useEffect } from "react"
+import { NavLink } from "react-router-dom"
 
 export function Members() {
 
@@ -12,30 +14,19 @@ export function Members() {
           const data = Object.fromEntries(formData.entries())
           console.log(data)
 
-          try {
-            const response = await fetch('http://localhost:3000/api/add-clerk', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(data),
-            });
-            if (!response.ok) {
-              throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const result = await response.json();
-            console.log(result);
-          } catch (error) {
-            console.error('Error:', error);
-            // Display an error message to the user if needed
-          }
+          const response = await axios.post("http://localhost:3000/api/add-clerk", data)
+
+          console.log(response)
 
       })
   }, [])
 
     return (    
   <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-fit">
+    <NavLink to="/clerk/login" className="text-blue-600">Signup</NavLink>
+    
     <h1 className="text-2xl font-bold text-blue-600 text-center mb-6">Signup Form</h1>
     <form action="#" method="POST" className="space-y-4 text-black">
-
       <span className="flex justify-between flex-wrap gap-4">
       <div className="flex-grow">
         <label htmlFor="first-name" className="block text-sm font-medium text-gray-700">First Name</label>
@@ -71,6 +62,17 @@ export function Members() {
       </div>
       </span>
 
+      <div className="flex-grow">
+        <label htmlFor="username" className="block text-sm font-medium text-gray-700">Username</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="Enter your username"
+          className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          required
+        />
+      </div>
 
       <div>
         <label htmlFor="age" className="block text-sm font-medium text-gray-700">Age</label>
