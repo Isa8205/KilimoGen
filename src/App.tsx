@@ -26,11 +26,11 @@ function App() {
         const navItems = [
             { icon: <LayoutDashboard />, label: "Dashboard", route: "dashboard" },
             { icon: <User />, label: "Members", route: "members" },
-            { icon: <Package />, label: "Production", route: "production" },
+            // { icon: <Package />, label: "Production", route: "production" },
             { icon: <Truck />, label: "Deliveries", route: "deliveries" },
             { icon: <Store />, label: "Inventory", route: "inventory" },
             { icon: <BarChart />, label: "Analytics", route: "analytics" },
-            { icon: <DollarSign />, label: "Financials", route: "financials" },
+            // { icon: <DollarSign />, label: "Financials", route: "financials" },
             { icon: <FileTextIcon />, label: "Reports", route: "reports" },
             { icon: <MessageSquareShare />, label: "Messaging", route: "messaging" },
         ];

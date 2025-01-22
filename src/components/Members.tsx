@@ -1,164 +1,96 @@
-
-import axios from "axios"
-import { useEffect } from "react"
-import { NavLink } from "react-router-dom"
+import axios from 'axios';
+import { Filter, Grid, List } from 'lucide-react';
+import { useEffect } from 'react';
 
 export function Members() {
+  useEffect(() => {
+    const form = document.querySelector('form');
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
 
-  useEffect(()=> {
-      const form = document.querySelector('form')
-      form?.addEventListener('submit', async (e) => {
-          e.preventDefault()
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      console.log(data);
 
-          const formData = new FormData(form)
-          const data = Object.fromEntries(formData.entries())
-          console.log(data)
+      const response = await axios.post(
+        'http://localhost:3000/api/add-clerk',
+        data,
+      );
 
-          const response = await axios.post("http://localhost:3000/api/add-clerk", data)
+      console.log(response);
+    });
+  }, []);
 
-          console.log(response)
+  return (
+    <section className="text-gray-800">
+      <div className="flex justify-between mb-4">
+        <h2 className="text-2xl font-bold">Members</h2>
 
-      })
-  }, [])
+        <span className="inline-flex gap-2 text-sm font-semibold">
+          <button className="bg-white text-black py-1 px-4 rounded">
+            Export CSV
+          </button>
+          <button className="bg-accent text-white py-1 px-4 rounded">
+            Add
+          </button>
+        </span>
+      </div>
 
-    return (    
-  <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-fit">
-    <NavLink to="/clerk/login" className="text-blue-600">Signup</NavLink>
-    
-    <h1 className="text-2xl font-bold text-blue-600 text-center mb-6">Signup Form</h1>
-    <form action="#" method="POST" className="space-y-4 text-black">
-      <span className="flex justify-between flex-wrap gap-4">
-      <div className="flex-grow">
-        <label htmlFor="first-name" className="block text-sm font-medium text-gray-700">First Name</label>
+      <div className="bg-white p-5 flex shadow-md rounded-md">
+        <span className="flex-grow border-x-2 border-gray-400 px-6">
+          <p>Total</p>
+          <span className="font-bold">235</span>
+        </span>
+
+        <span className="flex-grow border-e-2 border-gray-400 px-6">
+          <p>Total</p>
+          <span className="font-bold">235</span>
+        </span>
+
+        <span className="flex-grow border-e-2 border-gray-400 px-6">
+          <p>Total</p>
+          <span className="font-bold">235</span>
+        </span>
+      </div>
+
+      <div className="flex justify-between my-4">
         <input
           type="text"
-          id="first-name"
-          name="firstName"
-          placeholder="Enter your first name"
-          className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          required
+          name="search"
+          id="search"
+          placeholder="search"
+          className="bg-white px-4 py-1 rounded-md shadow-md text-gray-600"
         />
-      </div>
-      <div className="flex-grow">
-        <label htmlFor="middle-name" className="block text-sm font-medium text-gray-700">Middle Name(optional)</label>
-        <input
-          type="text"
-          id="middle-name"
-          name="middleName"
-          placeholder="Enter your middle name"
-          className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-      </div>
-      <div className="flex-grow">
-        <label htmlFor="last-name" className="block text-sm font-medium text-gray-700">Last Name</label>
-        <input
-          type="text"
-          id="last-name"
-          name="lastName"
-          placeholder="Enter your last name"
-          className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          required
-        />
-      </div>
-      </span>
 
-      <div className="flex-grow">
-        <label htmlFor="username" className="block text-sm font-medium text-gray-700">Username</label>
-        <input
-          type="text"
-          id="username"
-          name="username"
-          placeholder="Enter your username"
-          className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          required
-        />
+        <span className="flex gap-4 items-center">
+          <span className="bg-white text-gray-600 py-1 px-2 gap-2 rounded inline-flex">
+            <button className="hover:text-orange-500 p-1">
+              <List className="text-xs" />
+            </button>
+            <button className="hover:text-orange-500 p-1">
+              <Grid className="text-xs" />
+            </button>
+          </span>
+          <button className="bg-white text-gray-600 hover:text-orange-500 font-semibold py-2 px-2 rounded inline-flex items-center gap-2">
+            <Filter /> Filter
+          </button>
+        </span>
       </div>
 
-      <div>
-        <label htmlFor="age" className="block text-sm font-medium text-gray-700">Age</label>
-        <input
-          type="number"
-          id="age"
-          name="age"
-          placeholder="Enter your age"
-          className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          required
-        />
+      <div className="bg-white shadow-md rounded-md p-4">
+        <span className="flex">
+          <span className="bg-gray-200 rounded-l-md p-2">
+            <input type="checkbox" name="all" id="all" />
+          </span>
+          <ul className="list-style-none flex flex-grow justify-between bg-gray-200 p-2 rounded-r-md">
+            <li>Name</li>
+            <li>Email</li>
+            <li>Gender</li>
+            <li>Phone</li>
+            <li>Status</li>
+          </ul>
+        </span>
       </div>
-
-      <div>
-        <label htmlFor="gender" className="block text-sm font-medium text-gray-700">Gender</label>
-        <select
-          id="gender"
-          name="gender"
-          className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          required
-        >
-          <option value="" disabled selected>Select your gender</option>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-
-      <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-gray-700">Phone</label>
-        <input
-          type="tel"
-          id="phone"
-          name="phone"
-          placeholder="Enter your phone number"
-          className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
-        <input
-          type="email"
-          id="email"
-          name="email"
-          placeholder="Enter your email address"
-          className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="password" className="block text-sm font-medium text-gray-700">Password</label>
-        <input
-          type="password"
-          id="password"
-          name="password"
-          placeholder="Enter your password"
-          className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          required
-        />
-      </div>
-
-      <div>
-        <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">Confirm Password</label>
-        <input
-          type="password"
-          id="confirm-password"
-          name="confirmPassword"
-          placeholder="Confirm your password"
-          className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-          required
-        />
-      </div>
-
-      <div>
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 shadow-lg"
-        >
-          Sign Up
-        </button>
-      </div>
-    </form>
-  </div>
-
-    )
+    </section>
+  );
 }
