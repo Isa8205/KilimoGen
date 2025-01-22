@@ -1,8 +1,22 @@
 import axios from 'axios';
 import { Filter, Grid, List } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import Loader from './Widgets/Loaders/Loader1';
 
 export function Members() {
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const fetchMembers = async () => {
+      const response = await axios.get('http://localhost:3000/api/clerks');
+      console.log(response.data.members);
+      setMembers(response.data.members)
+      setTimeout(() => setLoading(false), 3000)
+    }
+
+    fetchMembers();
+  }, [])
+
   useEffect(() => {
     const form = document.querySelector('form');
     form?.addEventListener('submit', async (e) => {
@@ -77,20 +91,51 @@ export function Members() {
         </span>
       </div>
 
-      <div className="bg-white shadow-md rounded-md p-4">
-        <span className="flex">
-          <span className="bg-gray-200 rounded-l-md p-2">
-            <input type="checkbox" name="all" id="all" />
-          </span>
-          <ul className="list-style-none flex flex-grow justify-between bg-gray-200 p-2 rounded-r-md">
-            <li>Name</li>
-            <li>Email</li>
-            <li>Gender</li>
-            <li>Phone</li>
-            <li>Status</li>
-          </ul>
-        </span>
-      </div>
+      <table className="bg-white shadow-md rounded-md p-2 w-full table-auto border-collapse">
+        <thead className="bg-gray-200 rounded-md">
+          <tr className='text-center'>
+            {/* Checkbox header */}
+            <th className=" p-2">
+              <input type="checkbox" name="select-all" id="all" />
+            </th>
+            {/* Table headers */}
+            <th className=" p-2">Name</th>
+            <th className=" p-2">Farmer No.</th>
+            <th className=" p-2">Email</th>
+            <th className=" p-2">Gender</th>
+            <th className=" p-2">Phone</th>
+            <th className=" p-2">Deliveries (kgs)</th>
+            <th className=" p-2">Status</th>
+          </tr>
+        </thead>
+
+        {loading ? <Loader/> : (
+          
+        <tbody>
+        {members.map((item: {firstName: string, lastName: string, id: number, email: string, gender: string, phone: number}, index) => (
+          <tr
+            key={index}
+            className={`border-b last:border-none text-center ${
+              index % 2 === 0 ? 'bg-gray-50' : ''
+            }`}
+          >
+            {/* Checkbox for each row */}
+            <td className="p-2">
+              <input type="checkbox" />
+            </td>
+            {/* Data cells */}
+            <td className="p-2 ">{item.firstName} {item.lastName}</td>
+            <td className="p-2 ">{item.id}</td>
+            <td className="p-2 ">{item.email}</td>
+            <td className="p-2 ">{item.gender}</td>
+            <td className="p-2 ">0{item.phone}</td>
+            <td className="p-2 ">34,540</td>
+            <td className="p-2 ">Active</td>
+          </tr>
+        ))}
+      </tbody>
+        )}
+      </table>
     </section>
   );
 }

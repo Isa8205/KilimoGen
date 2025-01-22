@@ -37,28 +37,31 @@ function App() {
 
         return (
             <nav
-                className={`navigation flex justify-start flex-col p-3 bg-primary text-white gap-10 md:w-fit relative`}
+                className="navigation flex justify-start flex-col p-3 bg-primary text-white gap-10 relative w-fit"
             >
-                <span className="flex gap-2 items-center mt-2">
+                <span className="flex gap-1 items-center mt-2">
                     <motion.h2
                         className="text-3xl text-nowrap"
-                        animate={{ opacity: 1, width: isExpanded ? "" : 0 }}
+                        animate={{ width: isExpanded ? "auto" : 0 }}
                         transition={{ duration: .15, ease: "easeInOut" }}
                         exit={{ opacity: 0 }}
                     >
-                        <Leaf className="inline" /> KilimoGen
+                        KilimoGen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                     </motion.h2>
+
                     <span
                         className="hover:bg-gray-100 hover:text-black rounded-lg inline-flex items-center px-2 py-2"
                         onClick={() => setExpanded((prev) => !prev)}
                     >
                         <motion.button
+                        className="inline-flex justify-center"
                             animate={{ rotate: isExpanded ? 0 : 180 }}
                             transition={{ duration: .5, ease: 'easeInOut' }}
                         >
                             <ChevronLeft />
                         </motion.button>
                     </span>
+                    
                 </span>
 
                 <div className="mid">
@@ -71,12 +74,12 @@ function App() {
                             >
                                 <NavLink
                                     to={nav.route}
-                                    className="flex py-2 ps-2 gap-1"
+                                    className="inline-flex py-2 ps-2 gap-2 justify-start items-center"
                                 >
                                     <span>{nav.icon}</span>
                                     <motion.p
                                         animate={{ opacity: 1, width: isExpanded ? "auto" : 0 }}
-                                        className="overflow-hidden text-sm"
+                                        className="overflow-hidden text-sm text-center"
                                         exit={{ opacity: 0 }}
                                     >
                                         {nav.label}
@@ -114,7 +117,7 @@ function App() {
                     {/* The header of the right section */}
                     <div className="flex justify-between items-center bg-white text-black p-2 sticky top-0 left-0 right-0 shadow-md">
                         <span>
-                            <input type="text" name="search" id="search" className="ml-4 px-2 py-1 bg-gray-300 rounded-md placeholder:text-gray-400" placeholder="Search" />
+                            <input type="text" name="search" id="search" className="ml-4 px-2 py-1 bg-gray-200 rounded-md placeholder:text-gray-400" placeholder="Search" />
                         </span>
                         <div className="flex gap-4 items-center">
                             
