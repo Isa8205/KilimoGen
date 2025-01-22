@@ -1,37 +1,37 @@
-import { ChevronLeft, ChevronRight, Clipboard } from "lucide-react";
+import { ChevronLeft, ChevronRight, Clipboard } from 'lucide-react';
 
 export default function Dashboard() {
   const date = new Date();
   const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   const quickActions = [
-    { id: 1, title: "Add Task" },
-    { id: 2, title: "Schedule Equipment" },
-    { id: 3, title: "Request Supply" },
-    { id: 4, title: "Report Issue" },
+    { id: 1, title: 'Add Task' },
+    { id: 2, title: 'Schedule Equipment' },
+    { id: 3, title: 'Request Supply' },
+    { id: 4, title: 'Report Issue' },
   ];
 
   const urgentTasks = [
-    { id: 1, title: "Harvesting crops", date: "Today" },
-    { id: 2, title: "Fertilizing soil", date: "Today" },
-    { id: 3, title: "Irrigating fields", date: "Today" },
+    { id: 1, title: 'Harvesting crops', date: 'Today' },
+    { id: 2, title: 'Fertilizing soil', date: 'Today' },
+    { id: 3, title: 'Irrigating fields', date: 'Today' },
   ];
   return (
     <section className="text-gray-700 flex flex-row-reverse justify-between items-start flex-wrap gap-3">
-      <aside className="bg-white shadow-sm p-4 rounded-md flex-grow">
+      <aside className="bg-white shadow-sm p-2 rounded-md flex-grow">
         <h2 className="text-xl font-semibold mb-4">Stats</h2>
 
         <div className=" rounded-md flex flex-col gap-2">

@@ -1,19 +1,6 @@
-import {
-  ArrowDownAZIcon,
-  ArrowDownZA,
-  ChevronDown,
-  Filter,
-  FilterIcon,
-  FilterX,
-  Grid,
-  List,
-  Plus,
-  Search,
-  X,
-} from 'lucide-react';
+import { Filter, Grid, List, X } from 'lucide-react';
 import { useState } from 'react';
-import Fuse from 'fuse.js';
-import { DropDown } from './Widgets/DropDown';
+import Fuse, { FuseResult } from 'fuse.js';
 
 export function Deliveries() {
   const data = [
@@ -208,9 +195,9 @@ export function Deliveries() {
     includeScore: true,
     includeMatches: true,
   });
-  const results = fuse.search(query);
+  const results: FuseResult<any>[] = fuse.search(query);
   const searchResulsts = results
-    .filter((result) => result.score <= 0.3)
+    .filter((result) => (result.score?? Infinity) <= 0.3)
     .map((result) => result.item);
 
   // Set the data to be displayed
@@ -301,48 +288,6 @@ export function Deliveries() {
     );
   };
 
-  // The filtering of the content that is displayed
-  const [quantityFilterValue, setQuantityFilter] = useState(0);
-  const qunatityItems = [
-    { label: 'None', onClick: () => setQuantityFilter(0) },
-    { label: 'above 10', onClick: () => setQuantityFilter(10) },
-    { label: 'above 100', onClick: () => setQuantityFilter(100) },
-    { label: 'above 1,000', onClick: () => setQuantityFilter(1000) },
-    { label: 'above 10,000', onClick: () => setQuantityFilter(10000) },
-  ];
-
-  const [berryFilter, setBerryFilter] = useState('');
-  const berrytypeItems = [
-    { label: 'None', onClick: () => setBerryFilter('') },
-    {
-      label: 'Mbuni',
-      onClick: () =>
-        setBerryFilter(berryFilter === 'Mbuni' ? 'Cherry' : 'Mbuni'),
-    },
-    {
-      label: 'Cherry',
-      onClick: () =>
-        setBerryFilter(berryFilter === 'Mbuni' ? 'Cherry' : 'Mbuni'),
-    },
-  ];
-
-  const [seasonFilter, setSeasonFilter] = useState('All');
-  const seasonFilterItems = [
-    { label: 'All', onClick: () => setSeasonFilter('All') },
-    { label: '2024/25', onClick: () => setSeasonFilter('2024/25') },
-    { label: '2023/24', onClick: () => setSeasonFilter('2023/24') },
-    { label: '2022/23', onClick: () => setSeasonFilter('2022/23') },
-    { label: '2021/22', onClick: () => setSeasonFilter('2021/22') },
-  ];
-
-  const [harvestFilter, setHarvestFilter] = useState(['All', 0]);
-  const harvestFilterItems = [
-    { label: 'All', onClick: () => setHarvestFilter(['All', 0]) },
-    { label: 'Harvest 1', onClick: () => setHarvestFilter(['Harvest 1', 1]) },
-    { label: 'Harvest 2', onClick: () => setHarvestFilter(['Harvest 2', 2]) },
-    { label: 'Harvest 3', onClick: () => setHarvestFilter(['Harvest 3', 3]) },
-  ];
-
   return (
     <section className="text-gray-700">
       <div>
@@ -419,8 +364,10 @@ export function Deliveries() {
             type="text"
             name="search"
             id="search"
-            placeholder="search"
-            className="bg-white px-4 py-1 rounded-md shadow-md text-gray-600"
+            value={query}
+            onChange={handleSearch}
+            placeholder="eg. 123 or Jane Doe"
+            className="bg-white px-4 py-1 rounded-md shadow-md text-gray-600 focus-visible:outline-none"
           />
 
           <span className="flex gap-4 items-center">
@@ -479,7 +426,7 @@ export function Deliveries() {
             </tr>
           </thead>
 
-          <tbody className='text-center'>
+          <tbody className="text-center">
             {deliveries
               .sort((a, b) => {
                 if (sortType === 'descending') {
@@ -488,18 +435,6 @@ export function Deliveries() {
                   return a.date.toString().localeCompare(b.date.toString()); // Ascending order
                 }
               })
-              .filter((delivery) =>
-                seasonFilter === 'All'
-                  ? delivery.season === delivery.season
-                  : delivery.season === seasonFilter,
-              )
-              .filter((delivery) =>
-                harvestFilter[1] === 0
-                  ? delivery.harvest === delivery.harvest
-                  : delivery.harvest === harvestFilter[1],
-              )
-              .filter((delivery) => delivery.product !== berryFilter)
-              .filter((delivery) => delivery.quantity >= quantityFilterValue)
               .map((delivery, index) => (
                 <tr
                   key={index}
