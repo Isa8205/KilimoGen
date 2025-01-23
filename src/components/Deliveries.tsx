@@ -1,6 +1,7 @@
 import { Filter, Grid, List, X } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Fuse, { FuseResult } from 'fuse.js';
+import axios from 'axios';
 
 export function Deliveries() {
   const data = [
@@ -186,8 +187,6 @@ export function Deliveries() {
     },
   ];
 
-  const [sortType, setSortType] = useState('descending');
-
   // The search functionality
   const [query, setQuery] = useState('');
   const fuse = new Fuse(data, {
@@ -197,7 +196,7 @@ export function Deliveries() {
   });
   const results: FuseResult<any>[] = fuse.search(query);
   const searchResulsts = results
-    .filter((result) => (result.score?? Infinity) <= 0.3)
+    .filter((result) => (result.score ?? Infinity) <= 0.3)
     .map((result) => result.item);
 
   // Set the data to be displayed
@@ -214,9 +213,20 @@ export function Deliveries() {
   // Modal body and box
   const [modalDisp, setModalDisp] = useState(false);
   const Modal = () => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      const data = Object.fromEntries(formData);
+
+      await axios.post('http://localhost:3000/api/add-delivery', data)
+      .then(res => {
+        console.log(res.data.farmer)
+        console.table(res.data.requestData)
+      })
+    };
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 text-black">
-        <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
+        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-lg w-full max-w-md">
           {/* Dialog Header */}
           <div className="border-b p-4">
             <span className="flex items-center justify-between">
@@ -237,13 +247,14 @@ export function Deliveries() {
               {/* Product Input */}
               <div className="grid grid-cols-4 items-center gap-4">
                 <label
-                  htmlFor="product"
+                  htmlFor="farmer-number"
                   className="text-right font-medium text-sm text-gray-700"
                 >
                   Product
                 </label>
                 <input
-                  id="product"
+                  id="farmer-number"
+                  name="farmerNumber"
                   className="col-span-3 p-2 border rounded-md focus:outline-none focus:ring focus:ring-pink-500"
                 />
               </div>
@@ -258,11 +269,12 @@ export function Deliveries() {
                 <input
                   id="quantity"
                   type="number"
+                  name='quantity'
                   className="col-span-3 p-2 border rounded-md focus:outline-none focus:ring focus:ring-pink-500"
                 />
               </div>
               {/* Destination Input */}
-              <div className="grid grid-cols-4 items-center gap-4">
+              {/* <div className="grid grid-cols-4 items-center gap-4">
                 <label
                   htmlFor="destination"
                   className="text-right font-medium text-sm text-gray-700"
@@ -273,7 +285,7 @@ export function Deliveries() {
                   id="destination"
                   className="col-span-3 p-2 border rounded-md focus:outline-none focus:ring focus:ring-pink-500"
                 />
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -283,7 +295,7 @@ export function Deliveries() {
               Add Delivery
             </button>
           </div>
-        </div>
+        </form>
       </div>
     );
   };
@@ -379,7 +391,10 @@ export function Deliveries() {
                 <Grid className="text-xs" />
               </button>
             </span>
-            <button className="bg-white text-gray-600 hover:text-orange-500 font-semibold py-2 px-2 rounded inline-flex items-center gap-2">
+            <button
+              className="bg-white text-gray-600 hover:text-orange-500 font-semibold py-2 px-2 rounded inline-flex items-center gap-2"
+              onClick={() => setModalDisp(true)}
+            >
               <Filter /> Filter
             </button>
           </span>
@@ -428,13 +443,13 @@ export function Deliveries() {
 
           <tbody className="text-center">
             {deliveries
-              .sort((a, b) => {
-                if (sortType === 'descending') {
-                  return b.date.toString().localeCompare(a.date.toString()); // Descending order
-                } else {
-                  return a.date.toString().localeCompare(b.date.toString()); // Ascending order
-                }
-              })
+              // .sort((a, b) => {
+              //   if (sortType === 'descending') {
+              //     return b.date.toString().localeCompare(a.date.toString()); // Descending order
+              //   } else {
+              //     return a.date.toString().localeCompare(b.date.toString()); // Ascending order
+              //   }
+              // })
               .map((delivery, index) => (
                 <tr
                   key={index}

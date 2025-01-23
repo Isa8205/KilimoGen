@@ -30,7 +30,7 @@ export default function LandingPage() {
     }, 1000)
 
     const redirect = setTimeout(() => {
-      window.location.href = "/home"
+      window.location.href = "/home/dashboard"
     }, 4000)
 
     return () => {

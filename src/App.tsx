@@ -1,6 +1,6 @@
 import { BarChart, BellIcon, ChevronDown, ChevronLeft, DollarSign, FileTextIcon, LayoutDashboard, Leaf, MessageSquareShare, Package, Settings, Store, Truck, User } from "lucide-react";
 import { useState } from "react";
-import { Routes, Route, NavLink, Outlet } from "react-router-dom";
+import { Routes, Route, NavLink, Outlet, useLocation } from "react-router-dom";
 import Dashboard from "./components/Dashboard";
 import Reports from "./components/Reports";
 import { Deliveries } from "./components/Deliveries";
@@ -8,17 +8,20 @@ import { Inventory } from "./components/Inventory";
 import { Messaging } from "./components/Messaging";
 import { motion } from "framer-motion";
 import Production from "./components/Production";
-import { Members } from "./components/Members";
+import { Farmers } from "./components/Farmers";
 import  ClerkLogin  from "./components/auth/clerks/ClerkLogin";
 import LandingPage from "./Landing";
 import ClerkRegister from "./components/auth/clerks/ClerkRegister";
 import ManagerLogin from "./components/auth/management/ManagerLogin";
 import ManagerRegister from "./components/auth/management/ManagerRegister";
+import FarmerRegister from "./components/FarmerRegister";
 
 function App() {
 
     // The active tab
     const [activeTab, setActiveTab] = useState('Dashboard');
+    const location = useLocation();
+    console.log(location.pathname.toString())
 
     const Navbar = () => {
         const [isExpanded, setExpanded] = useState(true);
@@ -29,7 +32,7 @@ function App() {
             // { icon: <Package />, label: "Production", route: "production" },
             { icon: <Truck />, label: "Deliveries", route: "deliveries" },
             { icon: <Store />, label: "Inventory", route: "inventory" },
-            { icon: <BarChart />, label: "Analytics", route: "analytics" },
+            // { icon: <BarChart />, label: "Analytics", route: "analytics" },
             // { icon: <DollarSign />, label: "Financials", route: "financials" },
             { icon: <FileTextIcon />, label: "Reports", route: "reports" },
             { icon: <MessageSquareShare />, label: "Messaging", route: "messaging" },
@@ -177,8 +180,8 @@ function App() {
 
                     {/* Members Management */}
                     <Route path="members">
-                        <Route path="" element={<Members/>} />
-                        <Route path="add" element={<div>Add Member Form</div>} />
+                        <Route path="" element={<Farmers/>} />
+                        <Route path="add" element={<FarmerRegister/>} />
                         <Route path="edit/:id" element={<div>Edit Member Form</div>} />
                         <Route path=":id" element={<div>View Member Details</div>} />
                     </Route>

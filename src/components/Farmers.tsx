@@ -2,20 +2,21 @@ import axios from 'axios';
 import { Filter, Grid, List } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Loader from './Widgets/Loaders/Loader1';
+import { NavLink } from 'react-router-dom';
 
-export function Members() {
+export function Farmers() {
   const [members, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchMembers = async () => {
       const response = await axios.get('http://localhost:3000/api/clerks');
       console.log(response.data.members);
-      setMembers(response.data.members)
-      setTimeout(() => setLoading(false), 3000)
-    }
+      setMembers(response.data.members);
+      setTimeout(() => setLoading(false), 3000);
+    };
 
     fetchMembers();
-  }, [])
+  }, []);
 
   useEffect(() => {
     const form = document.querySelector('form');
@@ -44,9 +45,11 @@ export function Members() {
           <button className="bg-white text-black py-1 px-4 rounded">
             Export CSV
           </button>
-          <button className="bg-accent text-white py-1 px-4 rounded">
-            Add
-          </button>
+          <NavLink to="/home/members/add">
+            <button className="bg-accent text-white py-1 px-4 rounded">
+              Add
+            </button>
+          </NavLink>
         </span>
       </div>
 
@@ -93,7 +96,7 @@ export function Members() {
 
       <table className="bg-white shadow-md rounded-md p-2 w-full table-auto border-collapse">
         <thead className="bg-gray-200 rounded-md">
-          <tr className='text-center'>
+          <tr className="text-center">
             {/* Checkbox header */}
             <th className=" p-2">
               <input type="checkbox" name="select-all" id="all" />
@@ -109,31 +112,46 @@ export function Members() {
           </tr>
         </thead>
 
-        {loading ? <Loader/> : (
-          
-        <tbody>
-        {members.map((item: {firstName: string, lastName: string, id: number, email: string, gender: string, phone: number}, index) => (
-          <tr
-            key={index}
-            className={`border-b last:border-none text-center ${
-              index % 2 === 0 ? 'bg-gray-50' : ''
-            }`}
-          >
-            {/* Checkbox for each row */}
-            <td className="p-2">
-              <input type="checkbox" />
-            </td>
-            {/* Data cells */}
-            <td className="p-2 ">{item.firstName} {item.lastName}</td>
-            <td className="p-2 ">{item.id}</td>
-            <td className="p-2 ">{item.email}</td>
-            <td className="p-2 ">{item.gender}</td>
-            <td className="p-2 ">0{item.phone}</td>
-            <td className="p-2 ">34,540</td>
-            <td className="p-2 ">Active</td>
-          </tr>
-        ))}
-      </tbody>
+        {loading ? (
+          <Loader />
+        ) : (
+          <tbody>
+            {members.map(
+              (
+                item: {
+                  firstName: string;
+                  lastName: string;
+                  id: number;
+                  email: string;
+                  gender: string;
+                  phone: number;
+                },
+                index,
+              ) => (
+                <tr
+                  key={index}
+                  className={`border-b last:border-none text-center ${
+                    index % 2 === 0 ? 'bg-gray-50' : ''
+                  }`}
+                >
+                  {/* Checkbox for each row */}
+                  <td className="p-2">
+                    <input type="checkbox" />
+                  </td>
+                  {/* Data cells */}
+                  <td className="p-2 ">
+                    {item.firstName} {item.lastName}
+                  </td>
+                  <td className="p-2 ">{item.id}</td>
+                  <td className="p-2 ">{item.email}</td>
+                  <td className="p-2 ">{item.gender}</td>
+                  <td className="p-2 ">0{item.phone}</td>
+                  <td className="p-2 ">34,540</td>
+                  <td className="p-2 ">Active</td>
+                </tr>
+              ),
+            )}
+          </tbody>
         )}
       </table>
     </section>
