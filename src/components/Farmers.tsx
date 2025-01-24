@@ -5,13 +5,15 @@ import Loader from './Widgets/Loaders/Loader1';
 import { NavLink } from 'react-router-dom';
 
 export function Farmers() {
-  const [members, setMembers] = useState([]);
+  const [farmers, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchMembers = async () => {
-      const response = await axios.get('http://localhost:3000/api/clerks');
-      setMembers(response.data.members);
-      setTimeout(() => setLoading(false), 3000);
+      if (!farmers) {
+        const response = await axios.get('http://localhost:3000/api/clerk');
+        setMembers(response.data.farmers);
+        setTimeout(() => setLoading(false), 3000);
+      }
     };
 
     fetchMembers();
@@ -115,7 +117,7 @@ export function Farmers() {
           <Loader />
         ) : (
           <tbody>
-            {members.map(
+            {farmers.map(
               (
                 item: {
                   firstName: string;

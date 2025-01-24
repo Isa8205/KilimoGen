@@ -2,7 +2,7 @@ import { ArrowLeft, Home } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { ToastContainer, toast, ToastPosition } from 'react-toastify';
+import { ToastContainer, toast, ToastPosition, ToastOptions } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 /**
@@ -16,8 +16,8 @@ import 'react-toastify/dist/ReactToastify.css';
  * @returns A JSX element representing the FarmerRegister component
  */
 const FarmerRegister = () => {
-  const notify = () => {
-    toast.success("Operation successful!", {
+  const notify = ({state, message}: {state: string, message: string}) => {
+    const properties: ToastOptions<unknown> = {
       position: "top-right", // Autocomplete works here
       autoClose: 3000, // Type-checked as a number
       hideProgressBar: false,
@@ -25,7 +25,8 @@ const FarmerRegister = () => {
       pauseOnHover: true,
       draggable: true,
       progress: undefined, // Can be used for manual progress updates
-    });
+    }
+    state === "Success" ? toast.success(message, properties) : toast.error(message, properties)
   }; 
 
     const navigate = useNavigate();
@@ -42,16 +43,19 @@ const FarmerRegister = () => {
       await axios
         .post('http://localhost:3000/api/farmer/add', data)
         .then((res) => {
-          if (res.data.message === 'Success') {
+          if (res.data.state === 'Success') {
             setSendingState(false);
-            notify();
+            notify({state: res.data.state, message: res.data.message});
             form.reset();
           } else {
             setSendingState(false);
             console.log(res.data.message);
+            notify({state: res.data.state, message: res.data.message});
           }
         })
-        .catch((err) => console.log(err));
+        .catch((err) => {
+          console.error(err)
+        });
     };
 
     return (

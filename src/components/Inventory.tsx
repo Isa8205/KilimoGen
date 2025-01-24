@@ -4,18 +4,17 @@ import { useEffect, useState } from 'react';
 import Loader from './Widgets/Loaders/Loader1';
 
 export function Inventory() {
-  const [members, setMembers] = useState([]);
+  const [farmers, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchMembers = async () => {
-      const response = await axios.get('http://localhost:3000/api/clerks');
-      console.log(response.data.members);
-      setMembers(response.data.members)
+      const response = await axios.get('http://localhost:3000/api/clerk');
+      setMembers(response.data.farmers)
       setTimeout(() => setLoading(false), 3000)
     }
 
     fetchMembers();
-  }, [])
+  }, [farmers])
 
   useEffect(() => {
     const form = document.querySelector('form');
@@ -112,7 +111,7 @@ export function Inventory() {
         {loading ? <Loader/> : (
           
         <tbody>
-        {members.map((item: {firstName: string, lastName: string, id: number, email: string, gender: string, phone: number}, index) => (
+        {farmers.map((item: {firstName: string, lastName: string, id: number, email: string, gender: string, phone: number}, index) => (
           <tr
             key={index}
             className={`border-b last:border-none text-center ${
