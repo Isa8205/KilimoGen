@@ -1,208 +1,242 @@
+import { ArrowLeft, Home } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { ToastContainer, toast, ToastPosition } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
+/**
+ * Component for farmer registration
+ *
+ * This component contains the form for farmers to register on the platform.
+ * The form contains fields for first name, middle name, last name, email, phone number, national ID, crops grown, and payment mode.
+ * The form also contains a submit button which sends the form data to the server.
+ * The component also contains a toast notification to notify the user of success or failure of the registration process.
+ *
+ * @returns A JSX element representing the FarmerRegister component
+ */
 const FarmerRegister = () => {
-  const [formData, setFormData] = useState({
-    firstName: '',
-    middleName: '',
-    lastName: '',
-    farmerNumber: '',
-    phone: '',
-    email: '',
-    nationalID: '',
-    coordinates: '',
-    crop: '',
-    paymentMode: '',
-  });
+  const notify = () => {
+    toast.success("Operation successful!", {
+      position: "top-right", // Autocomplete works here
+      autoClose: 3000, // Type-checked as a number
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined, // Can be used for manual progress updates
+    });
+  }; 
 
-  const navigate = useNavigate();
+    const navigate = useNavigate();
+    const [sendingState, setSendingState] = useState(false);
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
-        <h1 className="text-2xl font-bold text-gray-800 text-center mb-6">
-          Farmer Registration
-        </h1>
-        <form  className="space-y-4">
-          {/* First Name */}
-          <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-              First Name
-            </label>
-            <input
-              type="text"
-              id="firstName"
-              name="firstName"
-              value={formData.firstName}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
-            />
-          </div>
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      setSendingState(true);
+      const form: HTMLFormElement = e.currentTarget;
+      const formdata = new FormData(form);
 
-          {/* Middle Name */}
-          <div>
-            <label htmlFor="middleName" className="block text-sm font-medium text-gray-700">
-              Middle Name
-            </label>
-            <input
-              type="text"
-              id="middleName"
-              name="middleName"
-              value={formData.middleName}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
-            />
-          </div>
+      const data = Object.fromEntries(formdata);
 
-          {/* Last Name */}
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-              Last Name
-            </label>
-            <input
-              type="text"
-              id="lastName"
-              name="lastName"
-              value={formData.lastName}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
-            />
-          </div>
+      await axios
+        .post('http://localhost:3000/api/farmer/add', data)
+        .then((res) => {
+          if (res.data.message === 'Success') {
+            setSendingState(false);
+            notify();
+            form.reset();
+          } else {
+            setSendingState(false);
+            console.log(res.data.message);
+          }
+        })
+        .catch((err) => console.log(err));
+    };
 
-          {/* Farmer Number */}
-          <div>
-            <label htmlFor="farmerNumber" className="block text-sm font-medium text-gray-700">
-              Farmer Number
-            </label>
-            <input
-              type="number"
-              id="farmerNumber"
-              name="farmerNumber"
-              value={formData.farmerNumber}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
-            />
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-              Phone
-            </label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
-            />
-          </div>
-
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
-            />
-          </div>
-
-          {/* National ID */}
-          <div>
-            <label htmlFor="nationalID" className="block text-sm font-medium text-gray-700">
-              National ID
-            </label>
-            <input
-              type="number"
-              id="nationalID"
-              name="nationalID"
-              value={formData.nationalID}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
-            />
-          </div>
-
-          {/* Coordinates */}
-          <div>
-            <label htmlFor="coordinates" className="block text-sm font-medium text-gray-700">
-              Coordinates (Optional)
-            </label>
-            <input
-              type="text"
-              id="coordinates"
-              name="coordinates"
-              value={formData.coordinates}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
-            />
-          </div>
-
-          {/* Crop */}
-          <div>
-            <label htmlFor="crop" className="block text-sm font-medium text-gray-700">
-              Crop
-            </label>
-            <input
-              type="text"
-              id="crop"
-              name="crop"
-              value={formData.crop}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
-            />
-          </div>
-
-          {/* Payment Mode */}
-          <div>
-            <label htmlFor="paymentMode" className="block text-sm font-medium text-gray-700">
-              Payment Mode
-            </label>
-            <select
-              id="paymentMode"
-              name="paymentMode"
-              value={formData.paymentMode}
-              required
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
-            >
-              <option value="">Select Payment Mode</option>
-              <option value="Bank Transfer">Bank Transfer</option>
-              <option value="Mobile Money">Mobile Money</option>
-              <option value="Cash">Cash</option>
-            </select>
-          </div>
-
-          {/* Navigation and Submission Buttons */}
-          <div className="flex justify-between mt-6">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-orange-600 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-            >
-              Back
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-orange-600 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
-            >
-              Home
-            </button>
-          </div>
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-gray-00 text-gray-900">
+        <ToastContainer />
+        {/* Top Navigation Buttons */}
+        <div className="bg-gray-100 flex items-center gap-4">
+          {/* Back Button */}
           <button
-            type="submit"
-            className="w-full inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-gray-700 hover:text-gray-900 hover:bg-gray-200 p-2 rounded-lg transition"
           >
-            Submit
+            <ArrowLeft className="w-5 h-5" />
+            <span className="hidden sm:inline">Back</span>
           </button>
-        </form>
+        </div>
+
+        <div className="bg-white mt-6 pt-2 p-8 rounded-lg shadow-xl w-full max-w-md">
+          <h1 className="text-2xl font-bold text-gray-800 mb-6">
+            Farmer Register
+          </h1>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+            {/* Name Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <label
+                  htmlFor="firstname"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Firstname <span className="text-red-500">*</span>
+                </label>
+                <input
+                  required
+                  type="text"
+                  name="firstName"
+                  id="firstname"
+                  placeholder="John"
+                  className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="middlename"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Middlename
+                </label>
+                <input
+                  type="text"
+                  name="middleName"
+                  id="middlename"
+                  placeholder="Doe"
+                  className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="lastname"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Lastname <span className="text-red-500">*</span>
+                </label>
+                <input
+                  required
+                  type="text"
+                  name="lastName"
+                  id="lastname"
+                  placeholder="Smith"
+                  className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </div>
+            </div>
+
+            {/* Username Field */}
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
+                email <span className="text-red-500">*</span>
+              </label>
+              <input
+                required
+                type="email"
+                name="email"
+                id="email"
+                placeholder="john.doe@example.com"
+                className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+
+            {/* Phone number field */}
+            <div>
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Phone <span className="text-red-500">*</span>
+              </label>
+              <span className="flex items-center">
+                <span className="p-2  mt-1 rounded-l-md text-center bg-gray-300 border border-gray-300">
+                  +254
+                </span>
+                <input
+                  required
+                  type="number"
+                  name="phone"
+                  id="email"
+                  placeholder="712345678"
+                  className="mt-1 block flex-grow bg-gray-50 border border-gray-300 rounded-r-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                />
+              </span>
+            </div>
+
+            <div>
+              <label
+                htmlFor="national-id"
+                className="block text-sm font-medium text-gray-700"
+              >
+                National ID <span className="text-red-500">*</span>
+              </label>
+              <input
+                required
+                type="number"
+                name="nationalID"
+                id="national-id"
+                placeholder="12345678"
+                className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+
+            {/* Password Fields */}
+            <div>
+              <label
+                htmlFor="crops"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Crops grown <span className="text-red-500">*</span>
+              </label>
+              <div>
+                <input
+                  required
+                  type="text"
+                  name="crop"
+                  id="crops"
+                  placeholder="Coffe, Maize, Beans"
+                  className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 pr-10"
+                />
+              </div>
+            </div>
+            <div>
+              <label
+                htmlFor="payment-mode"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Payments Mode <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <select
+                  required
+                  name="paymentMode"
+                  id="payment-mode"
+                  className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 pr-10"
+                >
+                  <option value="">-- Select one --</option>
+                  <option value="M-pesa">Mpesa</option>
+                  <option value="KCB">KCB bank</option>
+                  <option value="Co-operative bank">Co-op</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className={`${
+                sendingState ? 'opacity-70 hover:opacity-70' : ''
+              } relative w-full bg-accent text-white py-2 px-4 rounded-lg shadow-md hover:opacity-90 focus:outline-none  duration-150 ease-in-out`}
+            >
+              {sendingState ? 'Sending......' : 'Register'}
+            </button>
+          </form>
+        </div>
       </div>
-    </div>
-  );
-};
+    );
+  };
 
 export default FarmerRegister;

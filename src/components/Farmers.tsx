@@ -10,7 +10,6 @@ export function Farmers() {
   useEffect(() => {
     const fetchMembers = async () => {
       const response = await axios.get('http://localhost:3000/api/clerks');
-      console.log(response.data.members);
       setMembers(response.data.members);
       setTimeout(() => setLoading(false), 3000);
     };
@@ -39,13 +38,13 @@ export function Farmers() {
   return (
     <section className="text-gray-800">
       <div className="flex justify-between mb-4">
-        <h2 className="text-2xl font-bold">Members</h2>
+        <h2 className="text-2xl font-bold">Farmers</h2>
 
         <span className="inline-flex gap-2 text-sm font-semibold">
           <button className="bg-white text-black py-1 px-4 rounded">
             Export CSV
           </button>
-          <NavLink to="/home/members/add">
+          <NavLink to="/home/farmers/add">
             <button className="bg-accent text-white py-1 px-4 rounded">
               Add
             </button>
