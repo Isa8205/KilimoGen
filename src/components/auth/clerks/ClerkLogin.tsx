@@ -3,55 +3,87 @@ import { ArrowLeft, Home } from "lucide-react";
 import { EyeIcon } from "lucide-react";
 import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import backgroundImage from "../../../assets/images/backgrounds/ForestLake.png";
 
 export default function ClerkLogin() {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const formRef = useRef<HTMLFormElement>(null)!;
 
-    const handleSubmit = async(e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
         const data = Object.fromEntries(formData);
         console.table(data);
 
-        await axios.post("http://localhost:3000/api/clerks/login", data)
-        .then(res => console.log(res.data))
-
-    }
+        await axios
+            .post("http://localhost:3000/api/clerks/login", data)
+            .then((res) => console.log(res.data));
+    };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 text-gray-900 relative">
+        <div
+            className="min-h-screen flex items-center justify-center bg-gray-100 text-gray-900 relative"
+            style={{
+                backgroundImage: `url(${backgroundImage})`,
+                backgroundSize: "cover",
+                backgroundPosition: "center",
+                backgroundRepeat: "no-repeat",
+            }}
+        >
             {/* Top Navigation Buttons */}
-            <div className="absolute top-4 left-4 flex items-center gap-4">
-                {/* Back Button */}
+            <div className="absolute top-4 left-4 flex items-center gap-4 backdrop:blur-md">
                 <button
                     onClick={() => navigate(-1)}
-                    className="flex items-center gap-2 text-gray-700 hover:text-gray-900 hover:bg-gray-200 p-2 rounded-lg transition"
+                    className="flex items-center gap-2 text-gray-700 hover:text-orange-500 hover:opacity-80 p-2 rounded-lg transition"
+                    style={{
+                        background: "rgba(255, 255, 255, 0.2)",
+                        backdropFilter: "blur(10px)",
+                        WebkitBackdropFilter: "blur(10px)",
+                        // border: "1px solid rgba(255, 255, 255, 0.3)",
+                    }}
                 >
                     <ArrowLeft className="w-5 h-5" />
                     <span className="hidden sm:inline">Back</span>
                 </button>
 
-                {/* Home Button */}
                 <button
                     onClick={() => navigate("/home/dashboard")}
-                    className="flex items-center gap-2 text-gray-700 hover:text-gray-900 hover:bg-gray-200 p-2 rounded-lg transition"
+                    className="flex items-center gap-2 text-gray-700 hover:text-orange-500 p-2 rounded-lg transition"
+                    style={{
+                        background: "rgba(255, 255, 255, 0.2)",
+                        backdropFilter: "blur(10px)",
+                        WebkitBackdropFilter: "blur(10px)",
+                        // border: "1px solid rgba(255, 255, 255, 0.3)",
+                    }}
                 >
                     <Home className="w-5 h-5" />
                     <span className="hidden sm:inline">Home</span>
                 </button>
             </div>
 
-            <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-                <h1 className="text-2xl font-bold text-gray-800 mb-6">Login</h1>
+            {/* Glass Effect Center Div */}
+            <div
+                className="p-8 rounded-lg shadow-xl w-full max-w-md"
+                style={{
+                    background: "rgba(255, 255, 255, 0.2)",
+                    backdropFilter: "blur(10px)",
+                    WebkitBackdropFilter: "blur(10px)",
+                    border: "1px solid rgba(255, 255, 255, 0.3)",
+                }}
+            >
+                <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">Login</h1>
                 <form
                     onSubmit={handleSubmit}
                     ref={formRef}
-                    className="flex flex-col gap-6">
+                    className="flex flex-col gap-6"
+                >
                     {/* Username Field */}
                     <div>
-                        <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                        <label
+                            htmlFor="username"
+                            className="block text-sm font-medium text-gray-800"
+                        >
                             Username or email
                         </label>
                         <input
@@ -59,13 +91,16 @@ export default function ClerkLogin() {
                             name="username"
                             id="username"
                             placeholder="eg. John Doe"
-                            className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
+                            className="mt-1 block w-full bg-transparent border-b border-gray-300 focus:border-orange-500 focus:ring-0 p-2 text-gray-8000"
                         />
                     </div>
 
                     {/* Password Field */}
                     <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                        <label
+                            htmlFor="password"
+                            className="block text-sm font-medium text-gray-800"
+                        >
                             Password
                         </label>
                         <div className="relative">
@@ -74,10 +109,10 @@ export default function ClerkLogin() {
                                 name="password"
                                 id="password"
                                 placeholder="&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;&#x25CF;"
-                                className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 pr-10"
+                                className="mt-1 block w-full bg-transparent border-b border-gray-300 focus:border-orange-500 focus-visible:outline-none p-2 text-gray-800"
                             />
                             <EyeIcon
-                                className="absolute right-3 top-3 cursor-pointer text-gray-400 hover:text-gray-600"
+                                className="absolute right-3 top-3 cursor-pointer text-gray-700 hover:text-orange-500"
                                 onClick={() => setShowPassword(!showPassword)}
                                 aria-label="Toggle password visibility"
                             />
@@ -86,7 +121,10 @@ export default function ClerkLogin() {
 
                     {/* Forgot Password Link */}
                     <div className="text-right">
-                        <a href="/forgot-password" className="text-sm text-orange-600 hover:underline">
+                        <a
+                            href="/forgot-password"
+                            className="text-sm text-orange-600 hover:underline"
+                        >
                             Forgot your password?
                         </a>
                     </div>
@@ -94,15 +132,18 @@ export default function ClerkLogin() {
                     {/* Submit Button */}
                     <button
                         type="submit"
-                        className="w-full bg-accent text-white py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 focus:ring-offset-2 transition duration-150 ease-in-out"
+                        className="w-full bg-orange-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 focus:ring-orange-500 focus:ring-offset-2 transition duration-150 ease-in-out"
                     >
                         Login
                     </button>
 
                     {/* Divider for Alternative Actions */}
-                    <div className="text-center text-sm text-gray-500 mt-4">
+                    <div className="text-center text-sm text-gray-800 mt-4">
                         Don't have an account?{" "}
-                        <a href="/auth/clerk/register" className="text-orange-600 hover:underline">
+                        <a
+                            href="/auth/clerk/register"
+                            className="text-orange-600 hover:underline"
+                        >
                             Sign up here
                         </a>
                     </div>
