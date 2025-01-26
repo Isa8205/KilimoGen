@@ -5,6 +5,7 @@ import Loader from './Widgets/Loaders/Loader1';
 import { NavLink } from 'react-router-dom';
 
 export function Farmers() {
+  // Fetching farmers from the database
   const [farmers, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -15,24 +16,6 @@ export function Farmers() {
     };
 
     fetchMembers();
-  }, []);
-
-  useEffect(() => {
-    const form = document.querySelector('form');
-    form?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
-      console.log(data);
-
-      const response = await axios.post(
-        'http://localhost:3000/api/add-clerk',
-        data,
-      );
-
-      console.log(response);
-    });
   }, []);
 
   return (
@@ -55,17 +38,17 @@ export function Farmers() {
       <div className="bg-white p-5 flex shadow-md rounded-md">
         <span className="flex-grow border-x-2 border-gray-400 px-6">
           <p>Total</p>
-          <span className="font-bold">235</span>
+          <span className="font-bold">{farmers.length}</span>
         </span>
 
         <span className="flex-grow border-e-2 border-gray-400 px-6">
-          <p>Total</p>
-          <span className="font-bold">235</span>
+          <p>Active</p>
+          <span className="font-bold">{farmers.length}</span>
         </span>
 
         <span className="flex-grow border-e-2 border-gray-400 px-6">
-          <p>Total</p>
-          <span className="font-bold">235</span>
+          <p>Inactive</p>
+          <span className="font-bold">0</span>
         </span>
       </div>
 
@@ -133,7 +116,7 @@ export function Farmers() {
                 >
                   {/* Checkbox for each row */}
                   <td className="p-2">
-                    <input type="checkbox" />
+                    <input type="checkbox" value={item.id} />
                   </td>
                   {/* Data cells */}
                   <td className="p-2 ">

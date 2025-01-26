@@ -27,7 +27,7 @@ export default function ClerkLogin() {
         if (res.data.passed) {
           setTimeout(() => {
             window.location.href = '/home/dashboard';
-          }, 2000);
+          }, 3000);
         }
       });
   };
@@ -84,7 +84,7 @@ export default function ClerkLogin() {
           border: '1px solid rgba(255, 255, 255, 0.3)',
         }}
       >
-        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+        <h1 className="text-4xl font-bold text-gray-800 mb-6 text-center">
           Login
         </h1>
         <form
@@ -96,7 +96,7 @@ export default function ClerkLogin() {
           <div>
             <label
               htmlFor="username"
-              className="block text-sm font-medium text-gray-800"
+              className="block text-sm font-medium text-gray-950"
             >
               Username or email
             </label>
@@ -113,7 +113,7 @@ export default function ClerkLogin() {
           <div>
             <label
               htmlFor="password"
-              className="block text-sm font-medium text-gray-800"
+              className="block text-sm font-medium text-gray-950"
             >
               Password
             </label>
@@ -134,14 +134,14 @@ export default function ClerkLogin() {
           </div>
 
           {/* Forgot Password Link */}
-          <div className="text-right">
+          {/* <div className="text-right">
             <a
               href="/forgot-password"
               className="text-sm text-orange-600 hover:underline"
             >
               Forgot your password?
             </a>
-          </div>
+          </div> */}
 
           {/* Submit Button */}
           <button

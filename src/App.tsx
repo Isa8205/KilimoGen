@@ -10,7 +10,7 @@ import {
   Truck,
   User,
 } from 'lucide-react';
-import { MutableRefObject, useRef, useState } from 'react';
+import { MutableRefObject, useEffect, useRef, useState } from 'react';
 import { Routes, Route, NavLink, Outlet } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import Reports from './components/Reports';
@@ -80,7 +80,7 @@ function App() {
                   const currentLocation = location.pathname.toString();
                   currentLocation.includes(nav.route)
                     ? setActiveTab(nav.label)
-                    : null;
+                    : setActiveTab('');
                 }}
                 key={nav.label}
                 className={`navlink rounded-md mt-1 cursor-pointer hover:opacity-80 w-full ${
@@ -124,16 +124,65 @@ function App() {
   };
 
   const Home = () => {
-    const profileSettingsRef:MutableRefObject<any> = useRef()
-
-    const handleProfileHover = () => {
-        profileSettingsRef.current.style.display = "flex"
-    }
-
+    const profileSettingsRef: MutableRefObject<HTMLSpanElement | null> = useRef(null);
+    const profileRef: MutableRefObject<HTMLSpanElement | null> = useRef(null);
+  
+    useEffect(() => {
+      let hideTimeout: NodeJS.Timeout | undefined;
+  
+      const handleProfileMouseOver = () => {
+        clearTimeout(hideTimeout)
+        if (profileSettingsRef.current) {
+          profileSettingsRef.current.style.display = "flex";
+        }
+      };
+  
+      const handleProfileMouseOut = () => {
+        hideTimeout = setTimeout(() => {
+          if (profileSettingsRef.current) {
+            profileSettingsRef.current.style.display = "none";
+          }
+        }, 2000);
+      };
+  
+      const handleSettingsMouseOver = () => {
+        clearTimeout(hideTimeout);
+      };
+  
+      const handleSettingsMouseOut = () => {
+        hideTimeout = setTimeout(() => {
+          if (profileSettingsRef.current) {
+            profileSettingsRef.current.style.display = "none";
+          }
+        }, 2000);
+      };
+  
+      const profileElement = profileRef.current;
+      const profileSettingsElement = profileSettingsRef.current;
+  
+      if (profileElement && profileSettingsElement) {
+        profileElement.addEventListener("mouseover", handleProfileMouseOver);
+        profileElement.addEventListener("mouseout", handleProfileMouseOut);
+        profileSettingsElement.addEventListener("mouseover", handleSettingsMouseOver);
+        profileSettingsElement.addEventListener("mouseout", handleSettingsMouseOut);
+      }
+  
+      return () => {
+        if (profileElement && profileSettingsElement) {
+          profileElement.removeEventListener("mouseover", handleProfileMouseOver);
+          profileElement.removeEventListener("mouseout", handleProfileMouseOut);
+          profileSettingsElement.removeEventListener("mouseover", handleSettingsMouseOver);
+          profileSettingsElement.removeEventListener("mouseout", handleSettingsMouseOut);
+        }
+        if (hideTimeout) clearTimeout(hideTimeout);
+        if (hideTimeout) clearTimeout(hideTimeout);
+      };
+    }, []);
+  
     return (
       <div className="h-screen w-screen flex bg-background">
         <Navbar />
-
+  
         <section className="content w-full text-white max-h-screen">
           {/* The header of the right section */}
           <div className="flex justify-between items-center bg-white text-black p-2 sticky top-0 left-0 right-0 shadow-md">
@@ -146,28 +195,37 @@ function App() {
                 placeholder="Search"
               />
             </span>
-
-            <div className=" relative  flex gap-4 items-center">
+  
+            <div className="relative flex gap-4 items-center">
               <div className="relative bg-gray-300 p-1 rounded-md hover:opacity-85 cursor-pointer">
                 <BellIcon className="text-sm" fill="gray" stroke="gray" />
                 <span className="text-xs bg-red-500 text-white py-1 px-1 rounded-full absolute top-1 right-2"></span>
               </div>
-
-              <span onMouseOver={handleProfileHover} className="inline-flex items-center">
+  
+              <span ref={profileRef} className="inline-flex items-center">
                 <img
                   src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80"
-                  alt=""
+                  alt="Not found"
                   className="h-8 w-8 object-cover rounded-md"
                 />
-
-                <span ref={profileSettingsRef} className='fixed right-2 top-12 shadow-md flex-col bg-teal-700 hidden'>
-                  <button className='py-2 px-1 inline-flex gap-2 text-white border-x-2 border border-b-1'><User/>Profile</button>
-                  <button className='py-2 px-1 inline-flex gap-2 text-white border-x-2 hover:text-red-500'><DoorOpen/>Log out</button>
+  
+                <span
+                  ref={profileSettingsRef}
+                  className="fixed right-2 top-12 shadow-md flex-col bg-teal-700 hidden"
+                >
+                  <button className="py-2 px-1 inline-flex gap-2 text-white border-x-2 border border-b-1">
+                    <User />
+                    Profile
+                  </button>
+                  <button className="py-2 px-1 inline-flex gap-2 text-white border-x-2 hover:text-red-500">
+                    <DoorOpen />
+                    Log out
+                  </button>
                 </span>
               </span>
             </div>
           </div>
-
+  
           {/* Outlet for rendering nested routes */}
           <div className="container mt-0 p-4 rounded-lg">
             <Outlet />
@@ -176,7 +234,7 @@ function App() {
       </div>
     );
   };
-
+  
   return (
     <div className="relative">
       <Routes>

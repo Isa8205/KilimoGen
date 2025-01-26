@@ -218,10 +218,9 @@ export function Deliveries() {
       const formData = new FormData(e.currentTarget);
       const data = Object.fromEntries(formData);
 
-      await axios.post('http://localhost:3000/api/add-delivery', data)
+      await axios.post('http://localhost:3000/api/delivery/add', data)
       .then(res => {
-        console.log(res.data.farmer)
-        console.table(res.data.requestData)
+        console.log(res.data)
       })
     };
     return (
@@ -250,12 +249,13 @@ export function Deliveries() {
                   htmlFor="farmer-number"
                   className="text-right font-medium text-sm text-gray-700"
                 >
-                  Product
+                  Farmer Number
                 </label>
                 <input
+                  required
                   id="farmer-number"
                   name="farmerNumber"
-                  className="col-span-3 p-2 border rounded-md focus:outline-none focus:ring focus:ring-pink-500"
+                  className="col-span-3 p-2 border rounded-md focus:outline-none "
                 />
               </div>
               {/* Quantity Input */}
@@ -267,31 +267,19 @@ export function Deliveries() {
                   Quantity
                 </label>
                 <input
+                  required
                   id="quantity"
                   type="number"
                   name='quantity'
-                  className="col-span-3 p-2 border rounded-md focus:outline-none focus:ring focus:ring-pink-500"
+                  className="col-span-3 p-2 border rounded-md focus:outline-none "
                 />
               </div>
-              {/* Destination Input */}
-              {/* <div className="grid grid-cols-4 items-center gap-4">
-                <label
-                  htmlFor="destination"
-                  className="text-right font-medium text-sm text-gray-700"
-                >
-                  Destination
-                </label>
-                <input
-                  id="destination"
-                  className="col-span-3 p-2 border rounded-md focus:outline-none focus:ring focus:ring-pink-500"
-                />
-              </div> */}
             </div>
           </div>
 
           {/* Dialog Footer */}
           <div className="border-t p-4 flex justify-end">
-            <button className="bg-black text-white py-2 px-4 rounded-md hover:bg-pink-600 focus:outline-none focus:ring focus:ring-pink-300">
+            <button className="bg-gray-100 text-gray-600 border-2 border-accent hover:text-white py-2 px-4 rounded-md hover:bg-accent focus:outline-none">
               Add Delivery
             </button>
           </div>
