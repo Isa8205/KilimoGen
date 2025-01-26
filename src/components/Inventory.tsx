@@ -2,19 +2,20 @@ import axios from 'axios';
 import { Filter, Grid, List } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Loader from './Widgets/Loaders/Loader1';
+import { NavLink } from 'react-router-dom';
 
 export function Inventory() {
   const [farmers, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchMembers = async () => {
-      const response = await axios.get('http://localhost:3000/api/clerk');
-      setMembers(response.data.farmers)
-      setTimeout(() => setLoading(false), 3000)
-    }
+        const response = await axios.get('http://localhost:3000/api/clerk');
+        setMembers(response.data.farmers);
+        setTimeout(() => setLoading(false), 3000);
+    };
 
     fetchMembers();
-  }, [farmers])
+  }, []);
 
   useEffect(() => {
     const form = document.querySelector('form');
@@ -37,15 +38,17 @@ export function Inventory() {
   return (
     <section className="text-gray-800">
       <div className="flex justify-between mb-4">
-        <h2 className="text-2xl font-bold">Inventory</h2>
+        <h2 className="text-2xl font-bold">Farmers</h2>
 
         <span className="inline-flex gap-2 text-sm font-semibold">
           <button className="bg-white text-black py-1 px-4 rounded">
             Export CSV
           </button>
-          <button className="bg-accent text-white py-1 px-4 rounded">
-            Add
-          </button>
+          <NavLink to="/home/farmers/add">
+            <button className="bg-accent text-white py-1 px-4 rounded">
+              Add
+            </button>
+          </NavLink>
         </span>
       </div>
 
@@ -90,9 +93,9 @@ export function Inventory() {
         </span>
       </div>
 
-      <table className="bg-white shadow-md rounded-md p-2 w-full table-auto border-collapse">
-        <thead className="bg-gray-200 rounded-md p-2">
-          <tr className='text-center'>
+      <table className={`bg-white ${!loading ? 'shadow-md' : ''} rounded-md p-2 w-full table-auto border-collapse`}>
+        <thead className="bg-gray-200 rounded-md">
+          <tr className="text-center">
             {/* Checkbox header */}
             <th className=" p-2">
               <input type="checkbox" name="select-all" id="all" />
@@ -108,33 +111,54 @@ export function Inventory() {
           </tr>
         </thead>
 
-        {loading ? <Loader/> : (
-          
-        <tbody>
-        {farmers.map((item: {firstName: string, lastName: string, id: number, email: string, gender: string, phone: number}, index) => (
-          <tr
-            key={index}
-            className={`border-b last:border-none text-center ${
-              index % 2 === 0 ? 'bg-gray-50' : ''
-            }`}
-          >
-            {/* Checkbox for each row */}
-            <td className="p-2">
-              <input type="checkbox" />
-            </td>
-            {/* Data cells */}
-            <td className="p-2 ">{item.firstName} {item.lastName}</td>
-            <td className="p-2 ">{item.id}</td>
-            <td className="p-2 ">{item.email}</td>
-            <td className="p-2 ">{item.gender}</td>
-            <td className="p-2 ">0{item.phone}</td>
-            <td className="p-2 ">34,540</td>
-            <td className="p-2 ">Active</td>
-          </tr>
-        ))}
-      </tbody>
-        )}
+        {!loading ? (
+          <tbody>
+            {farmers.map(
+              (
+                item: {
+                  firstName: string;
+                  lastName: string;
+                  id: number;
+                  email: string;
+                  gender: string;
+                  phone: number;
+                },
+                index,
+              ) => (
+                <tr
+                  key={index}
+                  className={`border-b last:border-none text-center ${
+                    index % 2 === 0 ? 'bg-gray-50' : ''
+                  }`}
+                >
+                  {/* Checkbox for each row */}
+                  <td className="p-2">
+                    <input type="checkbox" />
+                  </td>
+                  {/* Data cells */}
+                  <td className="p-2 ">
+                    {item.firstName} {item.lastName}
+                  </td>
+                  <td className="p-2 ">{item.id}</td>
+                  <td className="p-2 ">{item.email}</td>
+                  <td className="p-2 ">{item.gender}</td>
+                  <td className="p-2 ">0{item.phone}</td>
+                  <td className="p-2 ">34,540</td>
+                  <td className="p-2 ">Active</td>
+                </tr>
+              ),
+            )}
+          </tbody>
+        ) : (null)}
       </table>
+
+      {loading ? (
+        <div className="mt-2 w-full flex flex-col justify-center items-center">
+          <Loader/>
+          <p className='text-gray-600'>Loading.....</p>
+        </div>
+        ) : null
+        }
     </section>
   );
 }

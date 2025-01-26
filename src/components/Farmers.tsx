@@ -9,11 +9,9 @@ export function Farmers() {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchMembers = async () => {
-      if (!farmers) {
         const response = await axios.get('http://localhost:3000/api/clerk');
         setMembers(response.data.farmers);
         setTimeout(() => setLoading(false), 3000);
-      }
     };
 
     fetchMembers();
@@ -95,7 +93,7 @@ export function Farmers() {
         </span>
       </div>
 
-      <table className="bg-white shadow-md rounded-md p-2 w-full table-auto border-collapse">
+      <table className={`bg-white ${!loading ? 'shadow-md' : ''} rounded-md p-2 w-full table-auto border-collapse`}>
         <thead className="bg-gray-200 rounded-md">
           <tr className="text-center">
             {/* Checkbox header */}
@@ -113,9 +111,7 @@ export function Farmers() {
           </tr>
         </thead>
 
-        {loading ? (
-          <Loader />
-        ) : (
+        {!loading ? (
           <tbody>
             {farmers.map(
               (
@@ -153,8 +149,16 @@ export function Farmers() {
               ),
             )}
           </tbody>
-        )}
+        ) : (null)}
       </table>
+
+      {loading ? (
+        <div className="mt-2 w-full flex flex-col justify-center items-center">
+          <Loader/>
+          <p className='text-gray-600'>Loading.....</p>
+        </div>
+        ) : null
+        }
     </section>
   );
 }

@@ -31,7 +31,7 @@ const StyledWrapper = styled.div`
   }
 
   .spinner.center {
-    position: absolute;
+    position: ;
     left: 0;
     right: 0;
     top: 0;
