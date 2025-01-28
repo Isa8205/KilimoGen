@@ -26,8 +26,32 @@ import ClerkRegister from './components/auth/clerks/ClerkRegister';
 import ManagerLogin from './components/auth/management/ManagerLogin';
 import ManagerRegister from './components/auth/management/ManagerRegister';
 import FarmerRegister from './components/FarmerRegister';
+import axios from 'axios';
 
 function App() {
+
+  async function checkLoginStatus() {
+    try {
+    await axios("http://localhost:3000/api/auth/status", {withCredentials: true})
+    .then(res => {
+      console.table(res.data.user)
+    })
+    } catch(err) {
+      console.log(err)
+    }
+  }
+
+  checkLoginStatus()
+  
+  // Example usage
+  // checkLoginStatus().then((loggedIn) => {
+  //   if (loggedIn) {
+  //     console.log("User is logged in");
+  //   } else {
+  //     console.log("User is not logged in");
+  //   }
+  // });
+  
   // The active tab
   const [activeTab, setActiveTab] = useState('Dashboard');
 
@@ -147,6 +171,11 @@ function App() {
               />
             </span>
 
+            <span>/
+              <NavLink to='/auth/clerk/login'>Login</NavLink>
+              <NavLink to='/auth/clerk/register'>Signup</NavLink>
+            </span>
+
             <div className=" relative  flex gap-4 items-center">
               <div className="relative bg-gray-300 p-1 rounded-md hover:opacity-85 cursor-pointer">
                 <BellIcon className="text-sm" fill="gray" stroke="gray" />
@@ -169,7 +198,7 @@ function App() {
           </div>
 
           {/* Outlet for rendering nested routes */}
-          <div className="container mt-0 p-4 rounded-lg">
+          <div className="mt-0 p-4 rounded-lg">
             <Outlet />
           </div>
         </section>
