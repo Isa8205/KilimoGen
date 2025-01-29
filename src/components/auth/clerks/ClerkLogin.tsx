@@ -27,7 +27,7 @@ export default function ClerkLogin() {
         if (res.data.passed) {
           setTimeout(() => {
             window.location.href = '/home/dashboard';
-          }, 3000);
+          }, 2000);
         }
       });
   };

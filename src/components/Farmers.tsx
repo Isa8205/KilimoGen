@@ -12,7 +12,7 @@ export function Farmers() {
     const fetchMembers = async () => {
         const response = await axios.get('http://localhost:3000/api/clerk');
         setMembers(response.data.farmers);
-        setTimeout(() => setLoading(false), 3000);
+        setTimeout(() => setLoading(false), 2000);
     };
 
     fetchMembers();
@@ -105,6 +105,7 @@ export function Farmers() {
                   email: string;
                   gender: string;
                   phone: number;
+                  avatar: string;
                 },
                 index,
               ) => (
@@ -127,7 +128,7 @@ export function Farmers() {
                   <td className="p-2 ">{item.gender}</td>
                   <td className="p-2 ">0{item.phone}</td>
                   <td className="p-2 ">34,540</td>
-                  <td className="p-2 ">Active</td>
+                  <td className="p-2 "><img src={item.avatar} alt="" /></td>
                 </tr>
               ),
             )}
