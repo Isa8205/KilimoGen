@@ -26,32 +26,9 @@ import ClerkRegister from './components/auth/clerks/ClerkRegister';
 import ManagerLogin from './components/auth/management/ManagerLogin';
 import ManagerRegister from './components/auth/management/ManagerRegister';
 import FarmerRegister from './components/FarmerRegister';
-import axios from 'axios';
+import AdminPanel from './components/AdminPanel';
 
 function App() {
-
-  async function checkLoginStatus() {
-    try {
-    await axios("http://localhost:3000/api/auth/status", {withCredentials: true})
-    .then(res => {
-      console.table(res.data.user)
-    })
-    } catch(err) {
-      console.log(err)
-    }
-  }
-
-  checkLoginStatus()
-  
-  // Example usage
-  // checkLoginStatus().then((loggedIn) => {
-  //   if (loggedIn) {
-  //     console.log("User is logged in");
-  //   } else {
-  //     console.log("User is not logged in");
-  //   }
-  // });
-  
   // The active tab
   const [activeTab, setActiveTab] = useState('Dashboard');
 
@@ -148,65 +125,81 @@ function App() {
   };
 
   const Home = () => {
-    const profileSettingsRef: MutableRefObject<HTMLSpanElement | null> = useRef(null);
+    const profileSettingsRef: MutableRefObject<HTMLSpanElement | null> =
+      useRef(null);
     const profileRef: MutableRefObject<HTMLSpanElement | null> = useRef(null);
-  
+
     useEffect(() => {
       let hideTimeout: NodeJS.Timeout | undefined;
-  
+
       const handleProfileMouseOver = () => {
-        clearTimeout(hideTimeout)
+        clearTimeout(hideTimeout);
         if (profileSettingsRef.current) {
-          profileSettingsRef.current.style.display = "flex";
+          profileSettingsRef.current.style.display = 'flex';
         }
       };
-  
+
       const handleProfileMouseOut = () => {
         hideTimeout = setTimeout(() => {
           if (profileSettingsRef.current) {
-            profileSettingsRef.current.style.display = "none";
+            profileSettingsRef.current.style.display = 'none';
           }
         }, 2000);
       };
-  
+
       const handleSettingsMouseOver = () => {
         clearTimeout(hideTimeout);
       };
-  
+
       const handleSettingsMouseOut = () => {
         hideTimeout = setTimeout(() => {
           if (profileSettingsRef.current) {
-            profileSettingsRef.current.style.display = "none";
+            profileSettingsRef.current.style.display = 'none';
           }
         }, 2000);
       };
-  
+
       const profileElement = profileRef.current;
       const profileSettingsElement = profileSettingsRef.current;
-  
+
       if (profileElement && profileSettingsElement) {
-        profileElement.addEventListener("mouseover", handleProfileMouseOver);
-        profileElement.addEventListener("mouseout", handleProfileMouseOut);
-        profileSettingsElement.addEventListener("mouseover", handleSettingsMouseOver);
-        profileSettingsElement.addEventListener("mouseout", handleSettingsMouseOut);
+        profileElement.addEventListener('mouseover', handleProfileMouseOver);
+        profileElement.addEventListener('mouseout', handleProfileMouseOut);
+        profileSettingsElement.addEventListener(
+          'mouseover',
+          handleSettingsMouseOver,
+        );
+        profileSettingsElement.addEventListener(
+          'mouseout',
+          handleSettingsMouseOut,
+        );
       }
-  
+
       return () => {
         if (profileElement && profileSettingsElement) {
-          profileElement.removeEventListener("mouseover", handleProfileMouseOver);
-          profileElement.removeEventListener("mouseout", handleProfileMouseOut);
-          profileSettingsElement.removeEventListener("mouseover", handleSettingsMouseOver);
-          profileSettingsElement.removeEventListener("mouseout", handleSettingsMouseOut);
+          profileElement.removeEventListener(
+            'mouseover',
+            handleProfileMouseOver,
+          );
+          profileElement.removeEventListener('mouseout', handleProfileMouseOut);
+          profileSettingsElement.removeEventListener(
+            'mouseover',
+            handleSettingsMouseOver,
+          );
+          profileSettingsElement.removeEventListener(
+            'mouseout',
+            handleSettingsMouseOut,
+          );
         }
         if (hideTimeout) clearTimeout(hideTimeout);
         if (hideTimeout) clearTimeout(hideTimeout);
       };
     }, []);
-  
+
     return (
       <div className="h-screen w-screen flex bg-background">
         <Navbar />
-  
+
         <section className="content w-full text-white max-h-screen">
           {/* The header of the right section */}
           <div className="flex justify-between items-center bg-white text-black p-2 sticky top-0 left-0 right-0 shadow-md">
@@ -225,14 +218,14 @@ function App() {
                 <BellIcon className="text-sm" fill="gray" stroke="gray" />
                 <span className="text-xs bg-red-500 text-white py-1 px-1 rounded-full absolute top-1 right-2"></span>
               </div>
-  
+
               <span ref={profileRef} className="inline-flex items-center">
                 <img
                   src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=880&q=80"
                   alt="Not found"
                   className="h-8 w-8 object-cover rounded-md"
                 />
-  
+
                 <span
                   ref={profileSettingsRef}
                   className="fixed right-2 top-12 shadow-md flex-col bg-teal-700 hidden"
@@ -249,7 +242,7 @@ function App() {
               </span>
             </div>
           </div>
-  
+
           {/* Outlet for rendering nested routes */}
           <div className="mt-0 p-4 rounded-lg">
             <Outlet />
@@ -258,10 +251,15 @@ function App() {
       </div>
     );
   };
-  
+
   return (
     <div className="relative">
       <Routes>
+        {/* Manager admin panel */}
+        <Route path="/admin">
+          <Route path="" element={<AdminPanel />} />
+        </Route>
+
         {/* Landing Page Route */}
         <Route path="/" element={<LandingPage />} />
 

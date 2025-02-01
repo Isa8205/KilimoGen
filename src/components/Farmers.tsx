@@ -12,7 +12,7 @@ export function Farmers() {
     const fetchMembers = async () => {
         const response = await axios.get('http://localhost:3000/api/clerk');
         setMembers(response.data.farmers);
-        setTimeout(() => setLoading(false), 2000);
+        setLoading(false)
     };
 
     fetchMembers();
@@ -84,13 +84,13 @@ export function Farmers() {
               <input type="checkbox" name="select-all" id="all" />
             </th>
             {/* Table headers */}
-            <th className=" p-2">Name</th>
-            <th className=" p-2">Farmer No.</th>
-            <th className=" p-2">Email</th>
-            <th className=" p-2">Gender</th>
-            <th className=" p-2">Phone</th>
-            <th className=" p-2">Deliveries (kgs)</th>
-            <th className=" p-2">Status</th>
+            <th className="p-2">Name</th>
+            <th className="p-2">Farmer No.</th>
+            <th className="p-2">Email</th>
+            <th className="p-2">Gender</th>
+            <th className="p-2">Phone</th>
+            <th className="p-2">Deliveries (kgs)</th>
+            <th className="p-2">Avatar</th>
           </tr>
         </thead>
 
@@ -128,7 +128,7 @@ export function Farmers() {
                   <td className="p-2 ">{item.gender}</td>
                   <td className="p-2 ">0{item.phone}</td>
                   <td className="p-2 ">34,540</td>
-                  <td className="p-2 "><img src={item.avatar} alt="" /></td>
+                  <td className="p-2 inline-flex justify-center"><img className='h-8 w-8 rounded-full object-cover' src={item.avatar} alt="" /></td>
                 </tr>
               ),
             )}
