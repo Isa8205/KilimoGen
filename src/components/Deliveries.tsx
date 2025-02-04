@@ -5,17 +5,20 @@ import axios from 'axios';
 
 export function Deliveries() {
   // Get the data from the server
-  const [data, setData] = useState([])
+  const [data, setData] = useState<{ id: number; farmer: string; farmerNumber: string }[]>([]);
+  const [fetching, setfetching] = useState(true);
   useEffect(() => {
     const fetchDeliveries = async () => {
       await axios.get('http://localhost:3000/api/delivery').then((res) => {
-        console.table(res.data.deliveries);
         setData(res.data.deliveries)
-        console.log(data)
       });
     };
 
     fetchDeliveries();
+
+    setTimeout(() => {
+      setfetching(false);
+    }, 5000);
   }, []);
 
   // The search functionality
@@ -52,7 +55,7 @@ export function Deliveries() {
       await axios
         .post('http://localhost:3000/api/delivery/add', data)
         .then((res) => {
-          console.log(res.data);
+          console.log(res);
         });
     };
     return (
