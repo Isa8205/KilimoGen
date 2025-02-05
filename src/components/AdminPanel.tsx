@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Plus, Calendar, Wheat, X, AlertCircle } from 'lucide-react';
 import axios from 'axios';
+import { ToastContainer } from 'react-toastify';
+import notify from './Widgets/ToastHelper';
 
 // Interfaces
 interface Season {
@@ -149,18 +151,30 @@ function SeasonCard({
 
 // Add Season Modal
 function AddSeasonModal({ onClose }: { onClose: () => void }) {
+  const [sending, setSending] = useState(false);
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setSending(true);
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData);
-    console.table(data);
 
-    await axios.post('http://localhost:3000/api/season/add', data).then((res) => {
-      console.log(res);
-    });
+    try {
+      const res = await axios.post(
+        'http://localhost:3000/api/season/add',
+        data,
+      );
+
+      notify(res.data.passed, res.data.message);
+      e.currentTarget.reset;
+    } catch (err) {
+      console.error('Error submitting form: ', err);
+    } finally {
+      setSending(false);
+    }
   };
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <ToastContainer />
       <div className="bg-white rounded-xl w-full max-w-md p-6">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-semibold text-teal-600">
@@ -181,9 +195,10 @@ function AddSeasonModal({ onClose }: { onClose: () => void }) {
             </label>
             <input
               type="text"
-              name='seasonName'
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500"
-              placeholder="e.g., Summer 2024"
+              name="seasonName"
+              className="w-full px-4 py-2 border rounded-lg eal-500 focus:border-teal-500"
+              placeholder="e.g., 2024/25"
+              required
             />
           </div>
 
@@ -194,8 +209,9 @@ function AddSeasonModal({ onClose }: { onClose: () => void }) {
               </label>
               <input
                 type="date"
-                name='startDate'
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500"
+                name="startDate"
+                className="w-full px-4 py-2 border rounded-lg eal-500"
+                required
               />
             </div>
             <div>
@@ -204,20 +220,34 @@ function AddSeasonModal({ onClose }: { onClose: () => void }) {
               </label>
               <input
                 type="date"
-                name='endDate'
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500"
+                name="endDate"
+                className="w-full px-4 py-2 border rounded-lg eal-500"
+                required
               />
             </div>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
+              Season Target(kg)
+            </label>
+            <input
+              type="number"
+              name="target"
+              className="w-full px-4 py-2 border rounded-lg eal-500 focus:border-teal-500"
+              placeholder="e.g., 1000"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description (optional)
             </label>
             <textarea
               rows={3}
-              name='description'
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-teal-500"
+              name="description"
+              className="w-full px-4 py-2 border rounded-lg eal-500"
               placeholder="Season notes..."
             />
           </div>
@@ -233,8 +263,9 @@ function AddSeasonModal({ onClose }: { onClose: () => void }) {
             <button
               type="submit"
               className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
+              disabled={sending}
             >
-              Create Season
+              {sending ? 'Saving...' : 'Create Season'}
             </button>
           </div>
         </form>
@@ -245,26 +276,42 @@ function AddSeasonModal({ onClose }: { onClose: () => void }) {
 
 // Add Harvest Modal
 function AddHarvestModal({
-  seasons,
   onClose,
 }: {
   seasons: Season[];
   onClose: () => void;
 }) {
+  const [seasons, setseasons] = useState<{name: string, id: number}[]>([]);
+  const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    const fetchSeasons = async () => {
+      const res = await axios.get('http://localhost:3000/api/season');
+      setseasons(res.data.seasons);
+    };
+    fetchSeasons();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setSending(true);
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData);
-    console.table(data);
 
-    await axios.post('http://localhost:3000/api/harverst/add', data).then((res) => {
-      console.log(res);
-    });
+    try {
+      const res = await axios.post('http://localhost:3000/api/harvest/add', data,);
+
+      notify(res.data.passed, res.data.message);
+    } catch (err) {
+      console.error('Error submitting form: ', err);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+      <ToastContainer />
       <div className="bg-white rounded-xl w-full max-w-md p-6">
         <div className="flex justify-between items-center mb-6">
           <h3 className="text-xl font-semibold text-orange-600">
@@ -279,11 +326,25 @@ function AddHarvestModal({
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Harvest Name
+            </label>
+            <input
+              type="text"
+              name='name'
+              className="w-full px-4 py-2 border rounded-lg range-500"
+              placeholder='eg. Harverst 1'
+              required
+            />
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Select Season
             </label>
-            <select className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500">
+            <select name='season' required className="w-full px-4 py-2 border rounded-lg range-500">
+              <option value="">-----Select Season-----</option>
               {seasons.map((season) => (
                 <option key={season.id} value={season.id}>
                   {season.name}
@@ -295,21 +356,24 @@ function AddHarvestModal({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Harvest Type
+                Start Date
               </label>
               <input
-                type="text"
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500"
+                type="date"
+                name='startDate'
+                className="w-full px-4 py-2 border rounded-lg range-500"
                 placeholder="e.g., Wheat"
+                required
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Quantity (kg)
+                End Date
               </label>
               <input
-                type="number"
-                className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500"
+                type="date"
+                name='endDate'
+                className="w-full px-4 py-2 border rounded-lg range-500"
                 placeholder="0"
               />
             </div>
@@ -317,27 +381,34 @@ function AddHarvestModal({
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Harvest Date
+              Target
             </label>
             <input
-              type="date"
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-orange-500"
+              type="number"
+              name='target'
+              className="w-full px-4 py-2 border rounded-lg range-500"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
+            <textarea
+              rows={3}
+              name='description'
+              className="w-full px-4 py-2 border rounded-lg range-500"
             />
           </div>
 
           <div className="flex justify-end gap-3">
             <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg"
-            >
-              Cancel
-            </button>
-            <button
+            disabled={sending}
               type="submit"
               className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
             >
-              Add Harvest
+              {sending ? 'Saving...' : 'Record Harvest'}
             </button>
           </div>
         </form>
