@@ -10,7 +10,7 @@ export function Farmers() {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchMembers = async () => {
-        const response = await axios.get('http://localhost:3000/api/clerk');
+        const response = await axios.get('http://localhost:3000/api/farmer');
         setMembers(response.data.farmers);
         setLoading(false)
     };

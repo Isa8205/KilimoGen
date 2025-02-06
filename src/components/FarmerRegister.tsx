@@ -1,9 +1,10 @@
 import { ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ToastContainer, toast, ToastOptions } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import defaultImage from '../assets/images/backgrounds/CresentMountain.png'
 
 /**
  * Component for farmer registration
@@ -41,7 +42,7 @@ const FarmerRegister = () => {
       const data = Object.fromEntries(formdata);
 
       await axios
-        .post('http://localhost:3000/api/farmer/add', data)
+        .post('http://localhost:3000/api/farmer/add', data, {headers: {"Content-Type": "multipart/form-data"}})
         .then((res) => {
           if (res.data.state === 'Success') {
             setSendingState(false);
@@ -57,6 +58,22 @@ const FarmerRegister = () => {
           console.error(err)
         });
     };
+
+    // Displaying the profile image on loading
+    const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+      const file = event.target.files?.[0];
+      console.log(file)
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const imageUrl = reader.result as string;
+          const imageElement = document.querySelector('#profileDisplay') as HTMLImageElement;
+          imageElement ? imageElement.src = imageUrl : null;
+        };
+
+        reader.readAsDataURL(file)
+      }
+    }
 
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-00 text-gray-900">
@@ -77,8 +94,13 @@ const FarmerRegister = () => {
           <h1 className="text-2xl font-bold text-gray-800 mb-6">
             Farmer Register
           </h1>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+
+          <div className='flex justify-center h-[100px] mb-4'>
+            <img id='profileDisplay' src={defaultImage} alt="farmer avatar" className='h-full w-[100px] object-cover rounded-full' />
+          </div>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6" encType='multipart/form-data'>
             {/* Name Fields */}
+            <input onChange={handleImageChange}  type="file" accept='image/*' name="avatar" id="fileInput" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label
