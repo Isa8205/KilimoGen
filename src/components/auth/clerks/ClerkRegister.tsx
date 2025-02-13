@@ -21,7 +21,9 @@ export default function ClerkRegister() {
     setIsSubmitting(true);
 
     await axios
-      .post('http://localhost:3000/api/clerk/add', data, {headers: {'Content-Type': 'multipart/form-data'}})
+      .post('http://localhost:3000/api/clerk/add', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      })
       .then((res) => {
         console.log(res.data);
         setIsSubmitting(false);
@@ -30,6 +32,24 @@ export default function ClerkRegister() {
         console.error(err);
         setIsSubmitting(false);
       });
+  };
+
+  // Displaying the profile image on loading
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    console.log(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const imageUrl = reader.result as string;
+        const imageElement = document.querySelector(
+          '#profileDisplay',
+        ) as HTMLImageElement;
+        imageElement ? (imageElement.src = imageUrl) : null;
+      };
+
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -78,30 +98,24 @@ export default function ClerkRegister() {
           onSubmit={handleSubmit}
           encType="multipart/form-data"
         >
-            <div
-              className="w-32 h-32 mx-auto rounded-full overflow-hidden border-2 border-gray-300 cursor-pointer group"
-              id="avatarContainer"
-            >
-              <div className="relative flex items-center justify-center bg-gray-100 group-hover:bg-gray-200 transition">
-                <span
-                  className="absolute inset-0 text-gray-500 text-4xl font-bold"
-                  id="plusIcon"
-                >
-                  +
-                </span>
-              </div>
-
-              <img
-                id="avatarPreview"
-                className="w-full h-full object-cover hidden"
-                alt="Avatar Preview"
-              />
-            </div>
-            <input type="file" name='avatar' id="fileInput" accept="image/*" className="" />
+          <div className="flex justify-center h-[100px] mb-4">
+            <img
+              id="profileDisplay"
+              src={backgroundImage}
+              alt="farmer avatar"
+              className="h-full w-[100px] object-cover rounded-full"
+            />
+          </div>
+          <input
+            onChange={handleImageChange}
+            type="file"
+            name="avatar"
+            id="fileInput"
+            accept="image/*"
+            className=""
+          />
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-
             <div>
               <label
                 htmlFor="firstname"
@@ -260,5 +274,3 @@ export default function ClerkRegister() {
     </div>
   );
 }
-
-

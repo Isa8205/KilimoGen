@@ -1,30 +1,39 @@
 import { Filter, Grid, List, X } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Fuse, { FuseResult } from 'fuse.js';
 import axios from 'axios';
+import notify from './Widgets/ToastHelper';
+import { ToastContainer } from 'react-toastify';
 
 export function Deliveries() {
   // Get the data from the server
   const [data, setData] = useState<{ id: number; farmer: string; farmerNumber: string }[]>([]);
   const [fetching, setfetching] = useState(true);
-  useEffect(() => {
+
+    // Function to fetch deliveries data
     const fetchDeliveries = async () => {
-      await axios.get('http://localhost:3000/api/delivery').then((res) => {
-        setData(res.data.deliveries)
-      });
+      setfetching(true); // Set loading state
+      try {
+        const response = await axios.get('http://localhost:3000/api/delivery');
+        setData(response.data.deliveries);
+        console.log(response.data.deliveries);
+      } catch (error) {
+        console.error('Failed to fetch deliveries:', error);
+        notify(false, 'Failed to fetch deliveries!');
+      } finally {
+        setfetching(false); // Turn off loading
+      }
     };
-
-    fetchDeliveries();
-
-    setTimeout(() => {
-      setfetching(false);
-    }, 5000);
-  }, []);
+  
+    // Fetch data on component mount
+    useEffect(() => {
+      fetchDeliveries();
+    }, []);
 
   // The search functionality
   const [query, setQuery] = useState('');
   const fuse = new Fuse(data, {
-    keys: ['farmer', 'farmerNumber'],
+    keys: ['farmer.firstName', 'farmer.lastName'],
     includeScore: true,
     includeMatches: true,
   });
@@ -56,10 +65,17 @@ export function Deliveries() {
         .post('http://localhost:3000/api/delivery/add', data)
         .then((res) => {
           console.log(res);
+          notify(res.data.passed, res.data.message);
+          res.data.passed ? setTimeout(() => {
+            setModalDisp(false)
+            fetchDeliveries()
+          }, 3000) : null;
+          
         });
     };
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 text-black">
+        <ToastContainer/>
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-lg shadow-lg w-full max-w-md"
@@ -222,7 +238,7 @@ export function Deliveries() {
                 <td className="py-3 text-center">{delivery.quantity}</td>
                 <td className="py-3 text-center">{delivery.crop}</td>
                 <td className="py-3 text-center">{delivery.deliveryDate.slice(0, 10).split('-').reverse().join('-')}</td>
-                <td className="py-3 text-center">{delivery.served_by}</td>
+                <td className="py-3 text-center">{delivery.servedBy}</td>
               </tr>
             ))}
           </tbody>
