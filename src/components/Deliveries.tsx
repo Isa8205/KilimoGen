@@ -1,34 +1,36 @@
-import { Filter, Grid, List, X } from 'lucide-react';
+import { Filter, Grid, List, RefreshCwIcon, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Fuse, { FuseResult } from 'fuse.js';
 import axios from 'axios';
 import notify from './Widgets/ToastHelper';
 import { ToastContainer } from 'react-toastify';
+import Loader from './Widgets/Loaders/Loader1';
 
 export function Deliveries() {
   // Get the data from the server
-  const [data, setData] = useState<{ id: number; farmer: string; farmerNumber: string }[]>([]);
+  const [data, setData] = useState<
+    { id: number; farmer: string; farmerNumber: string }[]
+  >([]);
   const [fetching, setfetching] = useState(true);
 
-    // Function to fetch deliveries data
-    const fetchDeliveries = async () => {
-      setfetching(true); // Set loading state
-      try {
-        const response = await axios.get('http://localhost:3000/api/delivery');
-        setData(response.data.deliveries);
-        console.log(response.data.deliveries);
-      } catch (error) {
-        console.error('Failed to fetch deliveries:', error);
-        notify(false, 'Failed to fetch deliveries!');
-      } finally {
-        setfetching(false); // Turn off loading
-      }
-    };
-  
-    // Fetch data on component mount
-    useEffect(() => {
-      fetchDeliveries();
-    }, []);
+  // Function to fetch deliveries data
+  const fetchDeliveries = async () => {
+    setfetching(true); // Set loading state
+    try {
+      const response = await axios.get('http://localhost:3000/api/delivery');
+      setData(response.data.deliveries);
+      console.log(response.data.deliveries)
+    } catch (error) {
+      notify(false, 'Failed! Please try again.');
+    } finally {
+      setfetching(false); // Turn off loading
+    }
+  };
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchDeliveries();
+  }, []);
 
   // The search functionality
   const [query, setQuery] = useState('');
@@ -66,16 +68,17 @@ export function Deliveries() {
         .then((res) => {
           console.log(res);
           notify(res.data.passed, res.data.message);
-          res.data.passed ? setTimeout(() => {
-            setModalDisp(false)
-            fetchDeliveries()
-          }, 3000) : null;
-          
+          res.data.passed
+            ? setTimeout(() => {
+                setModalDisp(false);
+                fetchDeliveries();
+              }, 3000)
+            : null;
         });
     };
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 text-black">
-        <ToastContainer/>
+        <ToastContainer />
         <form
           onSubmit={handleSubmit}
           className="bg-white rounded-lg shadow-lg w-full max-w-md"
@@ -144,12 +147,16 @@ export function Deliveries() {
 
   return (
     <section className="text-gray-700">
+      <ToastContainer/>
       <div>
         {modalDisp && <Modal />}
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold mb-4">Deliveries</h2>
 
-          <button onClick={() => setModalDisp(true)} className="bg-accent text-white py-1 px-4 rounded">
+          <button
+            onClick={() => setModalDisp(true)}
+            className="bg-accent text-white py-1 px-4 rounded"
+          >
             Add
           </button>
         </div>
@@ -201,9 +208,7 @@ export function Deliveries() {
                 <Grid className="text-xs" />
               </button>
             </span>
-            <button
-              className="bg-white text-gray-600 hover:text-orange-500 font-semibold py-2 px-2 rounded inline-flex items-center gap-2"
-            >
+            <button className="bg-white text-gray-600 hover:text-orange-500 font-semibold py-2 px-2 rounded inline-flex items-center gap-2">
               <Filter /> Filter
             </button>
           </span>
@@ -225,24 +230,45 @@ export function Deliveries() {
             </tr>
           </thead>
 
-          <tbody className="text-center">
-            {deliveries.map((delivery, index) => (
-              <tr
-                key={index}
-                className=" cursor-pointer last:border-none border-b-2"
-              >
-                <td className=" p-2">
-                  <input type="checkbox" name="select-all" id="all" />
-                </td>
-                <td className="py-3 text-center">{delivery.farmer.firstName + ' ' + delivery.farmer.lastName}</td>
-                <td className="py-3 text-center">{delivery.quantity}</td>
-                <td className="py-3 text-center">{delivery.crop}</td>
-                <td className="py-3 text-center">{delivery.deliveryDate.slice(0, 10).split('-').reverse().join('-')}</td>
-                <td className="py-3 text-center">{delivery.servedBy}</td>
-              </tr>
-            ))}
-          </tbody>
+          {!fetching && (
+            <tbody className="text-center">
+              {deliveries.map((delivery, index) => (
+                <tr
+                  key={index}
+                  className=" cursor-pointer last:border-none border-b-2"
+                >
+                  <td className=" p-2">
+                    <input type="checkbox" name="select-all" id="all" />
+                  </td>
+                  <td className="py-3 text-center">
+                    {delivery.farmer.firstName + ' ' + delivery.farmer.lastName}
+                  </td>
+                  <td className="py-3 text-center">{delivery.quantity}</td>
+                  <td className="py-3 text-center">{delivery.crop}</td>
+                  <td className="py-3 text-center">
+                    {delivery.deliveryDate
+                      .slice(0, 10)
+                      .split('-')
+                      .reverse()
+                      .join('-')}
+                  </td>
+                  <td className="py-3 text-center">{delivery.servedBy}</td>
+                </tr>
+              ))}
+            </tbody>
+          )}
         </table>
+
+        {fetching ? (
+          <div className="mt-2 w-full flex flex-col justify-center items-center">
+            <Loader />
+            <p className="text-gray-600">Loading.....</p>
+          </div>
+        ) : (deliveries.length === 0 &&
+          <div className="mt-5 w-full flex flex-col justify-center items-center">
+            <p className="text-gray-600">No deliveries found</p>
+            <button onClick={fetchDeliveries}><RefreshCwIcon className='w-6 h-6 text-gray-600'/></button>
+          </div>)}
       </div>
     </section>
   );

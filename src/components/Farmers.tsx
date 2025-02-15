@@ -128,7 +128,7 @@ export function Farmers() {
                   <td className="p-2 ">{item.gender}</td>
                   <td className="p-2 ">0{item.phone}</td>
                   <td className="p-2 ">34,540</td>
-                  <td className="p-2 inline-flex justify-center"><img className='h-8 w-8 rounded-full object-cover' src={item.avatar} alt="farmer-avatar" /></td>
+                  <td className="p-2 inline-flex justify-center">{item.avatar ? <img className='h-8 w-8 rounded-full object-cover' src={item.avatar} alt="farmer-avatar" />: <span className='bg-teal-700 rounded-full text-white h-8 w-8 flex items-center justify-center'>{item.firstName[0]}{item.lastName[0]}</span>}</td>
                 </tr>
               ),
             )}

@@ -27,6 +27,7 @@ import ManagerLogin from './components/auth/management/ManagerLogin';
 import ManagerRegister from './components/auth/management/ManagerRegister';
 import FarmerRegister from './components/FarmerRegister';
 import AdminPanel from './components/AdminPanel';
+import { InventoryForm } from './components/InventoryAdd';
 
 function App() {
   // The active tab
@@ -304,7 +305,7 @@ function App() {
           {/* Inventory Management */}
           <Route path="inventory">
             <Route path="" Component={Inventory} />
-            <Route path="add" Component={ClerkLogin} />
+            <Route path="add" Component={InventoryForm} />
             <Route path="edit/:id" element={<div>Edit Inventory Form</div>} />
             <Route path=":id" element={<div>View Inventory Details</div>} />
           </Route>

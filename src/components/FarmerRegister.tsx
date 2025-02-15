@@ -60,6 +60,7 @@ const FarmerRegister = () => {
     };
 
     // Displaying the profile image on loading
+    const profileInputRef = useRef()!
     const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
       const file = event.target.files?.[0];
       console.log(file)
@@ -95,12 +96,13 @@ const FarmerRegister = () => {
             Farmer Register
           </h1>
 
-          <div className='flex justify-center h-[100px] mb-4'>
+          <div onClick={() => profileInputRef.current.click()} className='flex justify-center h-[100px] mb-4'>
             <img id='profileDisplay' src={defaultImage} alt="farmer avatar" className='h-full w-[100px] object-cover rounded-full' />
           </div>
+
           <form onSubmit={handleSubmit} className="flex flex-col gap-6" encType='multipart/form-data'>
             {/* Name Fields */}
-            <input onChange={handleImageChange}  type="file" accept='image/*' name="avatar" id="fileInput" />
+            <input style={{display: 'none'}} ref={profileInputRef} onChange={handleImageChange}  type="file" accept='image/*' name="avatar" id="fileInput" />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label

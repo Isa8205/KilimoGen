@@ -1,50 +1,62 @@
 import axios from 'axios';
-import { Filter, Grid, List } from 'lucide-react';
+import { Filter, Grid, List, MoreHorizontal, RefreshCwIcon, Table } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Loader from './Widgets/Loaders/Loader1';
 import { NavLink } from 'react-router-dom';
+import notify from './Widgets/ToastHelper';
 
 export function Inventory() {
-  const [farmers, setMembers] = useState([]);
-  const [loading, setLoading] = useState(true);
+  // States for the display either grid or table
+  const [gridDisplay, setGridDisplay] = useState(true);
+
+  // Data state for storing after api fetching
+  const [items, setItems] = useState<
+    {
+      id: number;
+      productName: string;
+      category: string;
+      quantity: number;
+      weight: string;
+      dateReceived: string;
+      receivedBy: {
+        firstName: string;
+        lastName: string;
+      };
+      Image: string;
+    }[]
+  >([]);
+  const [fetching, setFetching] = useState(false);
+
+  // Function to fetch deliveries data
+  const fetchInventory = async () => {
+    setFetching(true); // Set fetching state
+    try {
+      const response = await axios.get('http://localhost:3000/api/inventory');
+      setItems(response.data.items);
+      console.log(response.data.items);
+    } catch (error) {
+      notify(false, 'Failed! Please try again.');
+    } finally {
+        setFetching(false); 
+    }
+  };
+
+  // Fetch data on component mount
   useEffect(() => {
-    const fetchMembers = async () => {
-        const response = await axios.get('http://localhost:3000/api/clerk');
-        setMembers(response.data.farmers);
-        setTimeout(() => setLoading(false), 3000);
-    };
-
-    fetchMembers();
-  }, []);
-
-  useEffect(() => {
-    const form = document.querySelector('form');
-    form?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const formData = new FormData(form);
-      const data = Object.fromEntries(formData.entries());
-      console.log(data);
-
-      const response = await axios.post(
-        'http://localhost:3000/api/add-clerk',
-        data,
-      );
-
-      console.log(response);
-    });
+    fetchInventory();
   }, []);
 
   return (
     <section className="text-gray-800">
       <div className="flex justify-between mb-4">
-        <h2 className="text-2xl font-bold">Farmers</h2>
+        <h2 className="text-2xl font-bold">Inventory</h2>
 
         <span className="inline-flex gap-2 text-sm font-semibold">
           <button className="bg-white text-black py-1 px-4 rounded">
+            {/* // TODO: Add export function */}
             Export CSV
           </button>
-          <NavLink to="/home/farmers/add">
+          <NavLink to="/home/inventory/add">
             <button className="bg-accent text-white py-1 px-4 rounded">
               Add
             </button>
@@ -55,17 +67,17 @@ export function Inventory() {
       <div className="bg-white p-5 flex shadow-md rounded-md">
         <span className="flex-grow border-x-2 border-gray-400 px-6">
           <p>Total</p>
-          <span className="font-bold">235</span>
+          <span className="font-bold">{items.length}</span>
         </span>
 
         <span className="flex-grow border-e-2 border-gray-400 px-6">
           <p>Total</p>
-          <span className="font-bold">235</span>
+          <span className="font-bold">{items.length}</span>
         </span>
 
         <span className="flex-grow border-e-2 border-gray-400 px-6">
           <p>Total</p>
-          <span className="font-bold">235</span>
+          <span className="font-bold">{items.length}</span>
         </span>
       </div>
 
@@ -80,11 +92,21 @@ export function Inventory() {
 
         <span className="flex gap-4 items-center">
           <span className="bg-white text-gray-600 py-1 px-2 gap-2 rounded inline-flex">
-            <button className="hover:text-orange-500 p-1">
-              <List className="text-xs" />
+            <button
+              className="hover:text-orange-500 p-1"
+              onClick={() => setGridDisplay(!gridDisplay)}
+            >
+              <List
+                className={`${!gridDisplay ? 'text-orange-500' : ''} text-xs`}
+              />
             </button>
-            <button className="hover:text-orange-500 p-1">
-              <Grid className="text-xs" />
+            <button
+              className="hover:text-orange-500 p-1"
+              onClick={() => setGridDisplay(!gridDisplay)}
+            >
+              <Grid
+                className={`${gridDisplay ? 'text-orange-500' : ''} text-xs`}
+              />
             </button>
           </span>
           <button className="bg-white text-gray-600 hover:text-orange-500 font-semibold py-2 px-2 rounded inline-flex items-center gap-2">
@@ -93,38 +115,30 @@ export function Inventory() {
         </span>
       </div>
 
-      <table className={`bg-white ${!loading ? 'shadow-md' : ''} rounded-md p-2 w-full table-auto border-collapse`}>
-        <thead className="bg-gray-200 rounded-md">
-          <tr className="text-center">
-            {/* Checkbox header */}
-            <th className=" p-2">
-              <input type="checkbox" name="select-all" id="all" />
-            </th>
-            {/* Table headers */}
-            <th className=" p-2">Name</th>
-            <th className=" p-2">Farmer No.</th>
-            <th className=" p-2">Email</th>
-            <th className=" p-2">Gender</th>
-            <th className=" p-2">Phone</th>
-            <th className=" p-2">Deliveries (kgs)</th>
-            <th className=" p-2">Status</th>
-          </tr>
-        </thead>
+      {!gridDisplay && (
+        <table
+          className={`bg-white rounded-md p-2 w-full table-auto border-collapse`}
+        >
+          <thead className="bg-gray-200 rounded-md">
+            <tr className="text-center">
+              {/* Checkbox header */}
+              <th className=" p-2">
+                <input type="checkbox" name="select-all" id="all" />
+              </th>
+              {/* Table headers */}
+              <th className=" p-2">Item</th>
+              <th className=" p-2">Category</th>
+              <th className=" p-2">Quantity</th>
+              <th className=" p-2">Weight/Volume</th>
+              <th className=" p-2">Received on</th>
+              <th className=" p-2">Received by</th>
+              <th className=" p-2">Image</th>
+            </tr>
+          </thead>
 
-        {!loading ? (
-          <tbody>
-            {farmers.map(
-              (
-                item: {
-                  firstName: string;
-                  lastName: string;
-                  id: number;
-                  email: string;
-                  gender: string;
-                  phone: number;
-                },
-                index,
-              ) => (
+          {!fetching && (
+            <tbody>
+              {items.map((item, index) => (
                 <tr
                   key={index}
                   className={`border-b last:border-none text-center ${
@@ -136,29 +150,95 @@ export function Inventory() {
                     <input type="checkbox" />
                   </td>
                   {/* Data cells */}
+                  <td className="p-2 ">{item.productName}</td>
+                  <td className="p-2 ">{item.category}</td>
+                  <td className="p-2 ">{item.quantity}</td>
+                  <td className="p-2 ">{item.weight}</td>
                   <td className="p-2 ">
-                    {item.firstName} {item.lastName}
+                    {item.dateReceived.split('').slice(0, 10).join('')}
                   </td>
-                  <td className="p-2 ">{item.id}</td>
-                  <td className="p-2 ">{item.email}</td>
-                  <td className="p-2 ">{item.gender}</td>
-                  <td className="p-2 ">0{item.phone}</td>
-                  <td className="p-2 ">34,540</td>
-                  <td className="p-2 ">Active</td>
+                  <td className="p-2 ">
+                    {item.receivedBy.firstName} {item.receivedBy.lastName}
+                  </td>
+                  <td className="p-2 ">
+                    <img
+                      className="h-8 w-8 rounded-sm object-cover"
+                      src={item.Image}
+                      alt="item image"
+                    />
+                  </td>
                 </tr>
-              ),
-            )}
-          </tbody>
-        ) : (null)}
-      </table>
+              ))}
+            </tbody>
+          )}
+        </table>
+      )}
 
-      {loading ? (
-        <div className="mt-2 w-full flex flex-col justify-center items-center">
-          <Loader/>
-          <p className='text-gray-600'>Loading.....</p>
+      {!fetching && gridDisplay ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+          {items.map((item, index) => (
+            <div
+              key={index}
+              className={`border rounded-lg shadow-md overflow-hidden ${
+                index % 2 === 0 ? 'bg-gray-50' : 'bg-white'
+              }`}
+            >
+              {/* Image at the top */}
+              <div className="w-full h-[10em] bg-gray-300 rounded-t-md flex items-center justify-center cursor-pointer hover:opacity-75">
+                {' '}
+                {item.Image ? (
+                  <img
+                    src={item.Image}
+                    alt="Preview"
+                    className="w-full h-full object-cover rounded-t-md"
+                  />
+                ) : (
+                  <span className="text-gray-500 text-sm">No Image</span>
+                )}
+              </div>
+              {/* Card content */}
+              <div className="p-4">
+                {/* Checkbox */}
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm text-gray-500">
+                    {item.dateReceived.split('').slice(0, 10).join('')}
+                  </span>
+                  <button><MoreHorizontal/></button>
+                </div>
+                {/* Data fields */}
+                <h2 className="text-lg font-semibold text-gray-600">
+                  {item.productName}
+                </h2>
+                <p className="text-sm text-gray-600">
+                  Category: {item.category}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Quantity: {item.quantity}
+                </p>
+                <p className="text-sm text-gray-600">Weight: {item.weight}</p>
+                <p className="text-sm text-gray-600">
+                  Received By: {item.receivedBy.firstName}{' '}
+                  {item.receivedBy.lastName}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
-        ) : null
-        }
+      ) : null}
+
+      {fetching ? (
+        <div className="mt-2 w-full flex flex-col justify-center items-center">
+          <Loader />
+          <p className="text-gray-600">fetching.....</p>
+        </div>
+      ) : items.length === 0 ? (
+        <div className="mt-5 w-full flex flex-col justify-center items-center">
+          <p className="text-gray-600">No deliveries found</p>
+          <button onClick={fetchInventory}>
+            <RefreshCwIcon className="w-6 h-6 text-gray-600" />
+          </button>
+        </div>
+      ) : null}
     </section>
   );
 }
