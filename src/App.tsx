@@ -28,6 +28,7 @@ import ManagerRegister from './components/auth/management/ManagerRegister';
 import FarmerRegister from './components/FarmerRegister';
 import AdminPanel from './components/AdminPanel';
 import { InventoryForm } from './components/InventoryAdd';
+import Tooltip from './components/Widgets/Tooltips/Tooltip';
 
 function App() {
   // The active tab
@@ -89,19 +90,22 @@ function App() {
                   nav.label === activeTab ? 'bg-teal-800' : ''
                 }`}
               >
+                <Tooltip text={isExpanded ? '' : nav.label} className=''>
                 <NavLink
                   to={nav.route}
                   className="inline-flex py-2 ps-2 gap-2 justify-start items-center"
                 >
                   <span>{nav.icon}</span>
+
                   <motion.p
                     animate={{ opacity: 1, width: isExpanded ? 'auto' : 0 }}
                     className="overflow-hidden text-sm text-center"
                     exit={{ opacity: 0 }}
-                  >
+                    >
                     {nav.label}
                   </motion.p>
                 </NavLink>
+                    </Tooltip>
               </li>
             ))}
           </ul>
@@ -110,7 +114,9 @@ function App() {
         <div className="absolute bottom-3 right-3 left-3">
           <ul className="list-none">
             <li className="navlink flex gap-2 rounded-sm py-1 cursor-pointer">
+              <Tooltip text={isExpanded ? '' : 'Settings'} className=''>
               <Settings />
+              </Tooltip>
               <motion.p
                 className="overflow-hidden"
                 animate={{ opacity: 1, width: isExpanded ? 'auto' : 0 }}
@@ -198,7 +204,7 @@ function App() {
     }, []);
 
     return (
-      <div className="h-screen w-screen flex bg-background">
+      <div className="realtive h-screen w-screen flex bg-background">
         <Navbar />
 
         <section className="content w-full text-white max-h-screen">

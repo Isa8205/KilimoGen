@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Loader from './Widgets/Loaders/Loader1';
 import { NavLink } from 'react-router-dom';
 import notify from './Widgets/ToastHelper';
+import Tooltip from './Widgets/Tooltips/Tooltip';
 
 export function Inventory() {
   // States for the display either grid or table
@@ -92,6 +93,7 @@ export function Inventory() {
 
         <span className="flex gap-4 items-center">
           <span className="bg-white text-gray-600 py-1 px-2 gap-2 rounded inline-flex">
+            <Tooltip text='List' className=''>
             <button
               className="hover:text-orange-500 p-1"
               onClick={() => setGridDisplay(!gridDisplay)}
@@ -100,6 +102,8 @@ export function Inventory() {
                 className={`${!gridDisplay ? 'text-orange-500' : ''} text-xs`}
               />
             </button>
+              </Tooltip>
+            <Tooltip text='Grid' className=''>
             <button
               className="hover:text-orange-500 p-1"
               onClick={() => setGridDisplay(!gridDisplay)}
@@ -108,6 +112,7 @@ export function Inventory() {
                 className={`${gridDisplay ? 'text-orange-500' : ''} text-xs`}
               />
             </button>
+              </Tooltip>
           </span>
           <button className="bg-white text-gray-600 hover:text-orange-500 font-semibold py-2 px-2 rounded inline-flex items-center gap-2">
             <Filter /> Filter
@@ -175,7 +180,7 @@ export function Inventory() {
       )}
 
       {!fetching && gridDisplay ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4">
           {items.map((item, index) => (
             <div
               key={index}
@@ -233,7 +238,7 @@ export function Inventory() {
         </div>
       ) : items.length === 0 ? (
         <div className="mt-5 w-full flex flex-col justify-center items-center">
-          <p className="text-gray-600">No deliveries found</p>
+          <p className="text-gray-600">No Items found</p>
           <button onClick={fetchInventory}>
             <RefreshCwIcon className="w-6 h-6 text-gray-600" />
           </button>
