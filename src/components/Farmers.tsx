@@ -62,14 +62,6 @@ export function Farmers() {
         />
 
         <span className="flex gap-4 items-center">
-          <span className="bg-white text-gray-600 py-1 px-2 gap-2 rounded inline-flex">
-            <button className="hover:text-orange-500 p-1">
-              <List className="text-xs" />
-            </button>
-            <button className="hover:text-orange-500 p-1">
-              <Grid className="text-xs" />
-            </button>
-          </span>
           <button className="bg-white text-gray-600 hover:text-orange-500 font-semibold py-2 px-2 rounded inline-flex items-center gap-2">
             <Filter /> Filter
           </button>
@@ -86,7 +78,6 @@ export function Farmers() {
             {/* Table headers */}
             <th className="p-2">Name</th>
             <th className="p-2">Farmer No.</th>
-            <th className="p-2">Email</th>
             <th className="p-2">Gender</th>
             <th className="p-2">Phone</th>
             <th className="p-2">Deliveries (kgs)</th>
@@ -102,10 +93,10 @@ export function Farmers() {
                   firstName: string;
                   lastName: string;
                   id: number;
-                  email: string;
                   gender: string;
                   phone: number;
                   avatar: string;
+                  totalDeliveries: number;
                 },
                 index,
               ) => (
@@ -123,11 +114,10 @@ export function Farmers() {
                   <td className="p-2 ">
                     {item.firstName} {item.lastName}
                   </td>
-                  <td className="p-2 ">{item.id}</td>
-                  <td className="p-2 ">{item.email}</td>
-                  <td className="p-2 ">{item.gender}</td>
+                  <td className="p-2 ">{item.id > 100 ? item.id : `00${item.id}`}</td>
+                  <td className="p-2 ">M</td>
                   <td className="p-2 ">0{item.phone}</td>
-                  <td className="p-2 ">34,540</td>
+                  <td className="p-2 ">{item.totalDeliveries}</td>
                   <td className="p-2 inline-flex justify-center">{item.avatar ? <img className='h-8 w-8 rounded-full object-cover' src={item.avatar} alt="farmer-avatar" />: <span className='bg-teal-700 rounded-full text-white h-8 w-8 flex items-center justify-center'>{item.firstName[0]}{item.lastName[0]}</span>}</td>
                 </tr>
               ),

@@ -169,17 +169,17 @@ export function Deliveries() {
 
           <span className="flex-grow border-e-2 border-gray-400 px-6">
             <p>Harvest</p>
-            <span className="font-bold">235</span>
+            <span className="font-bold">1</span>
           </span>
 
           <span className="flex-grow border-e-2 border-gray-400 px-6">
-            <p>Total</p>
-            <span className="font-bold">540, 000 kgs</span>
+            <p>Season Total</p>
+            <span className="font-bold">{deliveries.reduce((acc, delivery) => acc + delivery.quantity, 0)} kgs</span>
           </span>
 
           <span className="flex-grow border-e-2 border-gray-400 px-6">
-            <p>Today</p>
-            <span className="font-bold">40, 000 kgs</span>
+            <p>Today's Total</p>
+            <span className="font-bold">{deliveries.filter((delivery) => delivery.deliveryDate.slice(0, 10).split('-').reverse().join('-') === new Date().toISOString().slice(0, 10).split('-').reverse().join('-')).reduce((acc, delivery) => acc + delivery.quantity, 0)} kgs</span>
           </span>
 
           <span className="flex-grow border-e-2 border-gray-400 px-6">
@@ -199,15 +199,7 @@ export function Deliveries() {
             className="bg-white px-4 py-1 rounded-md shadow-md text-gray-600 focus-visible:outline-none"
           />
 
-          <span className="flex gap-4 items-center">
-            <span className="bg-white text-gray-600 py-1 px-2 gap-2 rounded inline-flex">
-              <button className="hover:text-orange-500 p-1">
-                <List className="text-xs" />
-              </button>
-              <button className="hover:text-orange-500 p-1">
-                <Grid className="text-xs" />
-              </button>
-            </span>
+          <span className="inline-flex gap-2">
             <button className="bg-white text-gray-600 hover:text-orange-500 font-semibold py-2 px-2 rounded inline-flex items-center gap-2">
               <Filter /> Filter
             </button>
@@ -235,7 +227,7 @@ export function Deliveries() {
               {deliveries.map((delivery, index) => (
                 <tr
                   key={index}
-                  className=" cursor-pointer last:border-none border-b-2"
+                  className="even:bg-gray-50 cursor-pointer last:border-none border-b border-gray-200 hover:bg-gray-100"
                 >
                   <td className=" p-2">
                     <input type="checkbox" name="select-all" id="all" />
@@ -246,11 +238,7 @@ export function Deliveries() {
                   <td className="py-3 text-center">{delivery.quantity}</td>
                   <td className="py-3 text-center">{delivery.crop}</td>
                   <td className="py-3 text-center">
-                    {delivery.deliveryDate
-                      .slice(0, 10)
-                      .split('-')
-                      .reverse()
-                      .join('-')}
+                    {delivery.deliveryDate.slice(0, 10).split('-').reverse().join('-')}
                   </td>
                   <td className="py-3 text-center">{delivery.servedBy}</td>
                 </tr>

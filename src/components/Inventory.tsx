@@ -93,7 +93,7 @@ export function Inventory() {
 
         <span className="flex gap-4 items-center">
           <span className="bg-white text-gray-600 py-1 px-2 gap-2 rounded inline-flex">
-            <Tooltip text='List' className=''>
+            <Tooltip text='List' className='' position='bottom'>
             <button
               className="hover:text-orange-500 p-1"
               onClick={() => setGridDisplay(!gridDisplay)}
@@ -103,7 +103,7 @@ export function Inventory() {
               />
             </button>
               </Tooltip>
-            <Tooltip text='Grid' className=''>
+            <Tooltip text='Grid' className='' position='bottom'>
             <button
               className="hover:text-orange-500 p-1"
               onClick={() => setGridDisplay(!gridDisplay)}
@@ -165,12 +165,19 @@ export function Inventory() {
                   <td className="p-2 ">
                     {item.receivedBy.firstName} {item.receivedBy.lastName}
                   </td>
-                  <td className="p-2 ">
-                    <img
-                      className="h-8 w-8 rounded-sm object-cover"
-                      src={item.Image}
-                      alt="item image"
-                    />
+                  <td className="p-2 inline-flex justify-center ">
+                  <div className="w-[4em] h-[4em] bg-gray-300 rounded-md flex items-center justify-center cursor-pointer hover:opacity-75">
+                {' '}
+                {item.Image ? (
+                  <img
+                    src={item.Image}
+                    alt="Preview"
+                    className="w-full h-full object-cover rounded-t-md"
+                  />
+                ) : (
+                  <span className="text-gray-500 text-xs">No Image</span>
+                )}
+              </div>
                   </td>
                 </tr>
               ))}

@@ -90,7 +90,7 @@ function App() {
                   nav.label === activeTab ? 'bg-teal-800' : ''
                 }`}
               >
-                <Tooltip text={isExpanded ? '' : nav.label} className=''>
+                <Tooltip text={isExpanded ? '' : nav.label} className='' position='right'>
                 <NavLink
                   to={nav.route}
                   className="inline-flex py-2 ps-2 gap-2 justify-start items-center"
@@ -114,7 +114,7 @@ function App() {
         <div className="absolute bottom-3 right-3 left-3">
           <ul className="list-none">
             <li className="navlink flex gap-2 rounded-sm py-1 cursor-pointer">
-              <Tooltip text={isExpanded ? '' : 'Settings'} className=''>
+              <Tooltip text={isExpanded ? '' : 'Settings'} className='' position='right'>
               <Settings />
               </Tooltip>
               <motion.p
@@ -221,10 +221,12 @@ function App() {
             </span>
 
             <div className=" relative  flex gap-4 items-center">
+              <Tooltip text="Notifications" className='' position='bottom'>
               <div className="relative bg-gray-300 p-1 rounded-md hover:opacity-85 cursor-pointer">
                 <BellIcon className="text-sm" fill="gray" stroke="gray" />
                 <span className="text-xs bg-red-500 text-white py-1 px-1 rounded-full absolute top-1 right-2"></span>
               </div>
+              </Tooltip>
 
               <span ref={profileRef} className="inline-flex items-center">
                 <img
