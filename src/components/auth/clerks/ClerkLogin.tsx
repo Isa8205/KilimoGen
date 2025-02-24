@@ -19,14 +19,14 @@ export default function ClerkLogin() {
     console.table(data);
 
     await axios
-      .post('http://localhost:3000/api/clerk/login', data)
+      .post('http://localhost:3000/api/clerk/login', data, {withCredentials: true})
       .then((res) => {
         console.log(res.data);
         notify(res.data.passed, res.data.message);
 
         if (res.data.passed) {
           setTimeout(() => {
-            window.location.href = '/home/dashboard';
+            navigate('/home/dashboard');
           }, 2000);
         }
       });

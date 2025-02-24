@@ -1,4 +1,4 @@
-import { Filter, Grid, List, RefreshCwIcon, X } from 'lucide-react';
+import { Filter, RefreshCwIcon, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Fuse, { FuseResult } from 'fuse.js';
 import axios from 'axios';
@@ -54,6 +54,20 @@ export function Deliveries() {
     const { value }: { value?: string } = currentTarget;
     setQuery(value as string);
   };
+
+  // Functionality for selecting each delivery
+  /**
+   * A function to manage the selected delieries for other actions
+   */
+  const [selectedIds, setSelected] = useState([])
+
+  const handleSelect = (deliveryId: number, action: string)=> {
+    if (action === 'add') {
+      selectedIds.map((id) => {
+        id === deliveryId 
+      })
+    }
+  }
 
   // Modal body and box
   const [modalDisp, setModalDisp] = useState(false);
@@ -230,7 +244,7 @@ export function Deliveries() {
                   className="even:bg-gray-50 cursor-pointer last:border-none border-b border-gray-200 hover:bg-gray-100"
                 >
                   <td className=" p-2">
-                    <input type="checkbox" name="select-all" id="all" />
+                    <input type="checkbox" onChange={(e) => handleSelect(delivery.id, 'add')} name="select-all" id="all" />
                   </td>
                   <td className="py-3 text-center">
                     {delivery.farmer.firstName + ' ' + delivery.farmer.lastName}

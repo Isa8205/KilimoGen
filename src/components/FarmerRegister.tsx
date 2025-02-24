@@ -187,7 +187,7 @@ const FarmerRegister = () => {
                   required
                   type="number"
                   name="phone"
-                  id="email"
+                  id="phone"
                   placeholder="712345678"
                   className="mt-1 block flex-grow bg-gray-50 border border-gray-300 rounded-r-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500"
                 />

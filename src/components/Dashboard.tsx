@@ -1,4 +1,5 @@
 import { ChevronLeft, ChevronRight, Clipboard } from 'lucide-react';
+import DeliveriesBarChart from './Analytics';
 
 export default function Dashboard() {
   const date = new Date();
@@ -30,42 +31,7 @@ export default function Dashboard() {
     { id: 3, title: 'Irrigating fields', date: 'Today' },
   ];
   return (
-    <section className="text-gray-700 flex flex-row-reverse justify-between items-start flex-wrap gap-3">
-      <aside className="bg-white shadow-sm p-2 rounded-md flex-grow">
-        <h2 className="text-xl font-semibold mb-4">Stats</h2>
-
-        <div className=" rounded-md flex flex-col gap-2">
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-500">Current Season</span>
-            <span className="text-sm font-semibold">2024/25</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-500">Cherry Production</span>
-            <span className="text-sm font-semibold">2.5 tons</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-500">Mbuni Production</span>
-            <span className="text-sm font-semibold">2.5 tons</span>
-          </div>
-        </div>
-
-        <h2 className="text-xl font-semibold my-4">Top 5 Farmers</h2>
-        <div className=" rounded-md flex flex-col gap-2">
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-500">Mary Jane</span>
-            <span className="text-sm font-semibold">15 tons</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-500">Peter Parker</span>
-            <span className="text-sm font-semibold">2.5 tons</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-sm text-gray-500">Batman</span>
-            <span className="text-sm font-semibold">2.5 tons</span>
-          </div>
-        </div>
-      </aside>
-
+    <section className="text-gray-700">
       <div className="flex gap-3 justify-between flex-wrap">
         {/* Calendar */}
         <div className="bg-white text-black shadow-md rounded-md p-4">
@@ -131,6 +97,8 @@ export default function Dashboard() {
             ))}
           </div>
         </div>
+
+        <DeliveriesBarChart/>
       </div>
     </section>
   );

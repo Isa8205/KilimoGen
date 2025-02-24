@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Filter, Grid, List } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Filter, Grid, List } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Loader from './Widgets/Loaders/Loader1';
 import { NavLink } from 'react-router-dom';
@@ -8,11 +8,38 @@ export function Farmers() {
   // Fetching farmers from the database
   const [farmers, setMembers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Pagination logic
+
+  // const checkSavedPage = ()=> {
+  //   const savedPage = localStorage.getItem('currentPage');
+  //   if (savedPage) {
+  //     setCurrentPage(parseInt(savedPage));
+  //   } else {
+  //     setCurrentPage(1);
+  //     localStorage.setItem('currentPage', '1');
+  //   }
+  // }
+  const prevPage = () => {
+    setCurrentPage((current) => Math.max(current - 1, 1));
+  };
+
+  const nextPage = () => {
+    setCurrentPage((current) => Math.min(current + 1, totalPages));
+  };
   useEffect(() => {
     const fetchMembers = async () => {
-        const response = await axios.get('http://localhost:3000/api/farmer');
-        setMembers(response.data.farmers);
-        setLoading(false)
+      const response = await axios.get(
+        `http://localhost:3000/api/farmer?page=${currentPage}&limit=${itemsPerPage}`,
+      );
+      setMembers(response.data.farmers);
+      setTotalPages(response.data.totalPages);
+      document.getElementById('totalFarmers')!.textContent =
+        response.data.totalFarmers;
+      setLoading(false);
     };
 
     fetchMembers();
@@ -38,7 +65,9 @@ export function Farmers() {
       <div className="bg-white p-5 flex shadow-md rounded-md">
         <span className="flex-grow border-x-2 border-gray-400 px-6">
           <p>Total</p>
-          <span className="font-bold">{farmers.length}</span>
+          <span className="font-bold" id="totalFarmers">
+            {farmers.length}
+          </span>
         </span>
 
         <span className="flex-grow border-e-2 border-gray-400 px-6">
@@ -68,7 +97,11 @@ export function Farmers() {
         </span>
       </div>
 
-      <table className={`bg-white ${!loading ? 'shadow-md' : ''} rounded-md p-2 w-full table-auto border-collapse`}>
+      <table
+        className={`bg-white ${
+          !loading ? 'shadow-md' : ''
+        } rounded-md p-2 w-full table-auto border-collapse`}
+      >
         <thead className="bg-gray-200 rounded-md">
           <tr className="text-center">
             {/* Checkbox header */}
@@ -114,25 +147,62 @@ export function Farmers() {
                   <td className="p-2 ">
                     {item.firstName} {item.lastName}
                   </td>
-                  <td className="p-2 ">{item.id > 100 ? item.id : `00${item.id}`}</td>
+                  <td className="p-2 ">
+                    {item.id > 100 ? item.id : `00${item.id}`}
+                  </td>
                   <td className="p-2 ">M</td>
                   <td className="p-2 ">0{item.phone}</td>
                   <td className="p-2 ">{item.totalDeliveries}</td>
-                  <td className="p-2 inline-flex justify-center">{item.avatar ? <img className='h-8 w-8 rounded-full object-cover' src={item.avatar} alt="farmer-avatar" />: <span className='bg-teal-700 rounded-full text-white h-8 w-8 flex items-center justify-center'>{item.firstName[0]}{item.lastName[0]}</span>}</td>
+                  <td className="p-2 inline-flex justify-center">
+                    {item.avatar ? (
+                      <img
+                        className="h-8 w-8 rounded-full object-cover"
+                        src={item.avatar}
+                        alt="farmer-avatar"
+                      />
+                    ) : (
+                      <span className="bg-teal-700 rounded-full text-white h-8 w-8 flex items-center justify-center">
+                        {item.firstName[0]}
+                        {item.lastName[0]}
+                      </span>
+                    )}
+                  </td>
                 </tr>
               ),
             )}
           </tbody>
-        ) : (null)}
+        ) : null}
       </table>
+
+      {farmers.length > 0 ? (
+        <div className="flex justify-end items-center my-4">
+          <div className="flex gap-2">
+            <button
+              onClick={prevPage}
+              className="bg-white text-gray-600 hover:text-orange-500 font-semibold text-xs py-1 px-2 rounded inline-flex items-center gap-2"
+            >
+              <ArrowLeft /> Previous
+            </button>
+
+            <span className="text-gray-600 ">
+              {currentPage} / {totalPages}
+            </span>
+            <button
+              onClick={nextPage}
+              className="bg-white text-gray-600 hover:text-orange-500 font-semibold text-xs py-1 px-2 rounded inline-flex items-center gap-2"
+            >
+              Next <ArrowRight />
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {loading ? (
         <div className="mt-2 w-full flex flex-col justify-center items-center">
-          <Loader/>
-          <p className='text-gray-600'>Loading.....</p>
+          <Loader />
+          <p className="text-gray-600">Loading.....</p>
         </div>
-        ) : null
-        }
+      ) : null}
     </section>
   );
 }
