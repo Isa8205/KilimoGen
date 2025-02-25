@@ -52,4 +52,50 @@
   *:hover::-webkit-scrollbar {
     display: block; /* Show scrollbar on hover */
   }
+
+  /* Override FullCalendar's z-index */
+.fc {
+  z-index: 0 !important;
+}
+
+/* Ensure the modal appears on top */
+.modal {
+  z-index: 50;
+}
+
+  /* Make FullCalendar text match Tailwind's font */
+.fc {
+  @apply font-sans text-gray-800;
+}
+
+/* Customize event appearance */
+.fc-daygrid-event {
+  @apply bg-blue-500 text-white px-2 py-1 rounded-md shadow-md hover:bg-blue-600 transition;
+}
+
+/* Custom styling for header buttons */
+.fc-button {
+  @apply bg-blue-600 text-white rounded-md px-4 py-2 hover:bg-blue-700 transition;
+}
+
+/* Active button styling */
+.fc-button-active {
+  @apply bg-blue-700 !important;
+}
+
+/* Change calendar background */
+.fc-view-container {
+  @apply bg-white rounded-lg shadow-md p-4;
+}
+
+/* Weekend days styling */
+.fc-day-sat, .fc-day-sun {
+  @apply bg-gray-200;
+}
+
+/* Highlight selected date */
+.fc-daygrid-day:hover {
+  @apply bg-blue-100 cursor-pointer;
+}
+
   

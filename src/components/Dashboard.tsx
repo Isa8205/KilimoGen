@@ -1,23 +1,10 @@
-import { ChevronLeft, ChevronRight, Clipboard } from 'lucide-react';
 import DeliveriesBarChart from './Analytics';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
 
 export default function Dashboard() {
-  const date = new Date();
-  const months = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-
   const quickActions = [
     { id: 1, title: 'Add Task' },
     { id: 2, title: 'Schedule Equipment' },
@@ -30,76 +17,63 @@ export default function Dashboard() {
     { id: 2, title: 'Fertilizing soil', date: 'Today' },
     { id: 3, title: 'Irrigating fields', date: 'Today' },
   ];
+
   return (
-    <section className="text-gray-700">
-      <div className="flex gap-3 justify-between flex-wrap">
+    <section className="text-gray-700 p-4">
+      <div className="flex justify-between items-start gap-3 mb-4 flex-wrap">
         {/* Calendar */}
-        <div className="bg-white text-black shadow-md rounded-md p-4">
-          <div className="flex justify-between font-bold pb-4">
-            <h2 className="text-xl">
-              {months[date.getMonth()]} &nbsp; {date.getFullYear()}
-            </h2>
-            <span className="text-white inline-flex gap-2">
-              <ChevronLeft className="bg-gray-700 text-center rounded-full" />
-              <ChevronRight className="bg-gray-700 text-center rounded-full" />
-            </span>
+        <div className="flex-grow  h-full bg-gray-100 p-5 rounded-lg shadow-lg overflow-hidden">
+          <FullCalendar
+            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+            initialView="dayGridMonth"
+            editable={true}
+            selectable={true}
+            events={[
+              { title: 'Meeting', start: '2024-02-25' },
+              { title: 'Conference', start: '2024-02-27', end: '2024-02-29' },
+            ]}
+          />
+        </div>
+
+        {/* Urgent Tasks & Quick Actions */}
+        <div className="flex-grow flex flex-col gap-2 justify-between">
+          {/* Urgent Tasks */}
+          <div className="bg-white p-4 rounded-xl shadow-sm">
+            <h2 className="text-lg font-semibold mb-4">Urgent Tasks</h2>
+            <div className="space-y-4">
+              {urgentTasks.map((task) => (
+                <div
+                  key={task.id}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                >
+                  <span className="font-medium">{task.title}</span>
+                  <span className="text-sm text-gray-500">{task.date}</span>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="flex justify-between items-center pb-5">
-            <span>Mon</span>
-            <span>Tue</span>
-            <span>Wed</span>
-            <span>Thur</span>
-            <span>Fri</span>
-            <span>Sat</span>
-            <span>Sun</span>
-          </div>
-
-          <div className="grid grid-cols-7 gap-x-10 gap-y-6">
-            {[...Array(30)].map((_, i) => (
-              <div className="flex justify-center">
-                <span className="w-6 h-6 rounded-full text-center bg-gray-200">
-                  {i + 1}
-                </span>
-              </div>
-            ))}
+          {/* Quick Actions */}
+          <div className="bg-white p-4 rounded-xl shadow-sm">
+            <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-2 gap-4">
+              {quickActions.map((action) => (
+                <button
+                  key={action.id}
+                  className="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed border-gray-200 hover:border-green-500 hover:bg-green-50 transition-colors"
+                >
+                  <span className="h-6 w-6 mb-2 text-green-600">📋</span>
+                  <span className="text-sm font-medium">{action.title}</span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Urgent Tasks */}
-        <div className="bg-white p-4 rounded-xl shadow-sm flex-grow">
-          <h2 className="text-lg font-semibold mb-4">Urgent Tasks</h2>
-          <div className="space-y-4">
-            {urgentTasks.map((task) => (
-              <div
-                key={task.id}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-              >
-                <span className="font-medium">{task.title}</span>
-                <span className="text-sm text-gray-500 mx-2">{task.date}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Quick Actions */}
-        <div className="bg-white p-4 rounded-xl shadow-sm flex-grow">
-          <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-2 gap-4">
-            {quickActions.map((action) => (
-              <button
-                key={action.id}
-                className="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed border-gray-200 hover:border-green-500 hover:bg-green-50 transition-colors"
-              >
-                <Clipboard className="h-6 w-6 mb-2 text-green-600" />
-                <span className="text-sm font-medium">{action.title}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <DeliveriesBarChart/>
+        {/* Deliveries Bar Chart */}
       </div>
+
+        <DeliveriesBarChart />
     </section>
   );
 }

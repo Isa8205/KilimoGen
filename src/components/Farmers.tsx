@@ -12,17 +12,6 @@ export function Farmers() {
   const itemsPerPage = 10;
   const [totalPages, setTotalPages] = useState(1);
 
-  // Pagination logic
-
-  // const checkSavedPage = ()=> {
-  //   const savedPage = localStorage.getItem('currentPage');
-  //   if (savedPage) {
-  //     setCurrentPage(parseInt(savedPage));
-  //   } else {
-  //     setCurrentPage(1);
-  //     localStorage.setItem('currentPage', '1');
-  //   }
-  // }
   const prevPage = () => {
     setCurrentPage((current) => Math.max(current - 1, 1));
   };
@@ -43,7 +32,7 @@ export function Farmers() {
     };
 
     fetchMembers();
-  }, []);
+  }, [currentPage]);
 
   return (
     <section className="text-gray-800">
@@ -65,9 +54,7 @@ export function Farmers() {
       <div className="bg-white p-5 flex shadow-md rounded-md">
         <span className="flex-grow border-x-2 border-gray-400 px-6">
           <p>Total</p>
-          <span className="font-bold" id="totalFarmers">
-            {farmers.length}
-          </span>
+          <span className="font-bold" id="totalFarmers"></span>
         </span>
 
         <span className="flex-grow border-e-2 border-gray-400 px-6">
@@ -177,22 +164,27 @@ export function Farmers() {
       {farmers.length > 0 ? (
         <div className="flex justify-end items-center my-4">
           <div className="flex gap-2">
+            {currentPage !== 1 && (
             <button
               onClick={prevPage}
               className="bg-white text-gray-600 hover:text-orange-500 font-semibold text-xs py-1 px-2 rounded inline-flex items-center gap-2"
             >
-              <ArrowLeft /> Previous
+              <ArrowLeft />
             </button>
+            )}
 
-            <span className="text-gray-600 ">
+            <span className="text-gray-600 bg-gray-300 inline-flex items-center p-2 rounded">
               {currentPage} / {totalPages}
             </span>
+
+            {currentPage !== totalPages && (
             <button
               onClick={nextPage}
-              className="bg-white text-gray-600 hover:text-orange-500 font-semibold text-xs py-1 px-2 rounded inline-flex items-center gap-2"
+              className="text-gray-600 hover:text-orange-500 font-semibold text-xs py-1 px-2 bg-white rounded inline-flex items-center gap-2"
             >
-              Next <ArrowRight />
+            <ArrowRight />
             </button>
+            )}
           </div>
         </div>
       ) : null}

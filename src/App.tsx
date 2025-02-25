@@ -302,7 +302,7 @@ function App() {
 
         <section className="content w-full text-white max-h-screen">
           {/* The header of the right section */}
-          <div className="flex justify-between items-center bg-white text-black p-2 sticky top-0 left-0 right-0 shadow-md">
+          <div className="flex justify-between items-center bg-white text-black p-2 sticky top-0 left-0 right-0 shadow-md z-50">
             <span>
               <input
                 type="text"
