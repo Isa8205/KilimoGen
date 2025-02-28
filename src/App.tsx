@@ -1,25 +1,20 @@
 import {
   BellIcon,
   ChevronLeft,
-  DoorOpen,
+  ExternalLink,
   FileTextIcon,
   LayoutDashboard,
   LogIn,
+  LogOut,
+  MailOpenIcon,
   MessageSquareShare,
   Settings,
   Store,
   Truck,
   User,
 } from 'lucide-react';
-import { MutableRefObject, useEffect, useRef, useState } from 'react';
-import {
-  Routes,
-  Route,
-  NavLink,
-  Outlet,
-  Navigate,
-  useLocation,
-} from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Routes, Route, NavLink, Outlet, useLocation } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import Reports from './components/Reports';
 import { Deliveries } from './components/Deliveries';
@@ -41,15 +36,17 @@ import SettingsPage from './components/Settings';
 import axios from 'axios';
 import notify from './components/Widgets/ToastHelper';
 import { ToastContainer } from 'react-toastify';
+import { useRecoilState } from 'recoil';
+import { sessionState } from './store/store';
 
 function App() {
   //Session management
-  const [user, setSessionData] = useState<{
+  const [user, setSessionData] = useRecoilState<{
     id?: number;
     firstName?: string;
     lastName?: string;
     avatar?: string;
-  } | null>(null);
+  } | null>(sessionState);
   const getSession = async () => {
     const response = await axios.get('http://localhost:3000/api/auth/status', {
       withCredentials: true,
@@ -84,12 +81,12 @@ function App() {
         <div>
           <span className="flex gap-1 items-center mt-2">
             <motion.h2
-              className="text-3xl text-nowrap"
+              className="text-3xl text-nowrap overflow-hidden whitespace-nowrap"
               animate={{ width: isExpanded ? 'auto' : 0 }}
               transition={{ duration: 0.15, ease: 'easeInOut' }}
               exit={{ opacity: 0 }}
             >
-              KilimoGen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+              KilimoGen
             </motion.h2>
 
             <span
@@ -141,33 +138,31 @@ function App() {
           </div>
         </div>
 
-        <div className="">
+        <div>
           <ul className="list-none">
             <li
-              className="navlink flex gap-2 rounded-sm py-1 cursor-pointer w-full"
-              style={{
-                background: location.pathname.includes('settings')
-                  ? 'bg-teal-800'
-                  : '',
-              }}
+              className={`navlink rounded-md mt-1 cursor-pointer hover:opacity-80 w-full ${
+                location.pathname.includes('settings') ? 'bg-teal-800' : ''
+              }`}
             >
-              <NavLink
-                to="settings"
-                className={`navlink flex gap-2 rounded-sm py-1 cursor-pointer ${
-                  location.pathname.includes('settings') ? 'bg-teal-800' : ''
-                }`}
-              >
-                <Tooltip text={isExpanded ? '' : 'Settings'} position="right">
-                  <Settings />
-                </Tooltip>
-                <motion.p
-                  className="overflow-hidden"
-                  animate={{ opacity: 1, width: isExpanded ? 'auto' : 0 }}
-                  exit={{ opacity: 0 }}
+              <Tooltip text={isExpanded ? '' : 'Settings'} position="right">
+                <NavLink
+                  to="settings"
+                  className="inline-flex py-2 ps-2 gap-2 justify-start items-center"
                 >
-                  Settings
-                </motion.p>
-              </NavLink>
+                  <span>
+                    <Settings />
+                  </span>
+
+                  <motion.p
+                    animate={{ opacity: 1, width: isExpanded ? 'auto' : 0 }}
+                    className="overflow-hidden text-sm text-center"
+                    exit={{ opacity: 0 }}
+                  >
+                    Settings
+                  </motion.p>
+                </NavLink>
+              </Tooltip>
             </li>
           </ul>
         </div>
@@ -178,7 +173,7 @@ function App() {
   const Home = () => {
     interface DropdownMenuProps {}
 
-    const DropdownMenu: React.FC<DropdownMenuProps> = () => {
+    const ProfileDropdownMenu: React.FC<DropdownMenuProps> = () => {
       const [isOpen, setIsOpen] = useState(false);
 
       const toggleMenu = () => setIsOpen((prev) => !prev);
@@ -279,10 +274,10 @@ function App() {
                 {user && (
                   <div className="py-1">
                     <button
-                      className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none"
+                      className="w-full flex items-center px-4 py-2 text-sm text-red-500 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none"
                       onClick={handleLogout}
                     >
-                      <DoorOpen />
+                      <LogOut />
                       Log out
                     </button>
                   </div>
@@ -294,15 +289,124 @@ function App() {
       );
     };
 
+    const NotificationDropdown = () => {
+      const [isOpen, setIsOpen] = useState(false);
+      const [notifications, setNotifications] = useState<notifications[] | []>(
+        [],
+      );
+
+      const fetchNotifications = async () => {
+        const response = await axios.get(
+          'http://localhost:3000/api/notification',
+        );
+
+        try {
+          setNotifications(response.data.notifications);
+        } catch (err) {
+          console.error(err);
+        }
+      };
+
+      useEffect(() => {
+        fetchNotifications();
+      }, []);
+
+      const handleNotificatioinSeen = async (
+        e: React.MouseEvent<HTMLButtonElement>,
+      ) => {
+        const id = e.currentTarget.id;
+        const response = await axios.put(
+          'http://localhost:3000/api/notification/seen/' + id,
+        );
+        console.log(response.data.message)
+        fetchNotifications();
+      };
+
+      // Filter unseen notifications
+      const unseenNotifications = notifications?.filter((n) => !n.seen);
+
+      return (
+        <div className="relative">
+          {/* Bell Icon with Notification Badge */}
+          <div
+            className="relative bg-gray-300 p-2 rounded-md hover:opacity-85 cursor-pointer"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <BellIcon className="w-4 h-4 font-bold text-gray-700" />
+            {unseenNotifications?.length > 0 && (
+              <span className="text-xs bg-red-500 text-white py-0.5 px-2 rounded-full absolute -top-1 -right-1 ">
+                {unseenNotifications?.length}
+              </span>
+            )}
+          </div>
+
+          {/* Dropdown Menu */}
+          {isOpen && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="fixed right-2 mt-2 w-72 bg-white shadow-lg rounded-lg overflow-hidden z-50"
+            >
+              <div className="p-4 border-b bg-gray-100 font-semibold text-gray-700">
+                Notifications
+              </div>
+
+              {/* Notification List */}
+              <div className="max-h-60 overflow-y-auto">
+                {notifications.length === 0 ? (
+                  <p className="text-center text-gray-500 p-4">
+                    No new notifications
+                  </p>
+                ) : (
+                  notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`p-3 flex items-start gap-3 hover:bg-gray-200 ${
+                        !notification.seen ? 'bg-gray-100' : ''
+                      }`}
+                    >
+                      <div className="flex-1">
+                        <p className="text-sm font-medium">
+                          {notification.title}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {notification.message}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {new Date(notification.date).toLocaleString()}
+                        </p>
+                      </div>
+
+                      <button id={notification.id.toString()} onClick={(e) => handleNotificatioinSeen(e)} className="flex flex-col justify-between items-stretch hover:bg-gray-200">
+                        <MailOpenIcon className="w-4 h-4 text-gray-400" />
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Footer - View All */}
+              <div className="p-2 bg-gray-100 text-center">
+                <span className="text-blue-600 text-sm hover:underline">
+                  View all notifications
+                </span>
+              </div>
+            </motion.div>
+          )}
+        </div>
+      );
+    };
+
     return (
       <div className="realtive h-screen w-screen flex bg-background">
         <ToastContainer />
 
         <Navbar />
 
-        <section className="content w-full text-white max-h-screen">
+        <section className="content w-full text-white h-screen flex flex-col">
           {/* The header of the right section */}
-          <div className="flex justify-between items-center bg-white text-black p-2 sticky top-0 left-0 right-0 shadow-md z-50">
+          <div className="flex justify-between items-center bg-white text-black p-2 shadow-md">
             <span>
               <input
                 type="text"
@@ -313,19 +417,16 @@ function App() {
               />
             </span>
 
-            <div className=" relative  flex gap-4 items-center">
-              <Tooltip text="Notifications" className="" position="bottom">
-                <div className="relative bg-gray-300 p-1 rounded-md hover:opacity-85 cursor-pointer">
-                  <BellIcon className="text-sm" fill="gray" stroke="gray" />
-                  <span className="text-xs bg-red-500 text-white py-1 px-1 rounded-full absolute top-1 right-2"></span>
-                </div>
+            <div className="relative flex gap-4 items-center">
+              <Tooltip text="Notifications" position="bottom">
+                <NotificationDropdown />
               </Tooltip>
-              <DropdownMenu />
+              <ProfileDropdownMenu />
             </div>
           </div>
 
-          {/* Outlet for rendering nested routes */}
-          <div className="mt-0 p-4 rounded-lg">
+          {/* Scrollable Content Area */}
+          <div className="content-wrapper flex-1 overflow-y-auto p-4 custom-scrollbar">
             <Outlet />
           </div>
         </section>
@@ -334,7 +435,7 @@ function App() {
   };
 
   return (
-    <div className="relative">
+    <div className="relative ">
       <Routes>
         {/* Manager admin panel */}
         <Route path="/admin">

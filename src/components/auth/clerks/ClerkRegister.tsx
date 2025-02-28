@@ -1,15 +1,16 @@
-import { ArrowLeft, EyeIcon, Home } from 'lucide-react';
+import { ArrowLeft, EyeIcon, EyeOff, Home, Upload, X } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import backgroundImage from '../../../assets/images/backgrounds/SunsetRed.png';
 import axios from 'axios';
+import defaultImage from '@/assets/images/defaultUser.png';
 
 export default function ClerkRegister() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const formRef = useRef<HTMLFormElement>(null)!;
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -34,38 +35,25 @@ export default function ClerkRegister() {
       });
   };
 
-  // Displaying the profile image on loading
+  // Handle Profile Image Upload
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    console.log(file);
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        const imageUrl = reader.result as string;
-        const imageElement = document.querySelector(
-          '#profileDisplay',
-        ) as HTMLImageElement;
-        imageElement ? (imageElement.src = imageUrl) : null;
+        setProfileImage(reader.result as string);
       };
-
       reader.readAsDataURL(file);
     }
   };
 
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-gray-900 relative"
-      style={{
-        backgroundImage: `url(${backgroundImage})`,
-        backgroundSize: '100% 100%',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-      }}
-    >
-      <div className="fixed top-4 left-4 flex items-center gap-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 text-gray-900">
+      {/* Navigation Buttons */}
+      <div className="absolute top-4 left-4 flex items-center gap-4">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-white hover:text-orange-500 hover:opacity-80 p-2 rounded-lg transition backdrop-blur-md border border-white/30 bg-white/10"
+          className="flex items-center gap-2 text-gray-700 hover:text-orange-500 hover:opacity-80 p-2 rounded-lg transition border border-orange-200 bg-orange-100"
         >
           <ArrowLeft className="w-5 h-5" />
           <span className="hidden sm:inline">Back</span>
@@ -73,54 +61,49 @@ export default function ClerkRegister() {
 
         <button
           onClick={() => navigate('/home/dashboard')}
-          className="flex items-center gap-2 text-white hover:text-orange-500 hover:opacity-80 p-2 rounded-lg transition backdrop-blur-md border border-white/30 bg-white/10"
+          className="flex items-center gap-2 text-gray-700 hover:text-orange-500 p-2 rounded-lg transition border border-orange-200 bg-orange-100"
         >
           <Home className="w-5 h-5" />
           <span className="hidden sm:inline">Home</span>
         </button>
       </div>
 
-      <div
-        className="p-8 rounded-lg shadow-xl w-full max-w-md mt-6 animate-fadeIn"
-        style={{
-          background: 'rgba(255, 255, 255, 0.25)',
-          backdropFilter: 'blur(25px)',
-          WebkitBackdropFilter: 'blur(8px)',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-        }}
-      >
+      {/* Form Container */}
+      <div className="p-8 rounded-lg shadow-lg w-full max-w-md mt-6 bg-white border border-gray-200">
         <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-          Signup
+          Clerk Register
         </h1>
-        <form
-          className="flex flex-col gap-6"
-          ref={formRef}
-          onSubmit={handleSubmit}
-          encType="multipart/form-data"
-        >
+
+        <form className="flex flex-col gap-6" onSubmit={handleSubmit} encType="multipart/form-data">
+          {/* Profile Image */}
           <div className="flex justify-center h-[100px] mb-4">
-            <img
-              id="profileDisplay"
-              src={backgroundImage}
-              alt="farmer avatar"
-              className="h-full w-[100px] object-cover rounded-full"
+            <div className="relative">
+              <img
+                id="profileDisplay"
+                src={profileImage || defaultImage}
+                alt="Profile"
+                className="h-full w-[100px] object-cover rounded-full border border-gray-300 shadow-md"
+              />
+              
+              <button type='button' onClick={() => !profileImage && fileInputRef.current?.click()} className="absolute cursor-pointer bottom-0 right-0 bg-orange-500 text-white p-1 rounded-full">
+                {!profileImage ? (<Upload className="w-4 h-4" />) : (<X className="w-4 h-4" onClick={() => setProfileImage(null)} />)}
+              </button>
+            </div>
+            <input
+              ref={fileInputRef}
+              onChange={handleImageChange}
+              type="file"
+              name="avatar"
+              id="fileInput"
+              accept="image/*"
+              className="hidden"
             />
           </div>
-          <input
-            onChange={handleImageChange}
-            type="file"
-            name="avatar"
-            id="fileInput"
-            accept="image/*"
-            className=""
-          />
 
+          {/* Name Fields */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label
-                htmlFor="firstname"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="firstname" className="block text-sm font-medium text-gray-700">
                 Firstname <span className="text-red-500">*</span>
               </label>
               <input
@@ -129,14 +112,11 @@ export default function ClerkRegister() {
                 id="firstname"
                 placeholder="John"
                 required
-                className="mt-1 block w-full bg-transparent border-b border-gray-300  focus:border-orange-500 transition p-2 text-gray-800"
+                className="mt-1 block w-full bg-white border border-gray-300 rounded-md p-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
               />
             </div>
             <div>
-              <label
-                htmlFor="middlename"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="middlename" className="block text-sm font-medium text-gray-700">
                 Middlename
               </label>
               <input
@@ -144,14 +124,11 @@ export default function ClerkRegister() {
                 name="middleName"
                 id="middlename"
                 placeholder="Doe"
-                className="mt-1 block w-full bg-transparent border-b border-gray-300  focus:border-orange-500 transition p-2 text-gray-800"
+                className="mt-1 block w-full bg-white border border-gray-300 rounded-md p-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
               />
             </div>
             <div>
-              <label
-                htmlFor="lastname"
-                className="block text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="lastname" className="block text-sm font-medium text-gray-700">
                 Lastname <span className="text-red-500">*</span>
               </label>
               <input
@@ -160,16 +137,14 @@ export default function ClerkRegister() {
                 id="lastname"
                 placeholder="Smith"
                 required
-                className="mt-1 block w-full bg-transparent border-b border-gray-300  focus:border-orange-500 transition p-2 text-gray-800"
+                className="mt-1 block w-full bg-white border border-gray-300 rounded-md p-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
               />
             </div>
           </div>
 
+          {/* Email */}
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
               Email
             </label>
             <input
@@ -178,32 +153,13 @@ export default function ClerkRegister() {
               id="email"
               placeholder="john.doe@example.com"
               required
-              className="mt-1 block w-full bg-transparent border-b border-gray-300  focus:border-orange-500 transition p-2 text-gray-800"
+              className="mt-1 block w-full bg-white border border-gray-300 rounded-md p-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
             />
           </div>
 
+          {/* Username */}
           <div>
-            <label
-              htmlFor="phone"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Phone
-            </label>
-            <input
-              type="number"
-              name="phone"
-              id="phone"
-              placeholder="johndoe"
-              required
-              className="mt-1 block w-full bg-transparent border-b border-gray-300  focus:border-orange-500 transition p-2 text-gray-800"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
               Username
             </label>
             <input
@@ -212,22 +168,20 @@ export default function ClerkRegister() {
               id="username"
               placeholder="johndoe"
               required
-              className="mt-1 block w-full bg-transparent border-b border-gray-300  focus:border-orange-500 transition p-2 text-gray-800"
+              className="mt-1 block w-full bg-white border border-gray-300 rounded-md p-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
             />
           </div>
 
+          {/* Gender */}
           <div>
-            <label
-              htmlFor="username"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
               Gender
             </label>
             <select
               name="gender"
               id="gender"
               required
-              className="mt-1 block w-full bg-transparent border-b border-gray-300  focus:border-orange-500 transition p-2 text-gray-800"
+              className="mt-1 block w-full bg-white border border-gray-300 rounded-md p-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
             >
               <option value="male">Male</option>
               <option value="female">Female</option>
@@ -235,11 +189,9 @@ export default function ClerkRegister() {
             </select>
           </div>
 
+          {/* Password */}
           <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Password
             </label>
             <div className="relative">
@@ -249,26 +201,24 @@ export default function ClerkRegister() {
                 id="password"
                 required
                 placeholder="Password"
-                className="mt-1 block w-full bg-transparent border-b border-gray-300  focus:border-orange-500 transition p-2 text-gray-800 pr-10"
+                className="mt-1 block w-full bg-white border border-gray-300 rounded-md p-2 pr-10 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
               />
-              <EyeIcon
-                className="absolute right-3 top-3 cursor-pointer text-gray-400 hover:text-orange-500"
-                onClick={() => setShowPassword(!showPassword)}
-              />
+              {showPassword ? (
+                <button type='button' className='absolute right-3 top-3 cursor-pointer text-gray-400 hover:text-orange-500' onClick={() => setShowPassword(!showPassword)}>
+                  <EyeOff/>
+                </button>
+              ): (
+                <button type='button' className='absolute right-3 top-3 cursor-pointer text-gray-400 hover:text-orange-500' onClick={() => setShowPassword(!showPassword)}>
+                  <EyeIcon/>
+                </button>
+              )}
             </div>
           </div>
 
-          <div>
-            <button
-              type="submit"
-              className={`w-full bg-orange-500 text-white py-2 px-4 rounded-lg shadow-md transition ${
-                isSubmitting ? 'cursor-wait opacity-70' : 'hover:bg-orange-600'
-              }`}
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Processing...' : 'Signup'}
-            </button>
-          </div>
+          {/* Submit Button */}
+          <button type="submit" className="w-full bg-orange-500 text-white py-2 px-4 rounded-lg shadow-md transition hover:bg-orange-600">
+            {isSubmitting ? 'Processing...' : 'Signup'}
+          </button>
         </form>
       </div>
     </div>

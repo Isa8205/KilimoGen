@@ -1,10 +1,16 @@
 import axios from 'axios';
-import { Filter, Grid, List, MoreHorizontal, RefreshCwIcon, Table } from 'lucide-react';
+import {
+  Grid,
+  List,
+  MoreHorizontal,
+  RefreshCcw,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Loader from './Widgets/Loaders/Loader1';
 import { NavLink } from 'react-router-dom';
-import notify from './Widgets/ToastHelper';
 import Tooltip from './Widgets/Tooltips/Tooltip';
+import { motion } from 'framer-motion';
+import errorImage from '@/assets/images/backgrounds/404_2.svg';
 
 export function Inventory() {
   // States for the display either grid or table
@@ -36,9 +42,9 @@ export function Inventory() {
       setItems(response.data.items);
       console.log(response.data.items);
     } catch (error) {
-      notify(false, 'Failed! Please try again.');
+      console.error(error)
     } finally {
-        setFetching(false); 
+      setFetching(false);
     }
   };
 
@@ -93,30 +99,27 @@ export function Inventory() {
 
         <span className="flex gap-4 items-center">
           <span className="bg-white text-gray-600 py-1 px-2 gap-2 rounded inline-flex">
-            <Tooltip text='List' className='' position='bottom'>
-            <button
-              className="hover:text-orange-500 p-1"
-              onClick={() => setGridDisplay(!gridDisplay)}
-            >
-              <List
-                className={`${!gridDisplay ? 'text-orange-500' : ''} text-xs`}
-              />
-            </button>
-              </Tooltip>
-            <Tooltip text='Grid' className='' position='bottom'>
-            <button
-              className="hover:text-orange-500 p-1"
-              onClick={() => setGridDisplay(!gridDisplay)}
-            >
-              <Grid
-                className={`${gridDisplay ? 'text-orange-500' : ''} text-xs`}
-              />
-            </button>
-              </Tooltip>
+            <Tooltip text="List" className="" position="bottom">
+              <button
+                className="hover:text-orange-500 p-1"
+                onClick={() => setGridDisplay(!gridDisplay)}
+              >
+                <List
+                  className={`${!gridDisplay ? 'text-orange-500' : ''} text-xs`}
+                />
+              </button>
+            </Tooltip>
+            <Tooltip text="Grid" className="" position="bottom">
+              <button
+                className="hover:text-orange-500 p-1"
+                onClick={() => setGridDisplay(!gridDisplay)}
+              >
+                <Grid
+                  className={`${gridDisplay ? 'text-orange-500' : ''} text-xs`}
+                />
+              </button>
+            </Tooltip>
           </span>
-          <button className="bg-white text-gray-600 hover:text-orange-500 font-semibold py-2 px-2 rounded inline-flex items-center gap-2">
-            <Filter /> Filter
-          </button>
         </span>
       </div>
 
@@ -166,18 +169,18 @@ export function Inventory() {
                     {item.receivedBy.firstName} {item.receivedBy.lastName}
                   </td>
                   <td className="p-2 inline-flex justify-center ">
-                  <div className="w-[4em] h-[4em] bg-gray-300 rounded-md flex items-center justify-center cursor-pointer hover:opacity-75">
-                {' '}
-                {item.Image ? (
-                  <img
-                    src={item.Image}
-                    alt="Preview"
-                    className="w-full h-full object-cover rounded-t-md"
-                  />
-                ) : (
-                  <span className="text-gray-500 text-xs">No Image</span>
-                )}
-              </div>
+                    <div className="w-[4em] h-[4em] bg-gray-300 rounded-md flex items-center justify-center cursor-pointer hover:opacity-75">
+                      {' '}
+                      {item.Image ? (
+                        <img
+                          src={item.Image}
+                          alt="Preview"
+                          className="w-full h-full object-cover rounded-t-md"
+                        />
+                      ) : (
+                        <span className="text-gray-500 text-xs">No Image</span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -215,7 +218,9 @@ export function Inventory() {
                   <span className="text-sm text-gray-500">
                     {item.dateReceived.split('').slice(0, 10).join('')}
                   </span>
-                  <button><MoreHorizontal/></button>
+                  <button>
+                    <MoreHorizontal />
+                  </button>
                 </div>
                 {/* Data fields */}
                 <h2 className="text-lg font-semibold text-gray-600">
@@ -239,15 +244,32 @@ export function Inventory() {
       ) : null}
 
       {fetching ? (
-        <div className="mt-2 w-full flex flex-col justify-center items-center">
+        <div className="mt-2 py-[100px] w-full flex flex-col justify-center items-center">
           <Loader />
-          <p className="text-gray-600">fetching.....</p>
+          <p className="text-gray-600">Loading.....</p>
         </div>
       ) : items.length === 0 ? (
-        <div className="mt-5 w-full flex flex-col justify-center items-center">
-          <p className="text-gray-600">No Items found</p>
-          <button onClick={fetchInventory}>
-            <RefreshCwIcon className="w-6 h-6 text-gray-600" />
+        <div className="flex gap-3 flex-col justify-center items-center my-4">
+          {' '}
+          {/* Animate to emerge from the center as it enlearges */}
+          <motion.div
+            initial={{ width: '10px', height: '10px' }}
+            animate={{ width: 'auto', height: 'auto' }}
+            transition={{ duration: 0.5, ease: 'easeInOut' }}
+          >
+            <img
+              src={errorImage}
+              alt=""
+              className="w-full h-[300px] flex-grow"
+            />
+          </motion.div>
+          <p className="text-gray-600">Ooops! No items found</p>
+          <button
+            onClick={fetchInventory}
+            className="border border-gray-400 text-gray-500 hover:text-accent hover:border-accent rounded p-1 flex items-center gap-2"
+          >
+            Refresh
+            <RefreshCcw className="w-4 h-4" />
           </button>
         </div>
       ) : null}

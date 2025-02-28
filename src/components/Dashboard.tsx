@@ -1,8 +1,5 @@
 import DeliveriesBarChart from './Analytics';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
+import Calendar from './Widgets/calendar';
 
 export default function Dashboard() {
   const quickActions = [
@@ -20,25 +17,16 @@ export default function Dashboard() {
 
   return (
     <section className="text-gray-700 p-4">
-      <div className="flex justify-between items-start gap-3 mb-4 flex-wrap">
+      <div className="flex justify-between gap-3 mb-4 flex-wrap">
         {/* Calendar */}
-        <div className="flex-grow  h-full bg-gray-100 p-5 rounded-lg shadow-lg overflow-hidden">
-          <FullCalendar
-            plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-            initialView="dayGridMonth"
-            editable={true}
-            selectable={true}
-            events={[
-              { title: 'Meeting', start: '2024-02-25' },
-              { title: 'Conference', start: '2024-02-27', end: '2024-02-29' },
-            ]}
-          />
+        <div className="flex-grow bg-white p-5 rounded-lg shadow-md">
+          <Calendar/>
         </div>
 
         {/* Urgent Tasks & Quick Actions */}
-        <div className="flex-grow flex flex-col gap-2 justify-between">
+        <div className="flex-grow flex lg:flex-col gap-2 justify-between">
           {/* Urgent Tasks */}
-          <div className="bg-white p-4 rounded-xl shadow-sm">
+          <div className="bg-white p-4 rounded-xl shadow-sm flex-grow">
             <h2 className="text-lg font-semibold mb-4">Urgent Tasks</h2>
             <div className="space-y-4">
               {urgentTasks.map((task) => (
@@ -54,7 +42,7 @@ export default function Dashboard() {
           </div>
 
           {/* Quick Actions */}
-          <div className="bg-white p-4 rounded-xl shadow-sm">
+          <div className="bg-white p-4 rounded-xl shadow-sm flex-grow">
             <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
             <div className="grid grid-cols-2 gap-4">
               {quickActions.map((action) => (
@@ -73,7 +61,9 @@ export default function Dashboard() {
         {/* Deliveries Bar Chart */}
       </div>
 
-        <DeliveriesBarChart />
+      <div className=''>
+      <DeliveriesBarChart />
+      </div>
     </section>
   );
 }

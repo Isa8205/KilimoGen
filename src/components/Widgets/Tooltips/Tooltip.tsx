@@ -94,7 +94,7 @@ const Tooltip: React.FC<TooltipProps> = ({ text, children, className, position =
 
           {/* Arrow */}
           <div
-            className="fixed w-2 h-2 transform rotate-45 bg-teal-600"
+            className="absolute w-3 h-3 transform bg-teal-600"
             style={{
               top:
                 tooltipDirection === 'top'
@@ -110,10 +110,10 @@ const Tooltip: React.FC<TooltipProps> = ({ text, children, className, position =
                   : '50%', // Center horizontally for top/bottom
               transform:
                 tooltipDirection === 'top' || tooltipDirection === 'bottom'
-                  ? 'translateX(-50%)' // Center arrow horizontally
-                  : 'translateY(-50%)', // Center arrow vertically
+                  ? 'translateX(-50%)rotate(45deg)' // Center arrow horizontally
+                  : 'translateY(-50%)rotate(45deg)', // Center arrow vertically
             }}
-          />
+          ></div>
         </motion.div>
       )}
 

@@ -1,4 +1,5 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow } from 'electron'
+import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
 // import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -29,18 +30,16 @@ export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
 
 let win: BrowserWindow | null
+setupTitlebar()
 
 function createWindow() {
   win = new BrowserWindow({
     minHeight: 600,
     minWidth: 600,
     autoHideMenuBar: true,
-    // Hide the defauly title bar
-    // titleBarStyle: 'hidden',
-    // On windows and linux display the window controls.
-    // ...(process.platform !== 'darwin' ? { titleBarOverlay: true } : {}),
-    icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+    icon: path.join(__dirname, 'react.svg'),
     webPreferences: {
+      sandbox: false,
       preload: path.join(__dirname, 'preload.mjs'),
     },
   })
@@ -56,6 +55,8 @@ function createWindow() {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(RENDERER_DIST, 'index.html'))
   }
+
+  attachTitlebarToWindow(win)
 
 }
 

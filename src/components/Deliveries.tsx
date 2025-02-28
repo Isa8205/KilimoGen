@@ -1,13 +1,26 @@
-import { Filter, RefreshCwIcon, X } from 'lucide-react';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Filter,
+  RefreshCcw,
+  X,
+} from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Fuse, { FuseResult } from 'fuse.js';
 import axios from 'axios';
 import notify from './Widgets/ToastHelper';
 import { ToastContainer } from 'react-toastify';
 import Loader from './Widgets/Loaders/Loader1';
+import { useRecoilState } from 'recoil';
+import { sessionState } from '@/store/store';
+import {motion} from 'framer-motion';
+import errorImage from '@/assets/images/backgrounds/404_2.svg';
 
 export function Deliveries() {
   // Get the data from the server
+  const itemsPerPage = 20;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [data, setData] = useState<
     { id: number; farmer: string; farmerNumber: string }[]
   >([]);
@@ -17,20 +30,35 @@ export function Deliveries() {
   const fetchDeliveries = async () => {
     setfetching(true); // Set loading state
     try {
-      const response = await axios.get('http://localhost:3000/api/delivery');
+      const response = await axios.get(
+        `http://localhost:3000/api/delivery?page=${currentPage}&limit=${itemsPerPage}`,
+      );
       setData(response.data.deliveries);
-      console.log(response.data.deliveries)
+      setTotalPages(response.data.totalPages);
     } catch (error) {
-      notify(false, 'Failed! Please try again.');
+      console.error(error);
     } finally {
       setfetching(false); // Turn off loading
+    }
+  };
+
+  // Page navigation
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
     }
   };
 
   // Fetch data on component mount
   useEffect(() => {
     fetchDeliveries();
-  }, []);
+  }, [currentPage]);
 
   // The search functionality
   const [query, setQuery] = useState('');
@@ -59,26 +87,30 @@ export function Deliveries() {
   /**
    * A function to manage the selected delieries for other actions
    */
-  const [selectedIds, setSelected] = useState([])
+  const [selectedIds, setSelected] = useState([]);
 
-  const handleSelect = (deliveryId: number, action: string)=> {
+  const handleSelect = (deliveryId: number, action: string) => {
     if (action === 'add') {
       selectedIds.map((id) => {
-        id === deliveryId 
-      })
+        id === deliveryId;
+      });
     }
-  }
+  };
 
   // Modal body and box
   const [modalDisp, setModalDisp] = useState(false);
   const Modal = () => {
+    const user = useRecoilState(sessionState)[0];
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const formData = new FormData(e.currentTarget);
       const data = Object.fromEntries(formData);
 
       await axios
-        .post('http://localhost:3000/api/delivery/add', data)
+        .post(
+          `http://localhost:3000/api/delivery/add?clerkId=${user?.id}`,
+          data,
+        )
         .then((res) => {
           console.log(res);
           notify(res.data.passed, res.data.message);
@@ -86,7 +118,7 @@ export function Deliveries() {
             ? setTimeout(() => {
                 setModalDisp(false);
                 fetchDeliveries();
-              }, 3000)
+              }, 1500)
             : null;
         });
     };
@@ -161,7 +193,7 @@ export function Deliveries() {
 
   return (
     <section className="text-gray-700">
-      <ToastContainer/>
+      <ToastContainer />
       <div>
         {modalDisp && <Modal />}
         <div className="flex justify-between items-center">
@@ -188,12 +220,33 @@ export function Deliveries() {
 
           <span className="flex-grow border-e-2 border-gray-400 px-6">
             <p>Season Total</p>
-            <span className="font-bold">{deliveries.reduce((acc, delivery) => acc + delivery.quantity, 0)} kgs</span>
+            <span className="font-bold">
+              {deliveries.reduce((acc, delivery) => acc + delivery.quantity, 0)}{' '}
+              kgs
+            </span>
           </span>
 
           <span className="flex-grow border-e-2 border-gray-400 px-6">
             <p>Today's Total</p>
-            <span className="font-bold">{deliveries.filter((delivery) => delivery.deliveryDate.slice(0, 10).split('-').reverse().join('-') === new Date().toISOString().slice(0, 10).split('-').reverse().join('-')).reduce((acc, delivery) => acc + delivery.quantity, 0)} kgs</span>
+            <span className="font-bold">
+              {deliveries
+                .filter(
+                  (delivery) =>
+                    delivery.deliveryDate
+                      .slice(0, 10)
+                      .split('-')
+                      .reverse()
+                      .join('-') ===
+                    new Date()
+                      .toISOString()
+                      .slice(0, 10)
+                      .split('-')
+                      .reverse()
+                      .join('-'),
+                )
+                .reduce((acc, delivery) => acc + delivery.quantity, 0)}{' '}
+              kgs
+            </span>
           </span>
 
           <span className="flex-grow border-e-2 border-gray-400 px-6">
@@ -244,33 +297,88 @@ export function Deliveries() {
                   className="even:bg-gray-50 cursor-pointer last:border-none border-b border-gray-200 hover:bg-gray-100"
                 >
                   <td className=" p-2">
-                    <input type="checkbox" onChange={(e) => handleSelect(delivery.id, 'add')} name="select-all" id="all" />
+                    <input
+                      type="checkbox"
+                      onChange={() => handleSelect(delivery.id, 'add')}
+                      name="select-all"
+                      id="all"
+                    />
                   </td>
                   <td className="py-3 text-center">
                     {delivery.farmer.firstName + ' ' + delivery.farmer.lastName}
                   </td>
                   <td className="py-3 text-center">{delivery.quantity}</td>
-                  <td className="py-3 text-center">{delivery.crop}</td>
+                  <td className="py-3 text-center">{delivery.berryType}</td>
                   <td className="py-3 text-center">
-                    {delivery.deliveryDate.slice(0, 10).split('-').reverse().join('-')}
+                    {delivery.deliveryDate
+                      .slice(0, 10)
+                      .split('-')
+                      .reverse()
+                      .join('-')}
                   </td>
-                  <td className="py-3 text-center">{delivery.servedBy}</td>
+                  <td className="py-3 text-center">
+                    {delivery.servedBy.firstName +
+                      ' ' +
+                      delivery.servedBy.lastName}
+                  </td>
                 </tr>
               ))}
             </tbody>
           )}
         </table>
 
+        {deliveries.length > 0 ? (
+          <div className="flex justify-end items-center my-4">
+            <div className="flex gap-2">
+              {currentPage !== 1 && (
+                <button
+                  onClick={prevPage}
+                  className="bg-white text-gray-600 hover:text-orange-500 font-semibold text-xs py-1 px-2 rounded inline-flex items-center gap-2"
+                >
+                  <ArrowLeft />
+                </button>
+              )}
+
+              <span className="text-gray-600 bg-gray-300 inline-flex items-center p-2 rounded">
+                {currentPage} / {totalPages}
+              </span>
+
+              {currentPage !== totalPages && (
+                <button
+                  onClick={nextPage}
+                  className="text-gray-600 hover:text-orange-500 font-semibold text-xs py-1 px-2 bg-white rounded inline-flex items-center gap-2"
+                >
+                  <ArrowRight />
+                </button>
+              )}
+            </div>
+          </div>
+        ) : null}
+
         {fetching ? (
-          <div className="mt-2 w-full flex flex-col justify-center items-center">
+          <div className="mt-2 py-[100px] w-full flex flex-col justify-center items-center">
             <Loader />
             <p className="text-gray-600">Loading.....</p>
           </div>
-        ) : (deliveries.length === 0 &&
-          <div className="mt-5 w-full flex flex-col justify-center items-center">
-            <p className="text-gray-600">No deliveries found</p>
-            <button onClick={fetchDeliveries}><RefreshCwIcon className='w-6 h-6 text-gray-600'/></button>
-          </div>)}
+        ) : deliveries.length === 0 ? (
+          <div className="flex gap-3 flex-col justify-center items-center my-4">          {/* Animate to emerge from the center as it enlearges */}
+          <motion.div
+          initial={{width: '10px', height: '10px'}}
+          animate={{width: 'auto', height: 'auto'}}
+          transition={{duration: 0.5, ease: 'easeInOut'}}
+          >
+          <img src={errorImage} alt="" className="w-full h-[300px] flex-grow" />
+          </motion.div>
+            <p className="text-gray-600">Ooops! No deliveries found</p>
+            <button
+              onClick={fetchDeliveries}
+              className="border border-gray-400 text-gray-500 hover:text-accent hover:border-accent rounded p-1 flex items-center gap-2"
+            >
+              Refresh
+              <RefreshCcw className="w-4 h-4" />
+            </button>
+          </div>
+        ) : null}
       </div>
     </section>
   );
