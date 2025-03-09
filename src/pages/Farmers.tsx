@@ -7,20 +7,23 @@ import {
   RefreshCcw,
   Search,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Loader from './Widgets/Loaders/Loader1';
 import { NavLink } from 'react-router-dom';
 import Fuse from 'fuse.js';
 import { motion } from 'framer-motion';
 import { useRecoilState } from 'recoil';
-import { farmersState } from '@/store/store';
+import { farmersState, sessionState } from '@/store/store';
 import errorImage from '@/assets/images/backgrounds/404_2.svg';
 export function Farmers() {
+  // Get the session data
+  const user = useRecoilState(sessionState)[0];
+
   // Fetching farmers from the database
   const [dbfarmers, setFarmers] = useRecoilState(farmersState);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 20;
   const [totalPages, setTotalPages] = useState(1);
 
   const prevPage = () => {
@@ -87,7 +90,7 @@ export function Farmers() {
         </button>
 
         {isOpen && (
-          <div className="fixed right-4 mt-2 w-40 bg-white border rounded-md shadow-lg z-10">
+          <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg z-10">
             <ul className="py-2 text-gray-700">
               {filters.map((filter) => (
                 <li
@@ -109,27 +112,52 @@ export function Farmers() {
     );
   };
 
+
+  // Individual farmer selection and all selection
+  const [selectedFarmers, setselectedFarmers] = useState<string[]>([]);
+  const handleSelect = (id: string) => {
+    if (selectedFarmers.includes(id)) {
+      setselectedFarmers(selectedFarmers.filter((item) => item !== id));
+    } else {
+      setselectedFarmers([...selectedFarmers, id]);
+    }
+  }
+
+  const handleselectall = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked
+
+    if (checked) {
+      setselectedFarmers(farmers.map(farmer => farmer.id.toString()))
+    } else {
+      setselectedFarmers([])
+    }
+  }
+
   return (
     <section className="text-gray-800">
       <div className="flex justify-between mb-4">
         <h2 className="text-2xl font-bold">Farmers</h2>
 
-        <span className="inline-flex gap-2 text-sm font-semibold">
-          <button className="bg-white text-black py-1 px-4 rounded">
-            Export CSV
-          </button>
-          <NavLink to="/home/farmers/add">
-            <button className="bg-accent text-white py-1 px-4 rounded">
-              Add
+        {user && (
+          <span className="inline-flex gap-2 text-sm font-semibold">
+            <button className="bg-white text-black py-1 px-4 rounded">
+              Export CSV
             </button>
-          </NavLink>
-        </span>
+            <NavLink to="/home/farmers/add">
+              <button className="bg-accent text-white py-1 px-4 rounded">
+                Add
+              </button>
+            </NavLink>
+          </span>
+        )}
       </div>
 
       <div className="bg-white p-5 flex shadow-md rounded-md">
         <span className="flex-grow border-x-2 border-gray-400 px-6">
           <p>Total</p>
-          <span className="font-bold" id="totalFarmers">0</span>
+          <span className="font-bold" id="totalFarmers">
+            0
+          </span>
         </span>
 
         <span className="flex-grow border-e-2 border-gray-400 px-6">
@@ -138,8 +166,8 @@ export function Farmers() {
         </span>
 
         <span className="flex-grow border-e-2 border-gray-400 px-6">
-          <p>Inactive</p>
-          <span className="font-bold">0</span>
+          <p>Selected</p>
+          <span className="font-bold">{selectedFarmers.length}</span>
         </span>
       </div>
 
@@ -164,6 +192,15 @@ export function Farmers() {
         </span>
       </div>
 
+      {/* Display the number of people selected */}
+      {selectedFarmers.length > 0 && (
+      <div>
+        <span className="text-sm font-semibold">
+          {selectedFarmers.length} selected
+        </span>
+      </div>        
+      )}
+
       <table
         className={`bg-white ${
           !loading ? 'shadow-md' : ''
@@ -172,9 +209,11 @@ export function Farmers() {
         <thead className="bg-gray-200 rounded-md">
           <tr className="text-center">
             {/* Checkbox header */}
-            <th className=" p-2">
-              <input type="checkbox" name="select-all" id="all" />
-            </th>
+            {user && (
+              <th className=" p-2">
+                <input onChange={(e) => handleselectall(e)} checked={selectedFarmers.length === farmers.length} type="checkbox" name="select-all" id="all" />
+              </th>
+            )}
             {/* Table headers */}
             <th className="p-2">Name</th>
             <th className="p-2">Farmer No.</th>
@@ -203,11 +242,13 @@ export function Farmers() {
                   }`}
                 >
                   {/* Checkbox for each row */}
-                  <td className="p-2">
-                    <input type="checkbox" value={item.id} />
-                  </td>
+                  {user && (
+                    <td className="p-2">
+                      <input onChange={() => handleSelect(item.id.toString())} checked={selectedFarmers.includes(item.id.toString())} type="checkbox" value={item.id} />
+                    </td>
+                  )}
                   {/* Data cells */}
-                  <td className="p-2 ">
+                  <td className="p-2 text-start">
                     {item.firstName} {item.lastName}
                   </td>
                   <td className="p-2 ">
@@ -217,7 +258,7 @@ export function Farmers() {
                       ? `00${item.id}`
                       : `0${item.id}`}
                   </td>
-                  <td className="p-2 ">M</td>
+                  <td className="p-2">M</td>
                   <td className="p-2 ">0{item.phone}</td>
                   <td className="p-2 ">{item.totalDeliveries}</td>
                   <td className="p-2 inline-flex justify-center">
@@ -277,11 +318,15 @@ export function Farmers() {
         <div className="flex gap-3 flex-col justify-center items-center my-4">
           {/* Animate to emerge from the center as it enlearges */}
           <motion.div
-          initial={{width: '10px', height: '10px'}}
-          animate={{width: 'auto', height: 'auto'}}
-          transition={{duration: 0.5, ease: 'easeInOut'}}
+            initial={{ width: '10px', height: '10px' }}
+            animate={{ width: 'auto', height: 'auto' }}
+            transition={{ duration: 0.5, ease: 'easeInOut' }}
           >
-          <img src={errorImage} alt="" className="w-full h-[300px] flex-grow" />
+            <img
+              src={errorImage}
+              alt=""
+              className="w-full h-[300px] flex-grow"
+            />
           </motion.div>
           <p className="text-gray-600">Ooops! No farmers found</p>
           <button

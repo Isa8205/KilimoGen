@@ -1,5 +1,4 @@
-import { app, BrowserWindow } from 'electron'
-import { setupTitlebar, attachTitlebarToWindow } from "custom-electron-titlebar/main";
+import { app, BrowserWindow, ipcMain } from 'electron'
 // import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -30,7 +29,6 @@ export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
 
 let win: BrowserWindow | null
-setupTitlebar()
 
 function createWindow() {
   win = new BrowserWindow({
@@ -39,7 +37,8 @@ function createWindow() {
     autoHideMenuBar: true,
     icon: path.join(__dirname, 'react.svg'),
     webPreferences: {
-      sandbox: false,
+      contextIsolation: false,
+      nodeIntegration: true,
       preload: path.join(__dirname, 'preload.mjs'),
     },
   })
@@ -55,8 +54,6 @@ function createWindow() {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(RENDERER_DIST, 'index.html'))
   }
-
-  attachTitlebarToWindow(win)
 
 }
 
@@ -78,6 +75,8 @@ app.on('activate', () => {
   }
 })
 
-// ipcMain.handle('send-data', async () => await Init())
+ipcMain.handle('getPrinters', async() => {
+  return await win?.webContents.getPrintersAsync()
+})
 
 app.whenReady().then(createWindow)

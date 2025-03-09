@@ -1,18 +1,18 @@
 import axios from 'axios';
-import {
-  Grid,
-  List,
-  MoreHorizontal,
-  RefreshCcw,
-} from 'lucide-react';
+import { Edit, Grid, List, MoreHorizontal, RefreshCcw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Loader from './Widgets/Loaders/Loader1';
 import { NavLink } from 'react-router-dom';
 import Tooltip from './Widgets/Tooltips/Tooltip';
 import { motion } from 'framer-motion';
 import errorImage from '@/assets/images/backgrounds/404_2.svg';
+import { useRecoilState } from 'recoil';
+import { sessionState } from '@/store/store';
 
 export function Inventory() {
+  // Get the session data
+  const user = useRecoilState(sessionState)[0];
+
   // States for the display either grid or table
   const [gridDisplay, setGridDisplay] = useState(true);
 
@@ -42,7 +42,7 @@ export function Inventory() {
       setItems(response.data.items);
       console.log(response.data.items);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
       setFetching(false);
     }
@@ -58,17 +58,19 @@ export function Inventory() {
       <div className="flex justify-between mb-4">
         <h2 className="text-2xl font-bold">Inventory</h2>
 
-        <span className="inline-flex gap-2 text-sm font-semibold">
-          <button className="bg-white text-black py-1 px-4 rounded">
-            {/* // TODO: Add export function */}
-            Export CSV
-          </button>
-          <NavLink to="/home/inventory/add">
-            <button className="bg-accent text-white py-1 px-4 rounded">
-              Add
+        {user && (
+          <span className="inline-flex gap-2 text-sm font-semibold">
+            <button className="bg-white text-black py-1 px-4 rounded">
+              {/* // TODO: Add export function */}
+              Export CSV
             </button>
-          </NavLink>
-        </span>
+            <NavLink to="/home/inventory/add">
+              <button className="bg-accent text-white py-1 px-4 rounded">
+                Add
+              </button>
+            </NavLink>
+          </span>
+        )}
       </div>
 
       <div className="bg-white p-5 flex shadow-md rounded-md">
@@ -218,9 +220,11 @@ export function Inventory() {
                   <span className="text-sm text-gray-500">
                     {item.dateReceived.split('').slice(0, 10).join('')}
                   </span>
-                  <button>
-                    <MoreHorizontal />
-                  </button>
+                  <Tooltip text="Edit" className="" position="bottom">
+                    <button className="hover:text-orange-500">
+                      <Edit className="w-4 h-4" />
+                    </button>
+                  </Tooltip>
                 </div>
                 {/* Data fields */}
                 <h2 className="text-lg font-semibold text-gray-600">

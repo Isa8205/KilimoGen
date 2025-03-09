@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Leaf } from "lucide-react"
+import Logo from "./pages/Widgets/Logo"
 
 const loadingSteps = [
   "Initializing system...",
@@ -43,7 +44,7 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#EFEDE7]">
       <div className="text-center">
-        <Leaf className="w-16 h-16 mx-auto mb-4 text-[#22331D]" />
+        <Logo />
         <h1 className="text-2xl font-bold text-[#22331D] mb-4">Kilimogen</h1>
         <div className="w-64 h-2 bg-[#6A6D69] rounded-full mb-4 overflow-hidden">
           <div

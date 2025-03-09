@@ -3,7 +3,7 @@ import { ArrowLeft, Home, EyeIcon, EyeOff } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
-import notify from '@/components/Widgets/ToastHelper';
+import notify from '@/pages/Widgets/ToastHelper';
 import { useRecoilState } from 'recoil';
 import { sessionState } from '@/store/store';
 

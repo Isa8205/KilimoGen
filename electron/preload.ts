@@ -1,5 +1,4 @@
 import { ipcRenderer, contextBridge } from 'electron'
-import { Titlebar } from "custom-electron-titlebar";
 
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld('ipcRenderer', {
@@ -25,10 +24,9 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 })
 
 contextBridge.exposeInMainWorld('electron', {
-  sendData: () => (ipcRenderer.invoke('send-data'))
-})
+  sendData: () => (ipcRenderer.invoke('send-data')),
 
-window.addEventListener('DOMContentLoaded', () => {
-  // Title bar implementation
-  new Titlebar({});
-});
+  // You can expose other APTs you need here.
+  getprinters: () => (ipcRenderer.invoke('getPrinters')),
+
+})

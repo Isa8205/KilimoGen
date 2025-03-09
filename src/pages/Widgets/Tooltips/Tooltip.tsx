@@ -71,7 +71,7 @@ const Tooltip: React.FC<TooltipProps> = ({ text, children, className, position =
   };
 
   return (
-    <div className="relative">
+    <div className="relative z-50">
       {/* Tooltip Element */}
       {isVisible && text && (
         <motion.div
