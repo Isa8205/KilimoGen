@@ -1,0 +1,12 @@
+# Folders
+node_modules
+dist
+release
+src/main/database2
+
+# Environment variable
+.env
+
+# Files
+database.sqlite
+test.html

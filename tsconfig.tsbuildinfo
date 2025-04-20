@@ -1,0 +1,23 @@
+{
+  "root": [
+    "./src/main/electron/main.ts",
+    "./src/main/electron/preload.ts",
+    "./src/main/electron/ipc/authhandlers.ts",
+    "./src/main/electron/ipc/clerkhandlers.ts",
+    "./src/main/electron/ipc/dbhandlers.ts",
+    "./src/main/electron/ipc/eventhandler.ts",
+    "./src/main/electron/ipc/farmerhandlers.ts",
+    "./src/main/electron/ipc/printhandlers.ts",
+    "./src/main/database/src/data-source.ts",
+    "./src/main/database/src/entities/advance.ts",
+    "./src/main/database/src/entities/clerk.ts",
+    "./src/main/database/src/entities/delivery.ts",
+    "./src/main/database/src/entities/event.ts",
+    "./src/main/database/src/entities/farmer.ts",
+    "./src/main/database/src/entities/harverst.ts",
+    "./src/main/database/src/entities/inventoryitem.ts",
+    "./src/main/database/src/entities/notification.ts",
+    "./src/main/database/src/entities/seasons.ts"
+  ],
+  "version": "5.8.3"
+}
