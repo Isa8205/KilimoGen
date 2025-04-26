@@ -6,7 +6,52 @@ import { saveFile } from "@/main/utils/saveFile";
 import { ipcMain } from "electron";
 
 export const registerFarmerHandlers = () => {
-  ipcMain.handle("get-farmers", async (event, data) => { 
+  ipcMain.handle("get-farmer", async (evevnt, data) => {
+    try {
+      const farmerRepository = AppDataSource.getRepository(Farmer);
+     const farmer = await farmerRepository
+  .createQueryBuilder("farmer")
+  .leftJoinAndSelect("farmer.deliveries", "deliveries")
+  .leftJoinAndSelect("deliveries.servedBy", "servedBy") // 👈 THIS is critical
+  .leftJoinAndSelect("farmer.advances", "advances")
+  .select([
+    "farmer.id",
+    "farmer.farmerNumber",
+    "farmer.firstName",
+    "farmer.lastName",
+    "farmer.phone",
+    "farmer.email",
+    "farmer.avatar",
+    "deliveries.quantity",
+    "deliveries.deliveryDate",
+    "deliveries.berryType",
+    "servedBy.firstName",
+    "servedBy.lastName",
+    "servedBy.firstName",
+    "servedBy.lastName",
+    "advances.amount",
+    "advances.dateGiven",
+    "advances.dateExpected",
+    "advances.reason",
+  ])
+  .where("farmer.id = :id", { id: data.id })
+  .getOne();
+
+
+      const avatar = getImageBase64(
+        farmer?.avatar as string,
+        process.env.SECRET_KEY!
+      );
+
+      const response = { ...farmer, avatar: avatar };
+
+      return response;
+    } catch (err) {
+      console.error(err);
+      return {};
+    }
+  });
+  ipcMain.handle("get-farmers", async (event, data) => {
     try {
       const page = data.page || 1;
       const itemsPerPage = data.itemsPerPage || 10;
@@ -24,13 +69,16 @@ export const registerFarmerHandlers = () => {
           "deliveries.berryType",
         ])
         .orderBy("farmer.id", "ASC")
-        .skip((page - 1) * itemsPerPage) 
+        .skip((page - 1) * itemsPerPage)
         .take(itemsPerPage)
         .getMany();
 
       const newData = dbFarmes.map((farmer) => {
         if (farmer.avatar) {
-          farmer.avatar = getImageBase64(farmer.avatar, process.env.SECRET_KEY!)
+          farmer.avatar = getImageBase64(
+            farmer.avatar,
+            process.env.SECRET_KEY!
+          );
         }
 
         if (farmer.deliveries) {
@@ -46,16 +94,16 @@ export const registerFarmerHandlers = () => {
       });
 
       // Correct totalPages calculation
-      const totalFarmers = await AppDataSource.getRepository(Farmer).count()
+      const totalFarmers = await AppDataSource.getRepository(Farmer).count();
       const totalPages = Math.ceil(totalFarmers / itemsPerPage);
 
-      const res =  {
+      const res = {
         farmers: newData,
         totalFarmers: totalFarmers,
         totalPages: totalPages, // Fix key name to match frontend
       };
 
-      return res
+      return res;
     } catch (error) {
       console.error("Error during processing:", error);
       return { failed: true, message: "An error occured! Please relfresh." };
@@ -71,14 +119,14 @@ export const registerFarmerHandlers = () => {
         email,
         phone,
         nationalID,
-        crop,
+        varieties,
         paymentMode,
         avatar,
       } = data.farmerDetails;
 
       const farmerRepository = AppDataSource.getRepository(Farmer);
       const farmer = new Farmer();
-      const farmerNumber = await farmerRepository.maximum("farmerNumber")
+      const farmerNumber = await farmerRepository.maximum("farmerNumber");
 
       farmer.firstName = firstName;
       farmer.lastName = lastName;
@@ -86,12 +134,12 @@ export const registerFarmerHandlers = () => {
       farmer.email = email;
       farmer.phone = phone;
       farmer.nationalID = nationalID;
-      farmer.crop = crop;
+      farmer.crop = varieties.join(";");
       farmer.paymentMode = paymentMode;
-      farmer.farmerNumber = farmerNumber! + 1
-      
+      farmer.farmerNumber = farmerNumber! + 1;
+
       if (avatar.data.length > 0) {
-          farmer.avatar = saveFile(avatar, "data/Farmers");
+        farmer.avatar = saveFile(avatar, "data/Farmers");
       }
       await farmerRepository.save(farmer);
       return { passed: true, message: "Farmer saved successfully" };

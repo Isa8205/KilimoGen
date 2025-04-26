@@ -10,11 +10,11 @@ const SettingsPage = () => {
   const [hasChanges, setHasChanges] = useState(false);
 
   useEffect(() => {
-    const storedSettings = localStorage.getItem("userSettings");
+    const storedSettings = localStorage.getItem("Settings");
     if (storedSettings) {
       setUserSettings(JSON.parse(storedSettings));
     } else {
-      localStorage.setItem("userSettings", JSON.stringify({}));
+      localStorage.setItem("Settings", JSON.stringify({}));
     }
   }, []);
 

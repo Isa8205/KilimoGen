@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import { useRecoilState } from "recoil";
 import { farmersState, sessionState } from "@/store/store";
 import errorImage from "@/assets/images/backgrounds/404_2.svg";
+import { DropDown } from "@/components/DropDown";
 export function Farmers() {
   // Get the session data
   const user = useRecoilState(sessionState)[0];
@@ -132,6 +133,11 @@ export function Farmers() {
     }
   };
 
+  const dropItems = [
+    { label: "CSV", onClick: () => {} },
+    { label: "Excel spredsheet", onClick: () => {} },
+  ];
+
   return (
     <section className="text-gray-800">
       <div className="flex justify-between mb-4">
@@ -139,9 +145,7 @@ export function Farmers() {
 
         {user && (
           <span className="inline-flex gap-2 text-sm font-semibold">
-            <button className="bg-white text-black py-1 px-4 rounded">
-              Export CSV
-            </button>
+            <DropDown text="Export" dropItems={dropItems} />
             <NavLink to="/home/farmers/add">
               <button className="bg-accent text-white py-1 px-4 rounded">
                 Add
@@ -259,7 +263,9 @@ export function Farmers() {
                   )}
                   {/* Data cells */}
                   <td className="p-2 text-start">
-                    {item.firstName} {item.lastName}
+                    <NavLink to={`/home/farmers/${item.id}`} className="hover:text-accent">
+                      {item.firstName} {item.lastName}
+                    </NavLink>
                   </td>
                   <td className="p-2 ">
                     {item.id > 100

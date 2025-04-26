@@ -2,7 +2,7 @@ import notify from "@/utils/ToastHelper";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import { Settings, User, LogIn, LogOut, BellIcon, MailOpenIcon, TriangleAlert } from "lucide-react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import  Tooltip  from "../components/Tooltips/Tooltip";
@@ -10,6 +10,7 @@ import Navbar from "./MainNavbar";
 import { useRecoilState } from "recoil";
 import { sessionState } from "@/store/store";
 import defaultAvatar from "@/assets/images/defaultUser.png"
+import useClickOutside from "@/hooks/useClickOutside";
 
 const Home = () => {
     interface DropdownMenuProps {}
@@ -17,6 +18,9 @@ const Home = () => {
     const ProfileDropdownMenu: React.FC<DropdownMenuProps> = () => {
       const [isOpen, setIsOpen] = useState(false);
       const [user, setUser] = useRecoilState(sessionState)
+
+      const modalRef = useRef()
+      useClickOutside(modalRef, () => setIsOpen(false))
 
       const toggleMenu = () => setIsOpen((prev) => !prev);
       const closeMenu = () => setIsOpen(false);
@@ -37,15 +41,7 @@ const Home = () => {
           console.error('Error submitting form: ', err);
         }
       };
-
-      useEffect(() => {
-        window.addEventListener('click', (e) => {
-          const dropDown = document.getElementById('drop-down')
-          console.log(e.currentTarget)
-          console.log(dropDown?.target)
-        })
-      })
-
+      
       return (
         <div className="relative inline-block mr-10 m-2">
           {/* Trigger Button */}
@@ -68,6 +64,7 @@ const Home = () => {
           <AnimatePresence>
             {isOpen && (
               <motion.div
+              ref={modalRef as any}
               id="drop-down"
                 className="fixed right-2 mt-2 w-56 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 z-10"
                 initial={{ opacity: 0, y: -10 }}
@@ -147,6 +144,9 @@ const Home = () => {
         [],
       );
 
+      const modalRef = useRef()
+      useClickOutside(modalRef, () => setIsOpen(false))
+
       const fetchNotifications = async () => {
         const response = await window.electron.invoke("get-notifications")
 
@@ -193,6 +193,7 @@ const Home = () => {
           {/* Dropdown Menu */}
           {isOpen && (
             <motion.div
+            ref={modalRef as any}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}

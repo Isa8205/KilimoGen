@@ -18,7 +18,7 @@ export default function ClerkRegister() {
     e.preventDefault();
 
     const formdata = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formdata);
+    const data = Object.fromEntries(formdata as any);
 
     const file = data.avatar;
     if (file) {

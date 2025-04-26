@@ -31,7 +31,7 @@ export const registerCalenderHandlers = () => {
 
       const eventRepository = AppDataSource.getRepository(CalendarEvent);
       const event = eventRepository.create({
-        ...eventData, ['venue']: venue, ['date']: date.toISOString().slice(1,10).split('-').reverse().join('-')       
+        ...eventData, ['venue']: venue, ['date']: date.toISOString().slice(0,10).split('-').reverse().join('-')      
       })
 
       await eventRepository.save(event)

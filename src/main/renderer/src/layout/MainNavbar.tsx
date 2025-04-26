@@ -37,7 +37,7 @@ const Navbar = () => {
           </span>
 
             <span
-              className="absolute top-20 -right-6 opacity-40 hover:opacity-100 bg-gray-600 rounded-r-md inline-flex py-2  items-center"
+              className="absolute bottom-10 z-20 -right-6 opacity-40 hover:opacity-100 bg-gray-600 rounded-r-md inline-flex py-2  items-center"
               onClick={() => setExpanded((prev) => !prev)}
             >
               <motion.button

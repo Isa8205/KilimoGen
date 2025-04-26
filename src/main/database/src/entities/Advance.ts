@@ -11,10 +11,16 @@ export class Advance {
     amount: number;
 
     @Column()
+    reason: string
+
+    @Column()
     dateGiven: Date;
 
     @Column()
     dateExpected: Date;
+
+    @Column({type: 'varchar'})
+    status: 'Paid' | 'Pending approval' | 'Pending' | 'OverDue'
 
     @Column()
     clerkId: number

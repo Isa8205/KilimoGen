@@ -19,6 +19,7 @@ import SettingsPage from "./pages/Settings";
 import { useRecoilState } from "recoil";
 import { sessionState } from "./store/store";
 import Home from "./layout/Home";
+import FarmerProfile from "./pages/FarmerProfile";
 
 function App() {
   const [user, setSessionData] = useRecoilState<{
@@ -78,7 +79,7 @@ function App() {
             <Route path="" element={<Farmers />} />
             <Route path="add" element={<FarmerRegister />} />
             <Route path="edit/:id" element={<div>Edit Member Form</div>} />
-            <Route path=":id" element={<div>View Member Details</div>} />
+            <Route path=":id" element={<FarmerProfile/>} />
           </Route>
 
           {/* Production */}

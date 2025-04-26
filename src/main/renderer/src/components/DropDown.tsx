@@ -8,7 +8,7 @@ type DropDownTypes = {
         onClick: MouseEventHandler,
     }[],
     text: ReactElement | string | number,
-    styles: string
+    styles?: string
 }
 
 export function DropDown({ dropItems, text, styles }: DropDownTypes) {
