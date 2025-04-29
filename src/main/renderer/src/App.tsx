@@ -17,26 +17,22 @@ import AdminPanel from "./pages/admin/AdminPanel";
 import { InventoryForm } from "./pages/InventoryAdd";
 import SettingsPage from "./pages/Settings";
 import { useRecoilState } from "recoil";
-import { sessionState } from "./store/store";
+import { sessionState, settingsState } from "./store/store";
 import Home from "./layout/Home";
 import FarmerProfile from "./pages/FarmerProfile";
+import { AppSettings } from "./types/appSettings";
 
 function App() {
-  const [user, setSessionData] = useRecoilState<{
-    id?: number;
-    firstName?: string;
-    lastName?: string;
-    avatar?: string;
-  } | null>(sessionState);
+  const [settings, setSettings] = useRecoilState(settingsState)
+  const setSessionData = useRecoilState(sessionState)[1];
 
   useEffect(() => {
-    async function getSession() {
+    (async () => {
       const response = await window.electron.invoke("check-session");
       if (response.user) {
         setSessionData(response.user);
       }
-    }
-    getSession();
+    })()
   }, []);
 
   return (
@@ -103,7 +99,7 @@ function App() {
           <Route path="messaging" element={<Messaging />} />
 
           {/* Settings  */}
-          <Route path="settings" element={<SettingsPage />} />
+          <Route path="settings" element={<SettingsPage settings={settings} />} />
         </Route>
       </Routes>
     </div>

@@ -1,10 +1,13 @@
 import OnlyAdmin from "@/components/auth/OnlyAdmin";
 import useClickOutside from "@/hooks/useClickOutside";
 import getFarmer from "@/services/fetchFarmer";
-import humanReadableDate from "@/utils/DateFormatter";
+import { sessionState } from "@/store/store";
+import notify from "@/utils/ToastHelper";
 import { AtSign, Phone, User, X } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
+import { useRecoilState } from "recoil";
 
 // ---------------- FLEX TAPE: TYPES ------------------
 
@@ -13,11 +16,13 @@ type Delivery = {
   deliveryDate: string;
   quantity: number;
   berryType: string;
-  servedBy?: {
-    id: number;
-    firstName: string;
-    lastName: string;
-  } | string;
+  servedBy?:
+    | {
+        id: number;
+        firstName: string;
+        lastName: string;
+      }
+    | string;
 };
 
 type Advance = {
@@ -44,27 +49,127 @@ type Farmer = {
 // ---------------- FLEX TAPE: COMPONENT ------------------
 
 const FarmerProfile: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<"deliveries" | "advances">("deliveries");
-  const [editDelivery, setEditDelivery] = useState<Partial<Delivery> | null>(null);
+  const [activeTab, setActiveTab] = useState<"deliveries" | "advances">(
+    "deliveries"
+  );
+  const [editDelivery, setEditDelivery] = useState<Partial<Delivery> | null>(
+    null
+  );
   const [farmerInfo, setFarmerInfo] = useState<Farmer | null>(null);
+  const [showDeliveryMoadal, setShowDeliveryModal] = useState(false);
 
   const params = useParams<{ id: string }>();
   const navigate = useNavigate();
   const modalRef = useRef<HTMLDivElement>(null);
+  const deliveryModalRef = useRef<HTMLDivElement>(null)
   useClickOutside(modalRef, () => setEditDelivery(null));
+  useClickOutside(deliveryModalRef, () => setShowDeliveryModal(false))
 
   useEffect(() => {
     (async () => {
       if (!params.id) return;
       const id = Number(params.id);
       const data = await getFarmer(id);
-      console.log(data);
       if (data) setFarmerInfo(data);
     })();
   }, [params.id]);
 
   const deliveries = farmerInfo?.deliveries || [];
   const advances = farmerInfo?.advances || [];
+
+  const AddDeliveryModal = () => {
+    const user = useRecoilState(sessionState)[0];
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const formData = new FormData(e.currentTarget);
+      const data = Object.fromEntries(formData as any);
+      data.servedBy = user?.id;
+      data.farmerNumber = farmerInfo?.farmerNumber;
+
+      const res = await window.electron.invoke("add-delivery", data);
+
+      console.log(res);
+      notify(res.passed, res.message);
+      if (res.passed) {
+        setTimeout(() => {
+          setShowDeliveryModal(false);
+        }, 1500);
+      }
+    };
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-50">
+        <ToastContainer />
+        <div ref={deliveryModalRef}>
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white rounded-lg shadow-lg w-full max-w-md"
+          >
+            {/* Dialog Header */}
+            <div className="border-b p-4">
+              <span className="flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Add New Delivery</h2>
+                <X
+                  className="bg-gray-100 cursor-pointer hover:bg-red-500 hover:text-white rounded-sm"
+                  onClick={() => setShowDeliveryModal(false)}
+                />
+              </span>
+              <p className="text-sm text-gray-600">
+                Enter the details for the new delivery.
+              </p>
+            </div>
+
+            {/* Dialog Content */}
+            <div className="p-4">
+              <div className="flex flex-col gap-2 justify-between">
+                <div className="flex justify-between">
+                  {/* Grade Input */}
+                  <label
+                    htmlFor="berryType"
+                    className="text-right font-medium text-sm text-gray-700"
+                  >
+                    Grade
+                  </label>
+                  <select
+                    name="berryType"
+                    id="berryType"
+                    className="w-full p-2 border rounded-md focus:outline-none"
+                  >
+                    <option value="CHERRY">CHERRY</option>
+                    <option value="MBUNI">MBUNI</option>
+                  </select>
+                </div>
+
+                {/* Quantity Input */}
+                <div className="flex flex-col items-start">
+                  <label
+                    htmlFor="quantity"
+                    className="text-right font-medium text-sm text-gray-700"
+                  >
+                    Quantity
+                  </label>
+                  <input
+                    min="1"
+                    required
+                    type="number"
+                    id="quantity"
+                    name="quantity"
+                    className="col-span-3 p-2 border rounded-md focus:outline-none "
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Dialog Footer */}
+            <div className="border-t p-4 flex justify-end">
+              <button className="bg-gray-100 text-gray-600 border-2 border-accent hover:text-white py-2 px-4 rounded-md hover:bg-accent focus:outline-none">
+                Add Delivery
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-full bg-background text-gray-700 p-6 relative">
@@ -103,7 +208,8 @@ const FarmerProfile: React.FC = () => {
             {farmerInfo?.firstName} {farmerInfo?.lastName}
           </h1>
           <p className="flex gap-2 mt-1 text-secondary font-semibold">
-            <User className="text-accent" /> Farmer No: {farmerInfo?.farmerNumber}
+            <User className="text-accent" /> Farmer No:{" "}
+            {farmerInfo?.farmerNumber}
           </p>
           <p className="flex gap-2 mt-1 text-secondary font-semibold">
             <AtSign className="text-accent" /> Email: {farmerInfo?.email}
@@ -135,8 +241,13 @@ const FarmerProfile: React.FC = () => {
       {activeTab === "deliveries" && (
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-primary">Delivery Records</h2>
-            <button className="px-4 py-2 bg-accent text-white font-medium rounded shadow hover:bg-opacity-90 transition">
+            <h2 className="text-2xl font-semibold text-primary">
+              Delivery Records
+            </h2>
+            <button
+              onClick={() => setShowDeliveryModal(true)}
+              className="px-4 py-2 bg-accent text-white font-medium rounded shadow hover:bg-opacity-90 transition"
+            >
               + Add Delivery
             </button>
           </div>
@@ -145,8 +256,19 @@ const FarmerProfile: React.FC = () => {
             <table className="w-full divide-y divide-secondary">
               <thead className="bg-secondary bg-opacity-10">
                 <tr>
-                  {["Date", "Quantity", "Grade", "Served By", <OnlyAdmin key="edit"><span>Edit</span></OnlyAdmin>].map((h, i) => (
-                    <th key={i} className="px-4 py-2 text-left text-secondary font-medium">
+                  {[
+                    "Date",
+                    "Quantity",
+                    "Grade",
+                    "Served By",
+                    <OnlyAdmin key="edit">
+                      <span>Edit</span>
+                    </OnlyAdmin>,
+                  ].map((h, i) => (
+                    <th
+                      key={i}
+                      className="px-4 py-2 text-left text-secondary font-medium"
+                    >
                       {h}
                     </th>
                   ))}
@@ -186,7 +308,9 @@ const FarmerProfile: React.FC = () => {
       {activeTab === "advances" && (
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold text-primary">Advance Payments</h2>
+            <h2 className="text-2xl font-semibold text-primary">
+              Advance Payments
+            </h2>
             <button className="px-4 py-2 bg-accent text-white font-medium rounded shadow hover:bg-opacity-90 transition">
               + Add Advance
             </button>
@@ -196,11 +320,16 @@ const FarmerProfile: React.FC = () => {
             <table className="w-full divide-y divide-secondary">
               <thead className="bg-secondary bg-opacity-10">
                 <tr>
-                  {["Given", "Due", "Amount", "Reason", "Status", "Edit"].map((h, i) => (
-                    <th key={i} className="px-4 py-2 text-left text-secondary font-medium">
-                      {h}
-                    </th>
-                  ))}
+                  {["Given", "Due", "Amount", "Reason", "Status", "Edit"].map(
+                    (h, i) => (
+                      <th
+                        key={i}
+                        className="px-4 py-2 text-left text-secondary font-medium"
+                      >
+                        {h}
+                      </th>
+                    )
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-secondary">
@@ -208,7 +337,9 @@ const FarmerProfile: React.FC = () => {
                   <tr key={idx} className="hover:bg-background transition">
                     <td className="px-4 py-3">{a.dateGiven}</td>
                     <td className="px-4 py-3">{a.dateExpected}</td>
-                    <td className="px-4 py-3">Ksh {a.amount.toLocaleString()}</td>
+                    <td className="px-4 py-3">
+                      Ksh {a.amount.toLocaleString()}
+                    </td>
                     <td className="px-4 py-3">{a.reason}</td>
                     <td className="px-4 py-3">
                       <span
@@ -224,7 +355,9 @@ const FarmerProfile: React.FC = () => {
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <button className="text-accent hover:underline">Edit</button>
+                      <button className="text-accent hover:underline">
+                        Edit
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -235,6 +368,9 @@ const FarmerProfile: React.FC = () => {
           )}
         </div>
       )}
+
+      {/* Add Delivery Modal */}
+      {showDeliveryMoadal && <AddDeliveryModal />}
 
       {/* Edit Modal */}
       {editDelivery && (
@@ -260,23 +396,33 @@ const FarmerProfile: React.FC = () => {
                 setEditDelivery(null);
               }}
             >
-              <label className="block mb-2 text-secondary font-medium">Product</label>
+              <label className="block mb-2 text-secondary font-medium">
+                Product
+              </label>
               <input
                 type="text"
                 className="w-full border border-secondary px-3 py-2 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-accent"
                 value={editDelivery.berryType ?? ""}
                 onChange={(e) =>
-                  setEditDelivery({ ...editDelivery, berryType: e.target.value })
+                  setEditDelivery({
+                    ...editDelivery,
+                    berryType: e.target.value,
+                  })
                 }
               />
 
-              <label className="block mb-2 text-secondary font-medium">Quantity</label>
+              <label className="block mb-2 text-secondary font-medium">
+                Quantity
+              </label>
               <input
                 type="number"
                 className="w-full border border-secondary px-3 py-2 rounded mb-6 focus:outline-none focus:ring-2 focus:ring-accent"
                 value={editDelivery.quantity ?? ""}
                 onChange={(e) =>
-                  setEditDelivery({ ...editDelivery, quantity: +e.target.value })
+                  setEditDelivery({
+                    ...editDelivery,
+                    quantity: +e.target.value,
+                  })
                 }
               />
 

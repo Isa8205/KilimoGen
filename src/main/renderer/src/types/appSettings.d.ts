@@ -1,4 +1,4 @@
-interface AppSettings {
+type AppSettings = {
     general: {
         theme: 'dark' | 'light'
     };
@@ -11,3 +11,5 @@ interface AppSettings {
         defaultReportPrinter: string;
     }
 }
+
+export {AppSettings}

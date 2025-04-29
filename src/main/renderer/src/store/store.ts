@@ -1,5 +1,12 @@
 // src/store/store.ts
+import { AppSettings } from "@/types/appSettings";
 import { atom } from "recoil";
+
+// Settings
+export const settingsState = atom<AppSettings | {}>({
+  key: 'settings',
+  default: {}
+})
 
 // Session data 
 export const sessionState = atom<{

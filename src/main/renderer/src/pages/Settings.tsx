@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { CheckCircle, Edit2, Save, ToggleLeft, ToggleRight } from "lucide-react";
 
-const SettingsPage = () => {
+const SettingsPage = ({settings} : {settings: object}) => {
   const [userSettings, setUserSettings] = useState<{ [key: string]: any }>({});
   const [printers, setPrinters] = useState<
     { name: string; displayName: string; description: string; printerId: string }[]

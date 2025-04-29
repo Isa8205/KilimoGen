@@ -120,7 +120,7 @@ export function Deliveries() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const formData = new FormData(e.currentTarget);
-      const data = Object.fromEntries(formData);
+      const data = Object.fromEntries(formData as any);
       data.servedBy = user?.id;
 
       const res = await window.electron.invoke("add-delivery", data);
