@@ -1,10 +1,17 @@
 import { AppDataSource } from "@/main/database/src/data-source";
 import { CalendarEvent } from "@/main/database/src/entities/Event";
 import { ipcMain, IpcMainInvokeEvent } from "electron";
+import { Like } from "typeorm";
 
+interface EventDataParams  {
+  day?: string;
+  month?: number;
+  year?: number;
+}
 export const registerCalenderHandlers = () => {
-  ipcMain.handle("get-events", async(event, eventData) => {
+  ipcMain.handle("get-events", async(__event, eventData: EventDataParams) => {
     try {
+      console.log(eventData)
       const eventRepository = AppDataSource.getRepository(CalendarEvent)
       const test = await eventRepository.find()
 
@@ -13,7 +20,8 @@ export const registerCalenderHandlers = () => {
         
         return {passed: true, data: data || []}
       }
-      const data = await eventRepository.find()
+      const dateEnding = `0${eventData.month}-${eventData.year}`
+      const data = await eventRepository.find({where: {date: Like(`%${dateEnding}`)}})
 
       return {passed: true, data: data}
     } catch (err) {

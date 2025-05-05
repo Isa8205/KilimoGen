@@ -43,7 +43,7 @@ export default function LandingPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#EFEDE7]">
-      <div className="text-center">
+      <div className="text-center flex flex-col items-center">
         <Logo />
         <h1 className="text-2xl font-bold text-[#22331D] mb-4">Kilimogen</h1>
         <div className="w-64 h-2 bg-[#6A6D69] rounded-full mb-4 overflow-hidden">

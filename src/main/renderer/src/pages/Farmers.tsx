@@ -69,11 +69,14 @@ export function Farmers() {
   // Filter dropdown and functionality
   const [selectedFilter, setSelectedFilter] = useState("All");
   const FilterDropdown = () => {
-    setSelectedFilter(() => localStorage.getItem("selectedFilter") || "All");
     const [isOpen, setIsOpen] = useState(false);
-
+    
     const filters = ["All", "With Produce", "No Produce"];
-
+    
+    useEffect(() => {
+      setSelectedFilter(() => localStorage.getItem("selectedFilter") || "All");
+      
+    }, [])
     return (
       <div className="relative inline-block text-left">
         <button

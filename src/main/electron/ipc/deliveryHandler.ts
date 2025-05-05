@@ -6,6 +6,7 @@ import { Harvest } from "@/main/database/src/entities/Harverst";
 import { getSession } from "@/main/electron/session/sessinStore";
 import generateCode from "@/main/utils/codeGenerator";
 import printReceipt from "@/main/utils/printReceipt";
+import sendSms from "@/main/utils/sendSms";
 import { ipcMain } from "electron";
 
 export default function registerDeliveryHandlers() {
@@ -107,6 +108,10 @@ export default function registerDeliveryHandlers() {
         };
 
         printReceipt(receiptData)
+        const smsText = `
+        Delivery of ${receiptData.berryType} to ${receiptData.farmerName} is ready. Weight: ${receiptData.weight}kg. Season total: ${receiptData.seasonTotal}kg.
+        `
+        sendSms(farmer.phone.toString(), smsText)
         passed = true;
         message = "Delivery added successfully";
       } else {

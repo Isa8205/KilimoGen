@@ -1,5 +1,5 @@
 import DeliveriesBarChart from './Analytics';
-import Calendar from '../components/calendar';
+import Calendar from '../components/Calendar/calendar';
 
 export default function Dashboard() {
   const quickActions = [

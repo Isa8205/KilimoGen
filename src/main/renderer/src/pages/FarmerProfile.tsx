@@ -121,7 +121,7 @@ const FarmerProfile: React.FC = () => {
             {/* Dialog Content */}
             <div className="p-4">
               <div className="flex flex-col gap-2 justify-between">
-                <div className="flex justify-between">
+                <div className="flex flex-col">
                   {/* Grade Input */}
                   <label
                     htmlFor="berryType"
