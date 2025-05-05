@@ -48,7 +48,6 @@ const registerClerkHandlers = (app: Electron.App) => {
   
         const filePath = path.join(savePath, `${filename}.png`);
         fs.writeFileSync(filePath, encryptedBuffer);
-        console.log("Saved the file here", filePath);
         profilePath = filePath;
       }
   
@@ -69,7 +68,6 @@ const registerClerkHandlers = (app: Electron.App) => {
       clerk.avatar = profilePath;
   
       const res = await clerkRepository.save(clerk);
-      console.log(res);
       return { passed: true, message: "Clerk added successfully" };
     } catch (err) {
       console.log(err);

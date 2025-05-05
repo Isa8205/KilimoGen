@@ -31,12 +31,9 @@ export default function ClerkRegister() {
       };
     }
 
-    console.log(data, file);
-
     setIsSubmitting(true);
 
     const res = await window.electron.invoke("add-clerk", data);
-    console.log(res);
 
     if (res) {
       notify(res.passed, res.message);
@@ -249,9 +246,9 @@ export default function ClerkRegister() {
               required
               className="mt-1 block w-full bg-white border border-gray-300 rounded-md p-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
             >
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
+              <option value="M">Male</option>
+              <option value="F">Female</option>
+              <option value="Other">Other</option>
             </select>
           </div>
 
