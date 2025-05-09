@@ -15,6 +15,7 @@ import { useRecoilState } from "recoil";
 import { farmersState, sessionState } from "@/store/store";
 import errorImage from "@/assets/images/backgrounds/404_2.svg";
 import { DropDown } from "@/components/DropDown";
+import Modal from "@/components/Modal/ExportModal";
 export function Farmers() {
   // Get the session data
   const user = useRecoilState(sessionState)[0];
@@ -70,13 +71,12 @@ export function Farmers() {
   const [selectedFilter, setSelectedFilter] = useState("All");
   const FilterDropdown = () => {
     const [isOpen, setIsOpen] = useState(false);
-    
+
     const filters = ["All", "With Produce", "No Produce"];
-    
+
     useEffect(() => {
       setSelectedFilter(() => localStorage.getItem("selectedFilter") || "All");
-      
-    }, [])
+    }, []);
     return (
       <div className="relative inline-block text-left">
         <button
@@ -136,10 +136,23 @@ export function Farmers() {
     }
   };
 
-  const dropItems = [
-    { label: "CSV", onClick: () => {} },
-    { label: "Excel spredsheet", onClick: () => {} },
-  ];
+  // Export Modal realted stuff
+  const [exportFarmerModal, setExportFarmerModal] = useState(false);
+  const [format, setFormat] = useState("pdf");
+  const [range, setRange] = useState("all");
+  const [startNumber, setStartNumber] = useState(1);
+  const [stopNumber, setStopNumber] = useState(350);
+
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    const data = {
+      format,
+      range,
+      startNumber: range === "from" ? startNumber : null,
+    };
+    await window.electron.invoke('export-farmers')
+    setExportFarmerModal(false);
+  };
 
   return (
     <section className="text-gray-800">
@@ -148,7 +161,14 @@ export function Farmers() {
 
         {user && (
           <span className="inline-flex gap-2 text-sm font-semibold">
-            <DropDown text="Export" dropItems={dropItems} />
+            <div>
+              <button
+                className="bg-white text-black shadow-sm py-1 px-4 rounded"
+                onClick={() => setExportFarmerModal(true)}
+              >
+                Export
+              </button>
+            </div>
             <NavLink to="/home/farmers/add">
               <button className="bg-accent text-white py-1 px-4 rounded">
                 Add
@@ -266,7 +286,10 @@ export function Farmers() {
                   )}
                   {/* Data cells */}
                   <td className="p-2 text-start">
-                    <NavLink to={`/home/farmers/${item.id}`} className="hover:text-accent">
+                    <NavLink
+                      to={`/home/farmers/${item.id}`}
+                      className="hover:text-accent"
+                    >
                       {item.firstName} {item.lastName}
                     </NavLink>
                   </td>
@@ -357,6 +380,127 @@ export function Farmers() {
           </button>
         </div>
       ) : null}
+
+      {/* The export farmers modal */}
+      {exportFarmerModal && (
+        <Modal
+          isOpen={exportFarmerModal}
+          onClose={() => setExportFarmerModal(false)}
+        >
+          <form>
+            {/* Format options */}
+            <div>
+              <p className="text-gray-700 font-medium my-3">Choose Format:</p>
+              <div className="flex gap-3 flex-wrap">
+                {["pdf", "csv", "excel"].map((option) => (
+                  <label
+                    key={option}
+                    className={`flex items-center gap-2 p-3 rounded-lg shadow-sm cursor-pointer transition border w-full sm:w-auto ${
+                      format === option
+                        ? "bg-orange-100 border-orange-400"
+                        : "bg-gray-50 border-gray-300"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="format"
+                      value={option}
+                      checked={format === option}
+                      onChange={() => setFormat(option)}
+                      className="accent-orange-500"
+                    />
+                    {option.toUpperCase()}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Range selection */}
+            <div>
+              <p className="text-gray-700 font-medium my-3">Data Range:</p>
+              <div className="flex gap-3 flex-wrap">
+                <label
+                  className={`flex items-center gap-2 p-3 rounded-lg shadow-sm cursor-pointer transition border w-full sm:w-auto ${
+                    range === "all"
+                      ? "bg-orange-100 border-orange-400"
+                      : "bg-gray-50 border-gray-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="range"
+                    value="all"
+                    checked={range === "all"}
+                    onChange={() => setRange("all")}
+                    className="accent-orange-500"
+                  />
+                  All Data
+                </label>
+                <label
+                  className={`flex items-center gap-2 p-3 rounded-lg shadow-sm cursor-pointer transition border w-full sm:w-auto ${
+                    range === "from"
+                      ? "bg-orange-100 border-orange-400"
+                      : "bg-gray-50 border-gray-300"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="range"
+                    value="from"
+                    checked={range === "from"}
+                    onChange={() => setRange("from")}
+                    className="accent-orange-500"
+                  />
+                  Range
+                </label>
+              </div>
+              {range === "from" && (
+                <div>
+                  <p className="text-gray-700 font-medium my-3">From:</p>
+                  <div className="flex justify-between items-center">
+                    <input
+                      type="number"
+                      min="1"
+                      value={startNumber}
+                      onChange={(e) => setStartNumber(Number(e.target.value))}
+                      placeholder="Enter starting number..."
+                      className="mt-3 p-2 w-1/3 border rounded-md focus:ring-2 focus:ring-orange-400 focus:outline-none"
+                    />
+
+                    <p className="text-lg">to</p>
+
+                    <input
+                      type="number"
+                      max="350"
+                      value={stopNumber}
+                      onChange={(e) => setStopNumber(Number(e.target.value))}
+                      placeholder="Enter stopping number..."
+                      className="mt-3 p-2 w-1/3 border rounded-md focus:ring-2 focus:ring-orange-400 focus:outline-none"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Buttons */}
+            <div className="flex justify-end gap-4 pt-2 mt-2">
+              <button
+                type="button"
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-md font-medium transition"
+                onClick={() => setExportFarmerModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-md font-medium transition"
+              >
+                Export
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </section>
   );
 }

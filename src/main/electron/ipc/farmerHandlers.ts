@@ -1,9 +1,11 @@
 import { AppDataSource } from "@/main/database/src/data-source";
 import { Delivery } from "@/main/database/src/entities/Delivery";
 import { Farmer } from "@/main/database/src/entities/Farmer";
+import exportToPdf from "@/main/utils/exportToPdf";
 import { getImageBase64 } from "@/main/utils/getImageBase64";
 import { saveFile } from "@/main/utils/saveFile";
-import { ipcMain } from "electron";
+import { app, ipcMain } from "electron";
+import path from "path";
 
 export const registerFarmerHandlers = () => {
   ipcMain.handle("get-farmer", async (evevnt, data) => {
@@ -148,4 +150,9 @@ export const registerFarmerHandlers = () => {
       return { passed: false, message: "Failed. Please try again" };
     }
   });
+
+  ipcMain.handle('export-farmers', async(__event, data) => {
+    const savePath = path.join(app.getPath('documents'), 'Kilimogen')
+    exportToPdf(savePath)
+  })
 };
