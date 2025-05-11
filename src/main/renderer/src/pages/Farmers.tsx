@@ -16,6 +16,8 @@ import { farmersState, sessionState } from "@/store/store";
 import errorImage from "@/assets/images/backgrounds/404_2.svg";
 import { DropDown } from "@/components/DropDown";
 import Modal from "@/components/Modal/ExportModal";
+import { toast } from "react-toastify";
+import notify, { properties } from "@/utils/ToastHelper";
 export function Farmers() {
   // Get the session data
   const user = useRecoilState(sessionState)[0];
@@ -138,6 +140,7 @@ export function Farmers() {
 
   // Export Modal realted stuff
   const [exportFarmerModal, setExportFarmerModal] = useState(false);
+  const [fileName, setFileName] = useState('')
   const [format, setFormat] = useState("pdf");
   const [range, setRange] = useState("all");
   const [startNumber, setStartNumber] = useState(1);
@@ -146,11 +149,14 @@ export function Farmers() {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     const data = {
+      fileName,
       format,
       range,
       startNumber: range === "from" ? startNumber : null,
+      stopNumber: range === "from" ? stopNumber : null
     };
-    await window.electron.invoke('export-farmers')
+    await window.electron.invoke('export-farmers', data)
+    toast.info("File was saved in Documents/Kilimogen", properties)
     setExportFarmerModal(false);
   };
 
@@ -382,12 +388,16 @@ export function Farmers() {
       ) : null}
 
       {/* The export farmers modal */}
-      {exportFarmerModal && (
         <Modal
           isOpen={exportFarmerModal}
           onClose={() => setExportFarmerModal(false)}
         >
-          <form>
+          <form onSubmit={handleSubmit}>
+            {/* Custom file name */}
+            <div>
+              <p className="text-gray-700 font-medium my-3">Report Name</p>
+              <input type="text" placeholder="Annual cherry report 2024" className="accent-orange-500" value={fileName} onChange={(e) => setFileName(e.target.value)}/>
+            </div>
             {/* Format options */}
             <div>
               <p className="text-gray-700 font-medium my-3">Choose Format:</p>
@@ -434,7 +444,7 @@ export function Farmers() {
                     onChange={() => setRange("all")}
                     className="accent-orange-500"
                   />
-                  All Data
+                  All
                 </label>
                 <label
                   className={`flex items-center gap-2 p-3 rounded-lg shadow-sm cursor-pointer transition border w-full sm:w-auto ${
@@ -451,7 +461,7 @@ export function Farmers() {
                     onChange={() => setRange("from")}
                     className="accent-orange-500"
                   />
-                  Range
+                  Custom
                 </label>
               </div>
               {range === "from" && (
@@ -500,7 +510,6 @@ export function Farmers() {
             </div>
           </form>
         </Modal>
-      )}
     </section>
   );
 }

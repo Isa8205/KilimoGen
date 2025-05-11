@@ -4,7 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import Reports from "./pages/Reports";
 import { Deliveries } from "./pages/Deliveries";
 import { Inventory } from "./pages/Inventory";
-import { Messaging } from "./pages/Messaging";
+import Messaging from "./pages/Messaging";
 import Production from "./pages/Production";
 import { Farmers } from "./pages/Farmers";
 import ClerkLogin from "./pages/auth/clerks/ClerkLogin";

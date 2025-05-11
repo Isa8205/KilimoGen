@@ -11,34 +11,33 @@ export const registerFarmerHandlers = () => {
   ipcMain.handle("get-farmer", async (evevnt, data) => {
     try {
       const farmerRepository = AppDataSource.getRepository(Farmer);
-     const farmer = await farmerRepository
-  .createQueryBuilder("farmer")
-  .leftJoinAndSelect("farmer.deliveries", "deliveries")
-  .leftJoinAndSelect("deliveries.servedBy", "servedBy") // 👈 THIS is critical
-  .leftJoinAndSelect("farmer.advances", "advances")
-  .select([
-    "farmer.id",
-    "farmer.farmerNumber",
-    "farmer.firstName",
-    "farmer.lastName",
-    "farmer.phone",
-    "farmer.email",
-    "farmer.avatar",
-    "deliveries.quantity",
-    "deliveries.deliveryDate",
-    "deliveries.berryType",
-    "servedBy.firstName",
-    "servedBy.lastName",
-    "servedBy.firstName",
-    "servedBy.lastName",
-    "advances.amount",
-    "advances.dateGiven",
-    "advances.dateExpected",
-    "advances.reason",
-  ])
-  .where("farmer.id = :id", { id: data.id })
-  .getOne();
-
+      const farmer = await farmerRepository
+        .createQueryBuilder("farmer")
+        .leftJoinAndSelect("farmer.deliveries", "deliveries")
+        .leftJoinAndSelect("deliveries.servedBy", "servedBy") // 👈 THIS is critical
+        .leftJoinAndSelect("farmer.advances", "advances")
+        .select([
+          "farmer.id",
+          "farmer.farmerNumber",
+          "farmer.firstName",
+          "farmer.lastName",
+          "farmer.phone",
+          "farmer.email",
+          "farmer.avatar",
+          "deliveries.quantity",
+          "deliveries.deliveryDate",
+          "deliveries.berryType",
+          "servedBy.firstName",
+          "servedBy.lastName",
+          "servedBy.firstName",
+          "servedBy.lastName",
+          "advances.amount",
+          "advances.dateGiven",
+          "advances.dateExpected",
+          "advances.reason",
+        ])
+        .where("farmer.id = :id", { id: data.id })
+        .getOne();
 
       const avatar = getImageBase64(
         farmer?.avatar as string,
@@ -151,8 +150,52 @@ export const registerFarmerHandlers = () => {
     }
   });
 
-  ipcMain.handle('export-farmers', async(__event, data) => {
-    const savePath = path.join(app.getPath('documents'), 'Kilimogen')
-    exportToPdf(savePath)
-  })
+  ipcMain.handle("export-farmers", async (__event, data) => {
+    const farmerAccumulated = (farmers: Farmer[]) => {
+
+      const result = farmers.map((farmer) => {
+        if (farmer.deliveries) {
+          const total = farmer.deliveries.reduce(
+            (acc: number, delivery: Delivery) => acc + delivery.quantity,
+            0
+          );
+          farmer.totalDeliveries = total;
+          farmer.deliveries = [];
+        }
+        return farmer;
+      });
+
+      return result;
+    };
+
+    const farmerRepository = AppDataSource.getRepository(Farmer);
+    let farmers;
+    const dbFarmes = AppDataSource.getRepository(Farmer)
+      .createQueryBuilder("farmer")
+      .leftJoinAndSelect("farmer.deliveries", "deliveries")
+      .select([
+        "farmer.id",
+        "farmer.firstName",
+        "farmer.lastName",
+        "farmer.phone",
+        "farmer.avatar",
+        "deliveries.quantity",
+      ]);
+
+    if (data.range === "all") {
+      const dbRes = await dbFarmes.getMany();
+
+      farmers = farmerAccumulated(dbRes);
+    } else {
+      const dbREs = await dbFarmes
+        .skip(data.startNumber)
+        .take(data.stopNumber + 1)
+        .getMany();
+
+      farmers = farmerAccumulated(dbREs);
+    }
+
+    const savePath = path.join(app.getPath("documents"), "Kilimogen");
+    exportToPdf(savePath, farmers, data.fileName);
+  });
 };
