@@ -9,7 +9,7 @@ export function saveFile(fileData: {type: string, data: Uint8Array, name: string
       let profilePath = "";
         const savePath = path.join(
           app.getPath("userData"),
-          `uploads/${saveDir}}`
+          `uploads/${saveDir}`
         );
         const buffer = Buffer.from(fileData.data);
         const encryptedBuffer = fileEncryption.encryptFile(buffer, process.env.SECRET_KEY!);

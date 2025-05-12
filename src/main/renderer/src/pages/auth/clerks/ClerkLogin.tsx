@@ -17,7 +17,6 @@ export default function ClerkLogin({ nextUrl }: {nextUrl?: string}) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData);
-    console.table(data);
 
     const res = await window.electron.invoke('clerk-login', data)
     notify(res.passed, res.message)

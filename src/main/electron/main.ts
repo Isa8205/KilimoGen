@@ -19,6 +19,7 @@ import registerHarvestHandlers from "@/main/electron/ipc/harvestHandlers";
 import registerSeasonHandlers from "@/main/electron/ipc/seasonHandlers";
 import registerNotificationHandlers from "@/main/electron/ipc/notificationHandler";
 import { registerCalenderHandlers } from "@/main/electron/ipc/calendarHandler";
+import registerInventoryHandlers from "@/main/electron/ipc/inventoryHandlers";
 // ------------------------
 // 🔠 Custom Types
 // ------------------------
@@ -84,6 +85,7 @@ app.whenReady().then(async () => {
   }
 
   // Register all the ipc handlers
+  registerNotificationHandlers()
   registerAuthHandlers()
   registerDeliveryHandlers()
   registerHarvestHandlers()
@@ -91,7 +93,7 @@ app.whenReady().then(async () => {
   registerCalenderHandlers()
   registerClerkHandlers(app)
   registerFarmerHandlers()
-  registerNotificationHandlers()
+  registerInventoryHandlers(app)
 });
 
 app.on("window-all-closed", () => {

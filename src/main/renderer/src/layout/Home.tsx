@@ -149,6 +149,7 @@ const Home = () => {
 
       const fetchNotifications = async () => {
         const response = await window.electron.invoke("get-notifications")
+        console.log(response)
 
         try {
           setNotifications(response.data.notifications);

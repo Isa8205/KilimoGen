@@ -11,7 +11,6 @@ interface EventDataParams  {
 export const registerCalenderHandlers = () => {
   ipcMain.handle("get-events", async(__event, eventData: EventDataParams) => {
     try {
-      console.log(eventData)
       const eventRepository = AppDataSource.getRepository(CalendarEvent)
       const test = await eventRepository.find()
 

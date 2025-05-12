@@ -28,5 +28,5 @@ export class InventoryItem {
     receivedBy: Clerk;
 
     @Column({nullable: true})
-    Image: string;
+    image: string;
 }

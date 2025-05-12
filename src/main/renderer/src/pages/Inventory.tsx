@@ -29,7 +29,7 @@ export function Inventory() {
         firstName: string;
         lastName: string;
       };
-      Image: string;
+      image: string;
     }[]
   >([]);
   const [fetching, setFetching] = useState(false);
@@ -38,9 +38,9 @@ export function Inventory() {
   const fetchInventory = async () => {
     setFetching(true); // Set fetching state
     try {
-      const response = await axios.get('http://localhost:3000/api/inventory');
-      setItems(response.data.items);
-      console.log(response.data.items);
+      const response = await window.electron.invoke('get-inventory');
+      setItems(response.items);
+      console.log(response.items);
     } catch (error) {
       console.error(error);
     } finally {
@@ -165,7 +165,7 @@ export function Inventory() {
                   <td className="p-2 ">{item.quantity}</td>
                   <td className="p-2 ">{item.weight}</td>
                   <td className="p-2 ">
-                    {item.dateReceived.split('').slice(0, 10).join('')}
+                    {item.dateReceived.toLocaleDateString()}
                   </td>
                   <td className="p-2 ">
                     {item.receivedBy.firstName} {item.receivedBy.lastName}
@@ -173,9 +173,9 @@ export function Inventory() {
                   <td className="p-2 inline-flex justify-center ">
                     <div className="w-[4em] h-[4em] bg-gray-300 rounded-md flex items-center justify-center cursor-pointer hover:opacity-75">
                       {' '}
-                      {item.Image ? (
+                      {item.image ? (
                         <img
-                          src={item.Image}
+                          src={`data:image/png;base64,${item.image}`}
                           alt="Preview"
                           className="w-full h-full object-cover rounded-t-md"
                         />
@@ -203,9 +203,9 @@ export function Inventory() {
               {/* Image at the top */}
               <div className="w-full h-[10em] bg-gray-300 rounded-t-md flex items-center justify-center cursor-pointer hover:opacity-75">
                 {' '}
-                {item.Image ? (
+                {item.image ? (
                   <img
-                    src={item.Image}
+                    src={`data:image/png;base64,${item.image}`}
                     alt="Preview"
                     className="w-full h-full object-cover rounded-t-md"
                   />
@@ -218,7 +218,7 @@ export function Inventory() {
                 {/* Checkbox */}
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-gray-500">
-                    {item.dateReceived.split('').slice(0, 10).join('')}
+                    {item.dateReceived.toLocaleDateString()}
                   </span>
                   <Tooltip text="Edit" className="" position="bottom">
                     <button className="hover:text-orange-500">
