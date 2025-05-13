@@ -1,4 +1,4 @@
-export const content = ['./src/**/*.{js,jsx,ts,tsx,html}', './public/index.html'];
+export const content = ['./src/**/*.{js,jsx,ts,tsx,html}', './index.html', './public/index.html'];
 export const darkMode = 'media';
 export const theme = {
   extend: {

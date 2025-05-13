@@ -101,6 +101,8 @@ function App() {
           {/* Settings  */}
           <Route path="settings" element={<SettingsPage settings={settings} />} />
         </Route>
+
+        <Route path="/settings" element={<SettingsPage/>} />
       </Routes>
     </div>
   );

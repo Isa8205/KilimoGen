@@ -4,8 +4,44 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kilimogen</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow-y: hidden;
+      }
+      #titlebar {
+        -webkit-app-region: drag;
+        height: 32px;
+        background: #1e1e1e;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 12px;
+      }
+      
+      .no-drag {
+        -webkit-app-region: no-drag;
+      }
+      
+    </style>
   </head>
   <body>
+    <div id="titlebar" class="flex items-center justify-between h-8 px-3 bg-[#202020] text-white drag">
+      <div class="flex items-center gap-2">
+        <span class="text-xs">MyApp</span>
+      </div>
+      <div class="flex items-center gap-2 no-drag">
+        <button onclick="window.api.window.minimize()" class="hover:bg-[#333] px-2">–</button>
+        <button onclick="window.api.window.maximize()" class="hover:bg-[#333] px-2">□</button>
+        <button onclick="window.api.window.close()" class="hover:bg-[#f44336] px-2">×</button>
+      </div>
+    </div>
+    
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

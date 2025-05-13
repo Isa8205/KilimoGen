@@ -4,6 +4,7 @@ import axios from 'axios';
 import { ToastContainer } from 'react-toastify';
 import { Navigate, NavLink } from 'react-router-dom';
 import notify from '@/utils/ToastHelper';
+import { User, Package, Truck, MessageSquare, BarChart2 } from 'lucide-react';
 
 // Interfaces
 interface Season {
@@ -29,6 +30,11 @@ export default function AdminPanel() {
   const [harvests, setHarvests] = useState<Harvest[]>([]);
   const [clerks, setClerks] = useState<{ id: string; name: string; email: string; role: string; password: string; phone: string; avatar: string;}[]>([]);
   const [selectedSeason, setSelectedSeason] = useState<string>('');
+  const [farmersCount, setFarmersCount] = useState(0);
+  const [inventoryCount, setInventoryCount] = useState(0);
+  const [deliveriesCount, setDeliveriesCount] = useState(0);
+  const [messagesCount, setMessagesCount] = useState(0);
+  const [productionCount, setProductionCount] = useState(0);
 
   // Temporary data for demonstration
   const demoSeasons: Season[] = [
@@ -64,34 +70,64 @@ export default function AdminPanel() {
     fetchClerks()
   }, []);
 
+  useEffect(() => {
+    // Fetch data counts (replace with actual API calls)
+    setFarmersCount(120); // Example data
+    setInventoryCount(45);
+    setDeliveriesCount(30);
+    setMessagesCount(15);
+    setProductionCount(20);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-teal-50">
+    <div className="min-h-screen bg-background text-primary">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
           <NavLink to="/home/dashboard">
-            <h1 className="text-3xl font-bold text-teal-600">Kilimogen</h1>
+            <h1 className="text-3xl font-bold text-teal-600">Kilimogen Admin</h1>
           </NavLink>
-          <div className="flex gap-4">
-            <button
-              onClick={() => setShowSeasonModal(true)}
-              className="bg-teal-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-teal-700"
-            >
-              <Plus size={18} />
-              Add Season
-            </button>
-            <button
-              onClick={() => setShowHarvestModal(true)}
-              className="bg-orange-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-orange-600"
-            >
-              <Plus size={18} />
-              Add Harvest
-            </button>
-          </div>
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 py-8">
+        <h2 className="text-2xl font-semibold mb-6">Overview</h2>
+
+        {/* Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <OverviewCard
+            title="Farmers"
+            count={farmersCount}
+            icon={<User className="w-8 h-8 text-teal-600" />}
+            link="/home/farmers"
+          />
+          <OverviewCard
+            title="Inventory"
+            count={inventoryCount}
+            icon={<Package className="w-8 h-8 text-orange-500" />}
+            link="/home/inventory"
+          />
+          <OverviewCard
+            title="Deliveries"
+            count={deliveriesCount}
+            icon={<Truck className="w-8 h-8 text-blue-500" />}
+            link="/home/deliveries"
+          />
+          <OverviewCard
+            title="Messages"
+            count={messagesCount}
+            icon={<MessageSquare className="w-8 h-8 text-purple-500" />}
+            link="/home/messaging"
+          />
+          <OverviewCard
+            title="Production"
+            count={productionCount}
+            icon={<BarChart2 className="w-8 h-8 text-green-500" />}
+            link="/home/production"
+          />
+        </div>
+
         {/* Seasons Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {demoSeasons.map((season) => (
@@ -464,5 +500,30 @@ function AddHarvestModal({
         </form>
       </div>
     </div>
+  );
+}
+
+function OverviewCard({
+  title,
+  count,
+  icon,
+  link,
+}: {
+  title: string;
+  count: number;
+  icon: JSX.Element;
+  link: string;
+}) {
+  return (
+    <NavLink
+      to={link}
+      className="bg-white shadow-md rounded-lg p-6 flex items-center gap-4 hover:shadow-lg transition-shadow"
+    >
+      <div className="p-4 bg-teal-50 rounded-full">{icon}</div>
+      <div>
+        <h3 className="text-lg font-semibold text-primary">{title}</h3>
+        <p className="text-2xl font-bold text-teal-600">{count}</p>
+      </div>
+    </NavLink>
   );
 }

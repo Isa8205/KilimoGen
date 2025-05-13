@@ -20,36 +20,8 @@ import registerSeasonHandlers from "@/main/electron/ipc/seasonHandlers";
 import registerNotificationHandlers from "@/main/electron/ipc/notificationHandler";
 import { registerCalenderHandlers } from "@/main/electron/ipc/calendarHandler";
 import registerInventoryHandlers from "@/main/electron/ipc/inventoryHandlers";
-// ------------------------
-// 🔠 Custom Types
-// ------------------------
+import { registerPrinterHandlers } from "@/main/electron/ipc/printHandlers";
 
-interface EventData {
-  title: string;
-  date: string;
-  description: string;
-  startTime: string;
-  endTime: string;
-  location: string;
-  otherLocation?: string;
-}
-
-interface ClerkData {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  password: string;
-  profile: {
-    name: string;
-    data: string;
-  };
-}
-
-interface LoginData {
-  email: string;
-  password: string;
-}
 
 dotenv.config();
 const SECRET_KEY = process.env.SECRET_KEY || "secret";
@@ -94,6 +66,7 @@ app.whenReady().then(async () => {
   registerClerkHandlers(app)
   registerFarmerHandlers()
   registerInventoryHandlers(app)
+  registerPrinterHandlers(mainWindow)
 });
 
 app.on("window-all-closed", () => {

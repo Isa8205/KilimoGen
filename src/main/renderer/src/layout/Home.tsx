@@ -96,7 +96,7 @@ const Home = () => {
                 <div className="border-t border-gray-200 dark:border-gray-700"></div>
                 {/* Dropdown Items */}
                 <div className="py-1">
-                  <NavLink to="/home/settings">
+                  <NavLink to="/settings">
                     <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none">
                       <Settings className="mr-2 h-4 w-4" />
                       Settings

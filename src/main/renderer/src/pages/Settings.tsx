@@ -1,162 +1,864 @@
-import { useEffect, useState } from "react";
-import { CheckCircle, Edit2, Save, ToggleLeft, ToggleRight } from "lucide-react";
+"use client"
 
-const SettingsPage = ({settings} : {settings: object}) => {
-  const [userSettings, setUserSettings] = useState<{ [key: string]: any }>({});
-  const [printers, setPrinters] = useState<
-    { name: string; displayName: string; description: string; printerId: string }[]
-  >([]);
-  const [editPrinter, setEditPrinter] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
+import { useState } from "react"
+import {
+  User,
+  Palette,
+  Bell,
+  Shield,
+  Smartphone,
+  RefreshCw,
+  CreditCard,
+  ChevronRight,
+  LogOut,
+  Eye,
+  EyeOff,
+  Check,
+  X,
+} from "lucide-react"
 
-  useEffect(() => {
-    const storedSettings = localStorage.getItem("Settings");
-    if (storedSettings) {
-      setUserSettings(JSON.parse(storedSettings));
-    } else {
-      localStorage.setItem("Settings", JSON.stringify({}));
-    }
-  }, []);
+export default function SettingsPage() {
+  const [activeCategory, setActiveCategory] = useState("account")
+  const [showPassword, setShowPassword] = useState(false)
+  const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
 
-  useEffect(() => {
-    const fetchPrinters = async () => {
-      try {
-        setPrinters(printers);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchPrinters();
-  }, []);
-
-  const handleSettingChange = (key: string, value: any) => {
-    setUserSettings((prev) => ({ ...prev, [key]: value }));
-    setHasChanges(true);
-  };
-
-  const saveUserSettings = () => {
-    localStorage.setItem("userSettings", JSON.stringify(userSettings));
-    setHasChanges(false);
-  };
+  const categories = [
+    { id: "account", name: "Account & Security", icon: <User size={20} /> },
+    { id: "profile", name: "Profile Settings", icon: <Palette size={20} /> },
+    { id: "notifications", name: "Notification Settings", icon: <Bell size={20} /> },
+    { id: "privacy", name: "Privacy Settings", icon: <Shield size={20} /> },
+    { id: "device", name: "Device & App Settings", icon: <Smartphone size={20} /> },
+    { id: "sync", name: "Sync & Integration", icon: <RefreshCw size={20} /> },
+    { id: "billing", name: "Billing & Subscription", icon: <CreditCard size={20} /> },
+  ]
 
   return (
-    <div className="space-y-6 p-10 pb-16 bg-[#EFEDE7] min-h-screen">
-      <h2 className="text-2xl font-bold text-[#22331D]">Settings</h2>
-      <p className="text-sm text-[#6A6D69]">Manage your factory management system settings.</p>
-
-      {/* Printer Settings */}
-      <div className="rounded-lg border bg-white shadow p-6">
-        <h3 className="text-xl font-semibold text-[#22331D]">Printer</h3>
-        <p className="text-sm text-[#6A6D69] mb-4">Set your default printer.</p>
-
-        <div className="flex items-center justify-between border p-3 rounded-md bg-[#EFEDE7]">
-          <p className="text-sm text-[#22331D]">
-            Default Printer: {userSettings.defaultPrinter || "Not set"}
-          </p>
-          <button onClick={() => setEditPrinter(!editPrinter)}>
-            <Edit2 size={16} className="text-[#F65A11]" />
-          </button>
+    <div className="flex flex-col md:flex-row w-full bg-white rounded-lg shadow-sm overflow-hidden">
+      {/* Sidebar Navigation */}
+      <div className="w-full md:w-64 bg-gray-50 border-r border-gray-200">
+        <div className="p-4 border-b border-gray-200">
+          <h2 className="text-xl font-semibold text-gray-800">Settings</h2>
         </div>
+        <nav className="p-2">
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => setActiveCategory(category.id)}
+              className={`w-full flex items-center p-3 mb-1 rounded-md text-left transition-colors ${
+                activeCategory === category.id ? "bg-orange-50 text-orange-600" : "text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              <span className="mr-3">{category.icon}</span>
+              <span className="flex-1">{category.name}</span>
+              <ChevronRight
+                size={16}
+                className={activeCategory === category.id ? "text-orange-600" : "text-gray-400"}
+              />
+            </button>
+          ))}
+        </nav>
+      </div>
 
-        {editPrinter && (
-          <select
-            onChange={(e) => handleSettingChange("defaultPrinter", e.target.value)}
-            className="mt-3 block w-full rounded-md border border-[#6A6D69] bg-white p-2 text-sm text-[#22331D]"
-          >
-            {printers.length ? (
-              printers.map((printer, i) => (
-                <option key={i} value={printer.displayName}>
-                  {printer.displayName}
-                </option>
-              ))
-            ) : (
-              <option>No printers found</option>
-            )}
-          </select>
+      {/* Content Area */}
+      <div className="flex-1 p-6 overflow-auto">
+        {activeCategory === "account" && (
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Account & Security Settings</h3>
+              <div className="space-y-6">
+                <div>
+                  <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+                    Username / Display name
+                  </label>
+                  <input
+                    type="text"
+                    id="username"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
+                    defaultValue="johndoe"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                    Email address
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
+                    defaultValue="john.doe@example.com"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      id="password"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
+                      defaultValue="••••••••••••"
+                    />
+                    <button
+                      type="button"
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff size={18} className="text-gray-500" />
+                      ) : (
+                        <Eye size={18} className="text-gray-500" />
+                      )}
+                    </button>
+                  </div>
+                  <button className="mt-2 text-sm text-orange-600 hover:text-orange-800">Change password</button>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-sm font-medium text-gray-700">Two-Factor Authentication (2FA)</label>
+                    <button
+                      onClick={() => setTwoFactorEnabled(!twoFactorEnabled)}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                        twoFactorEnabled ? "bg-orange-600" : "bg-gray-200"
+                      }`}
+                    >
+                      <span
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                          twoFactorEnabled ? "translate-x-6" : "translate-x-1"
+                        }`}
+                      />
+                    </button>
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    {twoFactorEnabled
+                      ? "2FA is enabled. Your account has an extra layer of security."
+                      : "Enable 2FA for additional account security."}
+                  </p>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Connected devices / sessions</h4>
+                  <div className="border border-gray-200 rounded-md divide-y">
+                    <div className="p-3 flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">Chrome on Windows</p>
+                        <p className="text-sm text-gray-500">Last active: Today, 2:45 PM</p>
+                      </div>
+                      <button className="text-red-600 text-sm hover:text-red-800">Logout</button>
+                    </div>
+                    <div className="p-3 flex justify-between items-center">
+                      <div>
+                        <p className="font-medium">Safari on iPhone</p>
+                        <p className="text-sm text-gray-500">Last active: Yesterday</p>
+                      </div>
+                      <button className="text-red-600 text-sm hover:text-red-800">Logout</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-gray-200">
+                  <button className="flex items-center text-red-600 hover:text-red-800">
+                    <LogOut size={18} className="mr-1" />
+                    <span>Delete account</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeCategory === "profile" && (
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Profile Settings</h3>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Profile picture / avatar</label>
+                  <div className="flex items-center space-x-4">
+                    <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                      <img
+                        src="/placeholder.svg?height=80&width=80"
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <button className="px-3 py-1.5 bg-orange-600 text-white rounded-md text-sm hover:bg-orange-700">
+                        Upload new
+                      </button>
+                      <button className="px-3 py-1.5 ml-2 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-gray-50">
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="bio" className="block text-sm font-medium text-gray-700 mb-1">
+                    Bio / status / tagline
+                  </label>
+                  <textarea
+                    id="bio"
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
+                    defaultValue="Product designer and developer based in New York."
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label htmlFor="dob" className="block text-sm font-medium text-gray-700 mb-1">
+                      Date of birth
+                    </label>
+                    <input
+                      type="date"
+                      id="dob"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">
+                      Gender
+                    </label>
+                    <select
+                      id="gender"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
+                    >
+                      <option>Prefer not to say</option>
+                      <option>Male</option>
+                      <option>Female</option>
+                      <option>Non-binary</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="location" className="block text-sm font-medium text-gray-700 mb-1">
+                      Location
+                    </label>
+                    <input
+                      type="text"
+                      id="location"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
+                      defaultValue="New York, USA"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+                  <div className="flex space-x-4">
+                    <label className="flex items-center">
+                      <input type="radio" name="theme" className="h-4 w-4 text-orange-600" defaultChecked />
+                      <span className="ml-2">Light</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="radio" name="theme" className="h-4 w-4 text-orange-600" />
+                      <span className="ml-2">Dark</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="radio" name="theme" className="h-4 w-4 text-orange-600" />
+                      <span className="ml-2">System</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-1">
+                    Language / locale
+                  </label>
+                  <select
+                    id="language"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
+                  >
+                    <option>English (US)</option>
+                    <option>English (UK)</option>
+                    <option>Spanish</option>
+                    <option>French</option>
+                    <option>German</option>
+                    <option>Japanese</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeCategory === "notifications" && (
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Notification Settings</h3>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Email notifications</h4>
+                  <div className="space-y-3">
+                    {["New messages", "Account updates", "Product updates", "Marketing emails"].map((item) => (
+                      <div key={item} className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">{item}</span>
+                        <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
+                          <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Push notifications</h4>
+                  <div className="space-y-3">
+                    {["New messages", "Mentions", "Friend requests", "Updates"].map((item) => (
+                      <div key={item} className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">{item}</span>
+                        <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
+                          <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">In-app notifications</h4>
+                  <div className="space-y-3">
+                    {["Activity on your posts", "New followers", "System notifications"].map((item) => (
+                      <div key={item} className="flex items-center justify-between">
+                        <span className="text-sm text-gray-700">{item}</span>
+                        <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
+                          <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Frequency controls</h4>
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="email-frequency" className="block text-sm text-gray-700 mb-1">
+                        Email digest frequency
+                      </label>
+                      <select
+                        id="email-frequency"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
+                      >
+                        <option>Real-time</option>
+                        <option>Daily summary</option>
+                        <option>Weekly digest</option>
+                        <option>Never</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeCategory === "privacy" && (
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Privacy Settings</h3>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Who can see your profile</h4>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="profile-visibility"
+                        className="h-4 w-4 text-orange-600"
+                        defaultChecked
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Everyone</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="radio" name="profile-visibility" className="h-4 w-4 text-orange-600" />
+                      <span className="ml-2 text-sm text-gray-700">Only followers</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="radio" name="profile-visibility" className="h-4 w-4 text-orange-600" />
+                      <span className="ml-2 text-sm text-gray-700">Only people you follow</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Who can contact you</h4>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="contact-permissions"
+                        className="h-4 w-4 text-orange-600"
+                        defaultChecked
+                      />
+                      <span className="ml-2 text-sm text-gray-700">Everyone</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="radio" name="contact-permissions" className="h-4 w-4 text-orange-600" />
+                      <span className="ml-2 text-sm text-gray-700">Only followers</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input type="radio" name="contact-permissions" className="h-4 w-4 text-orange-600" />
+                      <span className="ml-2 text-sm text-gray-700">Nobody</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Blocked users</h4>
+                  <div className="border border-gray-200 rounded-md divide-y max-h-40 overflow-y-auto">
+                    <div className="p-3 flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 rounded-full bg-gray-200 mr-3"></div>
+                        <span>blockeduser1</span>
+                      </div>
+                      <button className="text-orange-600 text-sm hover:text-orange-800">Unblock</button>
+                    </div>
+                    <div className="p-3 flex justify-between items-center">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 rounded-full bg-gray-200 mr-3"></div>
+                        <span>spammer123</span>
+                      </div>
+                      <button className="text-orange-600 text-sm hover:text-orange-800">Unblock</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Ad tracking / data sharing preferences</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">Allow personalized ads</span>
+                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
+                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">Share usage data</span>
+                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
+                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">Allow third-party cookies</span>
+                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
+                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Search visibility</h4>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-700">Show profile in search results</span>
+                    <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
+                      <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeCategory === "device" && (
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Device & App Settings</h3>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Mobile vs. Desktop toggles</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">Use mobile layout on tablets</span>
+                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
+                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">Optimize for touch on desktop</span>
+                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
+                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Auto-play media</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">Auto-play videos</span>
+                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
+                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">Auto-play GIFs</span>
+                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
+                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Download quality</h4>
+                  <div>
+                    <label htmlFor="video-quality" className="block text-sm text-gray-700 mb-1">
+                      Video quality
+                    </label>
+                    <select
+                      id="video-quality"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
+                    >
+                      <option>Auto (recommended)</option>
+                      <option>Low - Save data</option>
+                      <option>Medium</option>
+                      <option>High</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Accessibility options</h4>
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="text-size" className="block text-sm text-gray-700 mb-1">
+                        Text size
+                      </label>
+                      <select
+                        id="text-size"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
+                      >
+                        <option>Small</option>
+                        <option>Medium (default)</option>
+                        <option>Large</option>
+                        <option>Extra Large</option>
+                      </select>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">High contrast mode</span>
+                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
+                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">Screen reader support</span>
+                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
+                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">Reduce animations</span>
+                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
+                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeCategory === "sync" && (
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Sync & Integration Settings</h3>
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Linked accounts</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                          <span className="text-blue-600 font-bold">G</span>
+                        </div>
+                        <div>
+                          <p className="font-medium">Google</p>
+                          <p className="text-xs text-gray-500">Connected as john.doe@gmail.com</p>
+                        </div>
+                      </div>
+                      <button className="text-red-600 text-sm hover:text-red-800">Disconnect</button>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center mr-3">
+                          <span className="text-white font-bold">f</span>
+                        </div>
+                        <div>
+                          <p className="font-medium">Facebook</p>
+                          <p className="text-xs text-gray-500">Not connected</p>
+                        </div>
+                      </div>
+                      <button className="text-orange-600 text-sm hover:text-orange-800">Connect</button>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center mr-3">
+                          <span className="text-white font-bold">A</span>
+                        </div>
+                        <div>
+                          <p className="font-medium">Apple</p>
+                          <p className="text-xs text-gray-500">Not connected</p>
+                        </div>
+                      </div>
+                      <button className="text-orange-600 text-sm hover:text-orange-800">Connect</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Third-party app access</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                          <span className="text-purple-600 font-bold">S</span>
+                        </div>
+                        <div>
+                          <p className="font-medium">Spotify</p>
+                          <p className="text-xs text-gray-500">Access to profile and playlists</p>
+                        </div>
+                      </div>
+                      <button className="text-red-600 text-sm hover:text-red-800">Revoke</button>
+                    </div>
+                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                          <span className="text-green-600 font-bold">C</span>
+                        </div>
+                        <div>
+                          <p className="font-medium">Calendar App</p>
+                          <p className="text-xs text-gray-500">Access to calendar events</p>
+                        </div>
+                      </div>
+                      <button className="text-red-600 text-sm hover:text-red-800">Revoke</button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Cloud sync</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">Sync settings across devices</span>
+                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
+                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
+                      </button>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">Sync history</span>
+                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
+                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Backup & restore options</h4>
+                  <div className="space-y-3">
+                    <button className="px-4 py-2 bg-orange-600 text-white rounded-md text-sm hover:bg-orange-700">
+                      Backup data now
+                    </button>
+                    <div>
+                      <p className="text-xs text-gray-500">Last backup: May 10, 2025, 2:30 PM</p>
+                    </div>
+                    <div className="pt-2">
+                      <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-gray-50">
+                        Restore from backup
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeCategory === "billing" && (
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Billing & Subscription</h3>
+              <div className="space-y-6">
+                <div className="bg-orange-50 border border-orange-200 rounded-md p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-orange-800">Pro Plan</h4>
+                      <p className="text-sm text-orange-600">$9.99/month</p>
+                    </div>
+                    <span className="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">Active</span>
+                  </div>
+                  <div className="mt-2 text-sm text-orange-600">Next billing date: June 15, 2025</div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Payment methods</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
+                      <div className="flex items-center">
+                        <div className="w-8 h-8 bg-gray-100 rounded-md flex items-center justify-center mr-3">
+                          <span className="text-gray-800 font-bold">V</span>
+                        </div>
+                        <div>
+                          <p className="font-medium">Visa ending in 4242</p>
+                          <p className="text-xs text-gray-500">Expires 12/25</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-xs bg-gray-100 text-gray-800 px-2 py-0.5 rounded mr-2">Default</span>
+                        <button className="text-gray-500 hover:text-gray-700">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-5 w-5"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                  <button className="mt-3 text-sm text-orange-600 hover:text-orange-800">+ Add payment method</button>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Subscription plans</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="border border-gray-200 rounded-md p-4">
+                      <h5 className="font-medium">Basic</h5>
+                      <p className="text-lg font-bold mt-1">Free</p>
+                      <ul className="mt-3 space-y-2 text-sm">
+                        <li className="flex items-center">
+                          <Check size={16} className="text-green-500 mr-2" />
+                          <span>Limited features</span>
+                        </li>
+                        <li className="flex items-center">
+                          <Check size={16} className="text-green-500 mr-2" />
+                          <span>Basic support</span>
+                        </li>
+                        <li className="flex items-center">
+                          <X size={16} className="text-red-500 mr-2" />
+                          <span className="text-gray-500">Advanced features</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="border-2 border-orange-500 rounded-md p-4 relative">
+                      <div className="absolute top-0 right-0 bg-orange-500 text-white text-xs px-2 py-1 rounded-bl-md">
+                        Current
+                      </div>
+                      <h5 className="font-medium">Pro</h5>
+                      <p className="text-lg font-bold mt-1">$9.99/mo</p>
+                      <ul className="mt-3 space-y-2 text-sm">
+                        <li className="flex items-center">
+                          <Check size={16} className="text-green-500 mr-2" />
+                          <span>All features</span>
+                        </li>
+                        <li className="flex items-center">
+                          <Check size={16} className="text-green-500 mr-2" />
+                          <span>Priority support</span>
+                        </li>
+                        <li className="flex items-center">
+                          <Check size={16} className="text-green-500 mr-2" />
+                          <span>Advanced analytics</span>
+                        </li>
+                      </ul>
+                    </div>
+                    <div className="border border-gray-200 rounded-md p-4">
+                      <h5 className="font-medium">Enterprise</h5>
+                      <p className="text-lg font-bold mt-1">$49.99/mo</p>
+                      <ul className="mt-3 space-y-2 text-sm">
+                        <li className="flex items-center">
+                          <Check size={16} className="text-green-500 mr-2" />
+                          <span>All Pro features</span>
+                        </li>
+                        <li className="flex items-center">
+                          <Check size={16} className="text-green-500 mr-2" />
+                          <span>24/7 support</span>
+                        </li>
+                        <li className="flex items-center">
+                          <Check size={16} className="text-green-500 mr-2" />
+                          <span>Custom solutions</span>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-3">Invoice history</h4>
+                  <div className="border border-gray-200 rounded-md overflow-hidden">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Date
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Amount
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Status
+                          </th>
+                          <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Action
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        <tr>
+                          <td className="px-4 py-3 text-sm text-gray-900">May 15, 2025</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">$9.99</td>
+                          <td className="px-4 py-3 text-sm">
+                            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Paid</span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-right">
+                            <button className="text-orange-600 hover:text-orange-800">Download</button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3 text-sm text-gray-900">Apr 15, 2025</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">$9.99</td>
+                          <td className="px-4 py-3 text-sm">
+                            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Paid</span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-right">
+                            <button className="text-orange-600 hover:text-orange-800">Download</button>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td className="px-4 py-3 text-sm text-gray-900">Mar 15, 2025</td>
+                          <td className="px-4 py-3 text-sm text-gray-900">$9.99</td>
+                          <td className="px-4 py-3 text-sm">
+                            <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">Paid</span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-right">
+                            <button className="text-orange-600 hover:text-orange-800">Download</button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-gray-200">
+                  <button className="px-4 py-2 border border-red-300 text-red-600 rounded-md text-sm hover:bg-red-50">
+                    Cancel subscription
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
       </div>
-
-      {/* Machine Settings */}
-      <div className="rounded-lg border bg-white shadow p-6">
-        <h3 className="text-xl font-semibold text-[#22331D]">Machinery Alerts</h3>
-        <p className="text-sm text-[#6A6D69] mb-4">Receive alerts for maintenance or faults.</p>
-
-        <div className="flex items-center justify-between p-3 border rounded-md bg-[#EFEDE7]">
-          <p className="text-sm text-[#22331D]">Enable Alerts</p>
-          <button onClick={() => handleSettingChange("machineAlerts", !userSettings.machineAlerts)}>
-            {userSettings.machineAlerts ? (
-              <ToggleRight size={24} className="text-[#F65A11]" />
-            ) : (
-              <ToggleLeft size={24} className="text-[#6A6D69]" />
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Environment Monitoring */}
-      <div className="rounded-lg border bg-white shadow p-6">
-        <h3 className="text-xl font-semibold text-[#22331D]">Temperature Monitoring</h3>
-        <p className="text-sm text-[#6A6D69] mb-4">Enable alerts for extreme factory conditions.</p>
-
-        <div className="flex items-center justify-between p-3 border rounded-md bg-[#EFEDE7]">
-          <p className="text-sm text-[#22331D]">Receive alerts for extreme temperatures</p>
-          <button onClick={() => handleSettingChange("tempAlerts", !userSettings.tempAlerts)}>
-            {userSettings.tempAlerts ? (
-              <ToggleRight size={24} className="text-[#F65A11]" />
-            ) : (
-              <ToggleLeft size={24} className="text-[#6A6D69]" />
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* User Access Control */}
-      <div className="rounded-lg border bg-white shadow p-6">
-        <h3 className="text-xl font-semibold text-[#22331D]">User Permissions</h3>
-        <p className="text-sm text-[#6A6D69] mb-4">Manage admin and operator access.</p>
-
-        <select
-          onChange={(e) => handleSettingChange("userRole", e.target.value)}
-          className="mt-1 block w-full rounded-md border border-[#6A6D69] bg-white p-2 text-sm text-[#22331D]"
-        >
-          <option value="operator">Operator</option>
-          <option value="supervisor">Supervisor</option>
-          <option value="admin">Admin</option>
-        </select>
-      </div>
-
-      {/* Notifications */}
-      <div className="rounded-lg border bg-white shadow p-6">
-        <h3 className="text-xl font-semibold text-[#22331D]">Notifications</h3>
-        <p className="text-sm text-[#6A6D69] mb-4">Configure notification preferences.</p>
-
-        <div className="flex items-center justify-between p-3 border rounded-md bg-[#EFEDE7]">
-          <p className="text-sm text-[#22331D]">Receive Notifications</p>
-          <button onClick={() => handleSettingChange("notifications", !userSettings.notifications)}>
-            {userSettings.notifications ? (
-              <ToggleRight size={24} className="text-[#F65A11]" />
-            ) : (
-              <ToggleLeft size={24} className="text-[#6A6D69]" />
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Save Button */}
-      <button
-        onClick={saveUserSettings}
-        disabled={!hasChanges}
-        className={`inline-flex items-center gap-2 h-10 px-5 rounded-md shadow-md transition ${
-          hasChanges
-            ? "bg-[#F65A11] text-white hover:bg-[#e0550f]"
-            : "bg-[#6A6D69] text-gray-300 cursor-not-allowed"
-        }`}
-      >
-        <Save size={16} />
-        Save changes
-      </button>
     </div>
-  );
-};
-
-export default SettingsPage;
+  )
+}
