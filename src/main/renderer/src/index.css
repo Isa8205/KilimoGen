@@ -4,7 +4,13 @@
 
 #root {
   height: 100vh;
-  width: 100vw; 
+  width: 100vw;
+  --titlebar-bg: #22331d;
+  --titlebar-fg: #cccccc;
+  --titlebar-height: 35px;
+  --hover-bg: #383838;
+  --close-hover-bg: #e81123;
+  --border-color: #252525;
 }
 
 /* Apply styles to the div that scrolls */

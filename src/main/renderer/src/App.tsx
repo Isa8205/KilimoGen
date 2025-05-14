@@ -21,6 +21,7 @@ import { sessionState, settingsState } from "./store/store";
 import Home from "./layout/Home";
 import FarmerProfile from "./pages/FarmerProfile";
 import { AppSettings } from "./types/appSettings";
+import TitleBar from "./layout/Titlebar";
 
 function App() {
   const [settings, setSettings] = useRecoilState(settingsState)
@@ -36,6 +37,8 @@ function App() {
   }, []);
 
   return (
+    <div>
+      <TitleBar/>
     <div className="relative ">
       <Routes>
         {/* Manager admin panel */}
@@ -104,6 +107,8 @@ function App() {
 
         <Route path="/settings" element={<SettingsPage/>} />
       </Routes>
+    </div>
+
     </div>
   );
 }

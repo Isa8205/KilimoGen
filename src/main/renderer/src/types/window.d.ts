@@ -6,10 +6,11 @@ interface response {
 declare global {
   interface Window {
     api: {
-      addClerk: (clerkData: any) => Promise<responseType>;
-      addEvent: (eventData: any) => Promise<any>;
-      checkDb: () => promise<any>;
-      getPrinters: () => Promise<any>;
+      window: {
+        minimize: () => void;
+        maximize: () => void;
+        close: () => void;
+      }
     };
     electron: {
       invoke: (channel: string, data?: any) => promise<response>

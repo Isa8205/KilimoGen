@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Leaf } from "lucide-react"
 import Logo from "./components/Logo"
+import { useNavigate } from "react-router-dom"
 
 const loadingSteps = [
   "Initializing system...",
@@ -14,6 +15,7 @@ const loadingSteps = [
 export default function LandingPage() {
   const [progress, setProgress] = useState(0)
   const [currentStep, setCurrentStep] = useState(0)
+  const navigation = useNavigate()
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -31,7 +33,7 @@ export default function LandingPage() {
     }, 1000)
 
     const redirect = setTimeout(() => {
-      window.location.href = "/home/dashboard"
+      navigation("/home/dashboard", { replace: true })
     }, 4000)
 
     return () => {
