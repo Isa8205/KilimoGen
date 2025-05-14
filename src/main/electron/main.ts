@@ -36,6 +36,8 @@ app.whenReady().then(async () => {
     width: 800,
     height: 600,
     icon: path.join(__dirname, "assets/icon.ico"),
+    frame: false,
+    titleBarStyle: "hidden", // For macOS
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -56,6 +58,22 @@ app.whenReady().then(async () => {
     );
   }
 
+  // Window handlers
+  ipcMain.handle("window-minimize", () => {
+    mainWindow?.minimize();
+  });
+  ipcMain.handle("window-maximize", () => {
+    if (mainWindow?.isMaximized()) {
+      mainWindow?.unmaximize()
+      return false
+    }
+
+    mainWindow?.maximize();
+    return true
+  });
+  ipcMain.handle("window-close", () => {
+    mainWindow?.close();
+  });
   // Register all the ipc handlers
   registerNotificationHandlers()
   registerAuthHandlers()

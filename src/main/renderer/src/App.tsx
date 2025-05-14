@@ -99,7 +99,7 @@ function App() {
           <Route path="messaging" element={<Messaging />} />
 
           {/* Settings  */}
-          <Route path="settings" element={<SettingsPage settings={settings} />} />
+          <Route path="settings" element={<SettingsPage />} />
         </Route>
 
         <Route path="/settings" element={<SettingsPage/>} />

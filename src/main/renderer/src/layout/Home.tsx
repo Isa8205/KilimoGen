@@ -256,13 +256,13 @@ const Home = () => {
     };
 
     return (
-      <div className="h-screen w-screen flex-col gap-2 bg-background">
+      <div className=" flex-col gap-2 bg-background">
         <div className="relative flex bg-background">
           <ToastContainer />
 
           <Navbar />
 
-          <section className="content w-full text-white h-screen flex flex-col">
+          <section className="content w-full text-white h-[calc(100vh-35px)] flex flex-col">
             {/* The header of the right section */}
             <div className="flex justify-end items-center bg-white text-black p-2 shadow-md ">
 
