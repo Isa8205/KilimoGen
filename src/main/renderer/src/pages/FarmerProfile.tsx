@@ -87,8 +87,6 @@ const FarmerProfile: React.FC = () => {
       data.farmerNumber = farmerInfo?.farmerNumber;
 
       const res = await window.electron.invoke("add-delivery", data);
-
-      console.log(res);
       notify(res.passed, res.message);
       if (res.passed) {
         setTimeout(() => {
@@ -392,7 +390,6 @@ const FarmerProfile: React.FC = () => {
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                console.log("Saving:", editDelivery);
                 setEditDelivery(null);
               }}
             >

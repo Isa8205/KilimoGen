@@ -62,7 +62,6 @@ export default function AdminPanel() {
       try {
         const clerks = await window.electron.invoke('get-clerks');
         setClerks(clerks);
-        console.log(clerks)
       } catch (err) {
         console.error('Error fetching clerks: ', err);
       }

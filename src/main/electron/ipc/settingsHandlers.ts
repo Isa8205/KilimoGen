@@ -18,7 +18,7 @@ const defaultSettings = {
 
 
 export default function registerSettingsHandlers(app: Electron.App) {
-    const settingsDir = path.join(app.getPath("appData"), ".config", "settings");
+    const settingsDir = path.join(app.getPath("appData"), "config");
     const settingsPath = path.join(settingsDir, "settings.json");
 
     ipcMain.handle("set-settings", (event, newSettings) => {

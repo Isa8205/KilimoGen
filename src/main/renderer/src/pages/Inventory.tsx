@@ -40,7 +40,6 @@ export function Inventory() {
     try {
       const response = await window.electron.invoke('get-inventory');
       setItems(response.items);
-      console.log(response.items);
     } catch (error) {
       console.error(error);
     } finally {

@@ -22,10 +22,10 @@ import Home from "./layout/Home";
 import FarmerProfile from "./pages/FarmerProfile";
 import { AppSettings } from "./types/appSettings";
 import TitleBar from "./layout/Titlebar";
-import { getSettings } from "./utils/SettingsManger";
+import NotificationsPage from "./pages/Notifications";
 
 function App() {
-  const setSettings = useRecoilState(settingsState)[1]
+  const [settings, setSettings] = useRecoilState(settingsState)
   const setSessionData = useRecoilState(sessionState)[1];
 
   // Get settings from localStorage and load it to recoil state
@@ -35,6 +35,13 @@ function App() {
       setSettings(userSettings);
     })()
   },[])
+
+  // Ensure to sync the settings with the backend
+  useEffect(() => {
+    (async () => {
+      await window.electron.invoke('set-settings', settings)
+    })
+  }, [settings])
 
   // Get current session if any
   useEffect(() => {
@@ -48,7 +55,7 @@ function App() {
 
   return (
     <div>
-      {/* <TitleBar/> */}
+      <TitleBar/>
     <div className="relative ">
       <Routes>
         {/* Manager admin panel */}
@@ -114,6 +121,8 @@ function App() {
           {/* Settings  */}
           <Route path="settings" element={<SettingsPage />} />
         </Route>
+
+        <Route path="/notifications" element={<NotificationsPage/>}/>
 
         <Route path="/settings" element={<SettingsPage/>} />
       </Routes>

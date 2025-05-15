@@ -11,6 +11,7 @@ import { useRecoilState } from "recoil";
 import { sessionState } from "@/store/store";
 import defaultAvatar from "@/assets/images/defaultUser.png"
 import useClickOutside from "@/hooks/useClickOutside";
+import { formatDistanceToNow } from "date-fns";
 
 const Home = () => {
     interface DropdownMenuProps {}
@@ -149,10 +150,9 @@ const Home = () => {
 
       const fetchNotifications = async () => {
         const response = await window.electron.invoke("get-notifications")
-        console.log(response)
 
         try {
-          setNotifications(response.data.notifications);
+          setNotifications(response.notifications);
         } catch (err) {
           console.error(err);
         }
@@ -166,10 +166,7 @@ const Home = () => {
         e: React.MouseEvent<HTMLButtonElement>,
       ) => {
         const id = e.currentTarget.id;
-        const response = await axios.put(
-          'http://localhost:3000/api/notification/seen/' + id,
-        );
-        console.log(response.data.message);
+        const response = await window.electron.invoke("notification:mark-as-read", id);
         fetchNotifications();
       };
 
@@ -207,15 +204,15 @@ const Home = () => {
 
               {/* Notification List */}
               <div className="max-h-60 overflow-y-auto">
-                {notifications.length === 0 ? (
+                {unseenNotifications.length === 0 ? (
                   <p className="text-center text-gray-500 p-4">
                     No new notifications
                   </p>
                 ) : (
-                  notifications.map((notification) => (
+                  unseenNotifications.map((notification) => (
                     <div
                       key={notification.id}
-                      className={`p-3 flex items-start gap-3 hover:bg-gray-200 ${
+                      className={`p-3 flex items-start gap-3 hover:bg-gray-100 border-b  ${
                         !notification.seen ? 'bg-gray-100' : ''
                       }`}
                     >
@@ -227,7 +224,9 @@ const Home = () => {
                           {notification.message}
                         </p>
                         <p className="text-xs text-gray-400">
-                          {new Date(notification.date).toLocaleString()}
+                          {formatDistanceToNow(notification.date, {
+                            addSuffix: true,
+                          })}
                         </p>
                       </div>
 
@@ -245,9 +244,9 @@ const Home = () => {
 
               {/* Footer - View All */}
               <div className="p-2 bg-gray-100 text-center">
-                <span className="text-blue-600 text-sm hover:underline">
+                <NavLink to="/notifications" className="text-blue-600 text-sm hover:underline">
                   View all notifications
-                </span>
+                </NavLink>
               </div>
             </motion.div>
           )}

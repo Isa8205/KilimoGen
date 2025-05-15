@@ -20,7 +20,6 @@ import { useRecoilState } from "recoil";
     } | null>(sessionState);
       
     const response = await window.electron.invoke('check-session')
-    console.log(response)
     if (response.user) {
       setSessionData(response.user);
       notify(true,  `Welcome back ${user?.firstName}!`)

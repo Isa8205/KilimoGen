@@ -86,6 +86,7 @@ app.whenReady().then(async () => {
   registerInventoryHandlers(app)
   registerPrinterHandlers(mainWindow)
   registerSettingsHandlers(app)
+  registerNotificationHandlers()
 });
 
 app.on("window-all-closed", () => {

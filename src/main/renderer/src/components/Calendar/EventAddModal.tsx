@@ -35,12 +35,9 @@ const EventAddModal: React.FC<EventAddModalProps> = ({
         date: selectedDate,
       };
 
-      console.log(eventData);
-
       const response = await window.electron.invoke("add-event", eventData);
 
       if (response) {
-        console.log(response);
         notify(response.passed, response.message);
         setTimeout(() => {
           setModalDisp(false);

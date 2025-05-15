@@ -125,7 +125,6 @@ export function Deliveries() {
 
       const res = await window.electron.invoke("add-delivery", data);
 
-      console.log(res);
       notify(res.passed, res.message);
       if (res.passed) {
         setTimeout(() => {
