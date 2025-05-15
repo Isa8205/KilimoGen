@@ -10,19 +10,35 @@ import {
   RefreshCw,
   CreditCard,
   ChevronRight,
-  LogOut,
   Eye,
   EyeOff,
   Check,
   X,
+  Edit,
+  TrashIcon,
+  Wrench,
+  Clock,
+  Activity,
+  Globe,
+  Home,
+  Globe2,
 } from "lucide-react"
+import { useRecoilState } from "recoil"
+import { sessionState, settingsState } from "@/store/store"
+import defaultUser from "@/assets/images/defaultUser.png"
+import notify from "@/utils/ToastHelper"
+import Modal from "@/components/Modal/Modal"
 
 export default function SettingsPage() {
+  const user = useRecoilState(sessionState)[0]
   const [activeCategory, setActiveCategory] = useState("account")
-  const [showPassword, setShowPassword] = useState(false)
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
+  const [showChangePass, setShowChangePass] = useState(false)
+  const [showPassModal, setShowPassModal] = useState(false)
+  const settings = useRecoilState(settingsState)[0]
 
   const categories = [
+    { id: "general", name: "General", icon: <Globe size={20}/>},
     { id: "account", name: "Account & Security", icon: <User size={20} /> },
     { id: "profile", name: "Profile Settings", icon: <Palette size={20} /> },
     { id: "notifications", name: "Notification Settings", icon: <Bell size={20} /> },
@@ -60,11 +76,104 @@ export default function SettingsPage() {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 p-6 overflow-auto">
+      <div className="flex-1 p-6 overflow-auto text-black">
+      {activeCategory === "general" && (
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">General Settings</h3>
+
+              <div className="bg-orange-50 border border-orange-200 rounded-md p-4 mb-6">
+                <div className="flex items-center">
+                  <div className="mr-4">
+                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                      <img
+                        src="/placeholder.svg?height=48&width=48"
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">John Doe</h4>
+                    <p className="text-sm text-gray-600">Pro Plan · Member since May 2023</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-md font-medium text-gray-700 mb-3">Default preferences</h4>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-gray-700">Default Receipt Printer</p>
+                      <span>{settings.printing.defaultReceiptPrinter || "-----Not set----"}</span>
+                      <select
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500">
+                        <option>Printer 1</option>
+                        <option>Printer 2</option>
+                        </select>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="default-page" className="block text-sm text-gray-700 mb-1">
+                        Default page
+                      </label>
+                      <select
+                        id="default-page"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
+                      >
+                        <option>Dashboard</option>
+                        <option>Projects</option>
+                        <option>Messages</option>
+                        <option>Analytics</option>
+                      </select>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">Show welcome screen on login</span>
+                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
+                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">Enable keyboard shortcuts</span>
+                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
+                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeCategory === "account" && (
           <div className="space-y-8">
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">Account & Security Settings</h3>
+              <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Profile picture / avatar</label>
+                  <div className="flex items-center justify-between space-x-4">
+                    <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                      <img
+                        src={user?.avatar ? `data:image/png;base64,${user?.avatar}` : defaultUser}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <button className="inline-flex gap-2 px-3 py-1.5 bg-orange-600 text-white rounded-md text-sm hover:bg-orange-700">
+                        <Edit size={16} /> Edit
+                      </button>
+                      <button className="inline-flex gap-2 px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-red-500 hover:text-white">
+                        <TrashIcon size={16}/> Remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
               <div className="space-y-6">
                 <div>
                   <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
@@ -73,8 +182,8 @@ export default function SettingsPage() {
                   <input
                     type="text"
                     id="username"
+                    value={user?.username}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
-                    defaultValue="johndoe"
                   />
                 </div>
 
@@ -85,35 +194,14 @@ export default function SettingsPage() {
                   <input
                     type="email"
                     id="email"
+                    value={user?.email}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
                     defaultValue="john.doe@example.com"
                   />
                 </div>
 
-                <div>
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      id="password"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
-                      defaultValue="••••••••••••"
-                    />
-                    <button
-                      type="button"
-                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                      onClick={() => setShowPassword(!showPassword)}
-                    >
-                      {showPassword ? (
-                        <EyeOff size={18} className="text-gray-500" />
-                      ) : (
-                        <Eye size={18} className="text-gray-500" />
-                      )}
-                    </button>
-                  </div>
-                  <button className="mt-2 text-sm text-orange-600 hover:text-orange-800">Change password</button>
+                <div>                  
+                  <button className="mt-2 text-sm text-orange-600 hover:text-orange-800" onClick={() => setShowChangePass(true)}>Change password</button>
                 </div>
 
                 <div>
@@ -137,33 +225,6 @@ export default function SettingsPage() {
                       ? "2FA is enabled. Your account has an extra layer of security."
                       : "Enable 2FA for additional account security."}
                   </p>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Connected devices / sessions</h4>
-                  <div className="border border-gray-200 rounded-md divide-y">
-                    <div className="p-3 flex justify-between items-center">
-                      <div>
-                        <p className="font-medium">Chrome on Windows</p>
-                        <p className="text-sm text-gray-500">Last active: Today, 2:45 PM</p>
-                      </div>
-                      <button className="text-red-600 text-sm hover:text-red-800">Logout</button>
-                    </div>
-                    <div className="p-3 flex justify-between items-center">
-                      <div>
-                        <p className="font-medium">Safari on iPhone</p>
-                        <p className="text-sm text-gray-500">Last active: Yesterday</p>
-                      </div>
-                      <button className="text-red-600 text-sm hover:text-red-800">Logout</button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="pt-4 border-t border-gray-200">
-                  <button className="flex items-center text-red-600 hover:text-red-800">
-                    <LogOut size={18} className="mr-1" />
-                    <span>Delete account</span>
-                  </button>
                 </div>
               </div>
             </div>
@@ -859,6 +920,62 @@ export default function SettingsPage() {
           </div>
         )}
       </div>
+
+      {showChangePass && (
+        <Modal title="Change Password" isOpen={showChangePass} onClose={() => setShowChangePass(false)}>
+          <form className="text-black" onSubmit={async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            const data = Object.fromEntries(formData as any);
+            if (data.new !== data.confirm) {
+              notify(false, "New passwords do not match");
+              return;
+            }
+            try {
+              const res = await window.electron.invoke('change-password', data);
+              notify(res.passed, res.message);
+            } catch (err) {
+              console.error('Error submitting form: ', err);
+            }
+          }}>
+
+            <div className="mt-4">
+              <label htmlFor="current" className="block text-sm font-medium text-gray-700">
+                Current Password
+              </label>
+              <input type="password" name="current" id="current" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500" required />
+            </div>
+
+            <div className="mt-4">
+              <label htmlFor="new" className="block text-sm font-medium text-gray-700">
+                New Password
+              </label>
+              <div className="relative">
+                <input type={showPassModal ? "text" : "password"} name="new" id="new" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500" required />
+                <button type="button" onClick={() => setShowPassModal(!showPassModal)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-black leading-5">
+                  {!showPassModal ? <Eye size={16}/> : <EyeOff size={16}/>}
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4">
+              <label htmlFor="confirm" className="block text-sm font-medium text-gray-700">
+                Confirm New Password
+              </label>
+                <input type={showPassModal ? "text" : "password"} name="confirm" id="confirm" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500" required /> 
+            </div>
+
+            <div className="mt-4 flex gap-2 justify-end">
+              <button className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500" onClick={() => setShowChangePass(false)}>
+                Cancel
+              </button>
+              <button type="submit" className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                Change Password
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   )
 }

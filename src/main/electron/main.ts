@@ -21,6 +21,7 @@ import registerNotificationHandlers from "@/main/electron/ipc/notificationHandle
 import { registerCalenderHandlers } from "@/main/electron/ipc/calendarHandler";
 import registerInventoryHandlers from "@/main/electron/ipc/inventoryHandlers";
 import { registerPrinterHandlers } from "@/main/electron/ipc/printHandlers";
+import registerSettingsHandlers from "@/main/electron/ipc/settingsHandlers";
 
 
 dotenv.config();
@@ -75,7 +76,6 @@ app.whenReady().then(async () => {
     mainWindow?.close();
   });
   // Register all the ipc handlers
-  registerNotificationHandlers()
   registerAuthHandlers()
   registerDeliveryHandlers()
   registerHarvestHandlers()
@@ -85,6 +85,7 @@ app.whenReady().then(async () => {
   registerFarmerHandlers()
   registerInventoryHandlers(app)
   registerPrinterHandlers(mainWindow)
+  registerSettingsHandlers(app)
 });
 
 app.on("window-all-closed", () => {

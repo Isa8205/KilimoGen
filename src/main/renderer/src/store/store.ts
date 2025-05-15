@@ -3,9 +3,9 @@ import { AppSettings } from "@/types/appSettings";
 import { atom } from "recoil";
 
 // Settings
-export const settingsState = atom<AppSettings | {}>({
+export const settingsState = atom<AppSettings>({
   key: 'settings',
-  default: {}
+  default: JSON.parse(localStorage.getItem('userSettings') as any)
 })
 
 // Session data 

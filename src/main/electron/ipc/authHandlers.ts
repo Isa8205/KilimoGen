@@ -57,6 +57,7 @@ export const registerAuthHandlers = () => {
           firstName: clerk.firstName,
           lastName: clerk.lastName,
           email: clerk.email,
+          username: clerk.username,
           avatar: getImageBase64(clerk.avatar, process.env.SECRET_KEY!),
           role: "clerk",
         };

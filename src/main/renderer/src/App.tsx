@@ -22,11 +22,21 @@ import Home from "./layout/Home";
 import FarmerProfile from "./pages/FarmerProfile";
 import { AppSettings } from "./types/appSettings";
 import TitleBar from "./layout/Titlebar";
+import { getSettings } from "./utils/SettingsManger";
 
 function App() {
-  const [settings, setSettings] = useRecoilState(settingsState)
+  const setSettings = useRecoilState(settingsState)[1]
   const setSessionData = useRecoilState(sessionState)[1];
 
+  // Get settings from localStorage and load it to recoil state
+  useEffect(() => {
+    (async () => {
+      const userSettings = await window.electron.invoke("get-settings");
+      setSettings(userSettings);
+    })()
+  },[])
+
+  // Get current session if any
   useEffect(() => {
     (async () => {
       const response = await window.electron.invoke("check-session");
@@ -38,7 +48,7 @@ function App() {
 
   return (
     <div>
-      <TitleBar/>
+      {/* <TitleBar/> */}
     <div className="relative ">
       <Routes>
         {/* Manager admin panel */}

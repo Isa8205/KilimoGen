@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kilimogen</title>
     <style>
-        :root {
-          --titlebar-bg: #22331d;
-          --titlebar-fg: #cccccc;
-          --titlebar-height: 35px;
-          --hover-bg: #383838;
-          --close-hover-bg: #e81123;
-          --border-color: #252525;
-        }
+      :root {
+        --titlebar-bg: #22331D;
+        --titlebar-fg: #cccccc;
+        --titlebar-height: 35px;
+        --hover-bg: #383838;
+        --close-hover-bg: #e81123;
+        --border-color: #252525;
+      }
 
       * {
         margin: 0;
@@ -139,11 +139,74 @@
     </style>
   </head>
   <body>
+    <div id="titlebar">
+      <div class="app-title">
+        <div class="app-icon"></div>
+        <span>Kilimogen</span>
+      </div>
+
+      <div class="menu-bar no-drag">
+        <div class="menu-item">File</div>
+        <div class="menu-item">Edit</div>
+        <div class="menu-item">View</div>
+        <div class="menu-item">Help</div>
+      </div>
+
+      <div class="window-controls">
+        <button
+          id="minimize-button"
+          class="window-control-button"
+          onclick="window.api.window.minimize()"
+          title="Minimize"
+        >
+          &#8211;
+        </button>
+        <button
+          id="maxminimize-button"
+          class="window-control-button"
+          title="Maximize"
+        >
+          &#9744;
+        </button>
+        <button
+          id="close-button"
+          class="window-control-button close"
+          onclick="window.api.window.close()"
+          title="Close"
+        >
+          &#10005;
+        </button>
+      </div>
+    </div>
 
     <div id="root">
       <!-- Your application content goes here -->
     </div>
 
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", async() => {
+        const maxminimizeButton = document.getElementById("maxminimize-button");
+        const resterButton = `
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+          <path d="M2 2h5v1H3v4H2V2zm3 3h5v5H5V5zm1 1v3h3V6H6z"/>
+        </svg>
+`;
+
+        maxminimizeButton.addEventListener("click", async () => {
+          isMaximized = await window.api.window.maximize();
+          updateMaxminimizeButton();
+        });
+        
+        const updateMaxminimizeButton = () => {
+          if (isMaximized) {
+            maxminimizeButton.innerHTML = resterButton; // Restore icon
+            maxminimizeButton.title = "Restore";
+          } else {
+            maxminimizeButton.innerHTML = "&#9744;"; // Maximize icon
+          }
+        };
+      });
+    </script>
   </body>
 </html>

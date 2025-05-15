@@ -1,4 +1,4 @@
-type AppSettings = {
+interface AppSettings {
     general: {
         theme: 'dark' | 'light'
     };
