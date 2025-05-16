@@ -22,16 +22,10 @@ export class Advance {
     @Column({type: 'varchar'})
     status: 'Paid' | 'Pending approval' | 'Pending' | 'OverDue'
 
-    @Column()
-    clerkId: number
-
     @ManyToOne(() => Clerk)
-    clerk: Clerk
-
-    @Column()
-    farmerId: number;
+    clerk: Clerk | null
 
     @ManyToOne(() => Farmer, farmer => farmer.advances)
-    farmer: Farmer;
+    farmer: Farmer | null
 
 }

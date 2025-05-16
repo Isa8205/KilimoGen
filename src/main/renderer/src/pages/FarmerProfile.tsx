@@ -1,8 +1,10 @@
 import OnlyAdmin from "@/components/auth/OnlyAdmin";
+import Modal from "@/components/Modal/Modal";
 import useClickOutside from "@/hooks/useClickOutside";
 import getFarmer from "@/services/fetchFarmer";
 import { sessionState } from "@/store/store";
 import notify from "@/utils/ToastHelper";
+import { formatDate } from "date-fns";
 import { AtSign, Phone, User, X } from "lucide-react";
 import React, { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
@@ -55,8 +57,13 @@ const FarmerProfile: React.FC = () => {
   const [editDelivery, setEditDelivery] = useState<Partial<Delivery> | null>(
     null
   );
+  const user = useRecoilState(sessionState)[0]
   const [farmerInfo, setFarmerInfo] = useState<Farmer | null>(null);
   const [showDeliveryMoadal, setShowDeliveryModal] = useState(false);
+  const [showAdvanceModal, setShowAdvanceModal] = useState(false)
+
+  const advanceModalRef = useRef<HTMLFormElement>(null)
+  useClickOutside(advanceModalRef, () => setShowAdvanceModal(false))
 
   const params = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -65,13 +72,15 @@ const FarmerProfile: React.FC = () => {
   useClickOutside(modalRef, () => setEditDelivery(null));
   useClickOutside(deliveryModalRef, () => setShowDeliveryModal(false))
 
+  const getFarmerData = async () => {
+    if (!params.id) return;
+    const id = Number(params.id);
+    const data = await getFarmer(id);
+    if (data) setFarmerInfo(data);
+  }
+
   useEffect(() => {
-    (async () => {
-      if (!params.id) return;
-      const id = Number(params.id);
-      const data = await getFarmer(id);
-      if (data) setFarmerInfo(data);
-    })();
+    getFarmerData()
   }, [params.id]);
 
   const deliveries = farmerInfo?.deliveries || [];
@@ -309,7 +318,7 @@ const FarmerProfile: React.FC = () => {
             <h2 className="text-2xl font-semibold text-primary">
               Advance Payments
             </h2>
-            <button className="px-4 py-2 bg-accent text-white font-medium rounded shadow hover:bg-opacity-90 transition">
+            <button onClick={() => setShowAdvanceModal(true)} className="px-4 py-2 bg-accent text-white font-medium rounded shadow hover:bg-opacity-90 transition">
               + Add Advance
             </button>
           </div>
@@ -333,8 +342,8 @@ const FarmerProfile: React.FC = () => {
               <tbody className="divide-y divide-secondary">
                 {advances.map((a, idx) => (
                   <tr key={idx} className="hover:bg-background transition">
-                    <td className="px-4 py-3">{a.dateGiven}</td>
-                    <td className="px-4 py-3">{a.dateExpected}</td>
+                    <td className="px-4 py-3">{formatDate(new Date(a.dateGiven), "dd/mm/yyyy")}</td>
+                    <td className="px-4 py-3">{formatDate(new Date(a.dateExpected), "dd/mm/yyyy")}</td>
                     <td className="px-4 py-3">
                       Ksh {a.amount.toLocaleString()}
                     </td>
@@ -343,7 +352,7 @@ const FarmerProfile: React.FC = () => {
                       <span
                         className={`inline-block px-2 py-1 text-sm font-medium rounded-full ${
                           a.status === "Paid"
-                            ? "bg-primary bg-opacity-20 text-primary"
+                            ? "bg-primary text-primary"
                             : a.status === "Pending"
                             ? "bg-accent bg-opacity-20 text-accent"
                             : "bg-secondary bg-opacity-20 text-secondary"
@@ -369,6 +378,58 @@ const FarmerProfile: React.FC = () => {
 
       {/* Add Delivery Modal */}
       {showDeliveryMoadal && <AddDeliveryModal />}
+
+      {/* Modal to add the advance */}
+      <Modal title="Add Advance" isOpen={showAdvanceModal} onClose={() => setShowAdvanceModal(false)}>
+        <form
+        ref={advanceModalRef}
+        onSubmit={async(e) => {
+          e.preventDefault()
+          const instance = new FormData(e.currentTarget)
+          const formData = Object.fromEntries(instance as any)
+          const data = {...formData, dateExpected: new Date(formData.dateExpected), farmerNumber: farmerInfo?.farmerNumber, clerkId: user?.id}
+
+          const response = await window.electron.invoke("advance:add-for-farmer", data)
+          notify(response.passed, response.message)
+
+          if (response.passed) {
+            getFarmerData()
+          }
+
+          setTimeout(() => {
+            setShowAdvanceModal(false)
+          }, 2000);
+        }}
+        >
+          <div className="mt-4">
+            <label htmlFor="amount" className="block text-sm font-medium text-gray-700">
+              Amount
+            </label>
+              <input type="number" min={0} name="amount" id="amount" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500" required /> 
+          </div>
+
+
+          <div className="mt-4">
+            <label htmlFor="reason" className="block text-sm font-medium text-gray-700">
+              Reason
+            </label>
+              <textarea cols={40} name="reason" id="reason" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500" required ></textarea>
+          </div>
+
+          <div className="mt-4">
+            <label htmlFor="dateExpected" className="block text-sm font-medium text-gray-700">
+              Date Expected
+            </label>
+            <input type="date" name="dateExpected" id="dateExpected" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500" required />
+          </div>
+
+
+          <div className="mt-4 flex justify-end gap-4">
+            <button className="bg-gray-600 text-white px-3 py-2 rounded-md">Cancel</button>
+            <button className="bg-orange-500 text-white px-3 py-2 rounded-md">Add</button>
+          </div>
+        </form>
+      </Modal>
 
       {/* Edit Modal */}
       {editDelivery && (

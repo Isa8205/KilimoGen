@@ -35,6 +35,7 @@ export const registerFarmerHandlers = () => {
           "advances.dateGiven",
           "advances.dateExpected",
           "advances.reason",
+          "advances.status",
         ])
         .where("farmer.id = :id", { id: data.id })
         .getOne();

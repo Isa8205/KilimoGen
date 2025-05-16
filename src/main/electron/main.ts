@@ -22,6 +22,7 @@ import { registerCalenderHandlers } from "@/main/electron/ipc/calendarHandler";
 import registerInventoryHandlers from "@/main/electron/ipc/inventoryHandlers";
 import { registerPrinterHandlers } from "@/main/electron/ipc/printHandlers";
 import registerSettingsHandlers from "@/main/electron/ipc/settingsHandlers";
+import registerAdvanceHandlers from "@/main/electron/ipc/advanceHandlers";
 
 
 dotenv.config();
@@ -87,6 +88,7 @@ app.whenReady().then(async () => {
   registerPrinterHandlers(mainWindow)
   registerSettingsHandlers(app)
   registerNotificationHandlers()
+  registerAdvanceHandlers()
 });
 
 app.on("window-all-closed", () => {
