@@ -1,6 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
-import { Bell, Check, Filter, Trash2, X } from "lucide-react";
-import {formatDistanceToNow} from "date-fns"
+import { Bell, Check, Filter, RefreshCcw, Trash2, X } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 // Type definition based on the provided data structure
 type Notification = {
@@ -11,7 +11,6 @@ type Notification = {
   date: Date;
   seen: boolean;
 };
-
 
 export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -55,25 +54,23 @@ export default function NotificationsPage() {
   }, [notifications]);
 
   // Mark a notification as read
-  const markAsRead = (id: number) => {
-    setNotifications((prev) =>
-      prev.map((notification) => {
-        if (notification.id === id) {
-          return { ...notification, seen: true };
-        }
-        return notification;
-      })
-    );
+  const markAsRead = async (id: number) => {
+    await window.electron.invoke("notification:mark-as-read", id);
+    fetchNotifications();
   };
 
   // Mark all notifications as read
   const markAllAsRead = () => {
-    setNotifications((prev) =>
-      prev.map((notification) => ({
-        ...notification,
-        seen: true,
-      }))
-    );
+    notifications.forEach(async (notification) => {
+      if (!notification.seen) {
+        await window.electron.invoke(
+          "notification:mark-as-read",
+          notification.id
+        );
+      }
+    });
+
+    fetchNotifications();
   };
 
   // Clear all notifications
@@ -162,6 +159,15 @@ export default function NotificationsPage() {
               title="Clear all notifications"
             >
               <Trash2 size={18} />
+            </button>
+
+            {/* Refresh the notifications */}
+            <button
+              title="Refresh"
+              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full"
+              onClick={fetchNotifications}
+            >
+              <RefreshCcw size={18} />
             </button>
           </div>
         </div>

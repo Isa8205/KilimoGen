@@ -1,7 +1,7 @@
 import notify from "@/utils/ToastHelper";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
-import { Settings, User, LogIn, LogOut, BellIcon, MailOpenIcon, TriangleAlert } from "lucide-react";
+import { Settings, User, LogIn, LogOut, BellIcon, MailOpenIcon, TriangleAlert, RefreshCcw } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
@@ -198,8 +198,12 @@ const Home = () => {
               transition={{duration: .2}}
               className="fixed right-2 mt-2 w-72 bg-white shadow-lg rounded-lg overflow-hidden z-50"
             >
-              <div className="p-4 border-b bg-gray-100 font-semibold text-gray-700">
+              <div className="flex justify-between items-center p-4 border-b bg-gray-100 font-semibold text-gray-700">
                 Notifications
+
+                <button title="Refresh" className="hover:text-orange-500" onClick={fetchNotifications}>
+                  <RefreshCcw size={16}/>
+                </button>
               </div>
 
               {/* Notification List */}
@@ -212,9 +216,7 @@ const Home = () => {
                   unseenNotifications.map((notification) => (
                     <div
                       key={notification.id}
-                      className={`p-3 flex items-start gap-3 hover:bg-gray-100 border-b  ${
-                        !notification.seen ? 'bg-gray-100' : ''
-                      }`}
+                      className={`p-3 flex items-start gap-3 hover:bg-gray-200 border-b bg-white`}
                     >
                       <div className="flex-1">
                         <p className="text-sm font-medium">
@@ -231,6 +233,7 @@ const Home = () => {
                       </div>
 
                       <button
+                        title="Mark as Read"
                         id={notification.id.toString()}
                         onClick={(e) => handleNotificatioinSeen(e)}
                         className="flex flex-col justify-between items-stretch hover:bg-gray-200"
