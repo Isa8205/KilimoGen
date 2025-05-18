@@ -3,14 +3,17 @@ import { Season } from "@/main/database/src/entities/Seasons";
 import { ipcMain } from "electron";
 
 function registerSeasonHandlers() {
-  ipcMain.handle("get-seasons", async () => {
+  ipcMain.handle("seasons:get-all", async () => {
     try {
       const seasonRepository = AppDataSource.getRepository(Season);
-      const seasons = await seasonRepository
-        .createQueryBuilder("season")
-        .select(["season.id AS id", "season.name AS name"])
-        .orderBy("season.startDate", "ASC")
-        .getRawMany();
+      // const seasons = await seasonRepository
+      //   .createQueryBuilder("season")
+      //   .leftJoinAndSelect("season.harverst", "harvests")
+      //   .select(["season.id", "season.name"])
+      //   .orderBy("season.startDate", "ASC")
+      //   .getMany();
+
+        const seasons = await seasonRepository.find({relations: ['harvests']})
 
       const res = { seasons: seasons };
       return res;
@@ -20,7 +23,7 @@ function registerSeasonHandlers() {
     }
   });
 
-  ipcMain.handle("add-season", async (event, seasonData) => {
+  ipcMain.handle("seasons:add", async (event, seasonData) => {
     const seasonRepository = AppDataSource.getRepository(Season);
     const season = new Season();
     season.name = seasonData.seasonName;

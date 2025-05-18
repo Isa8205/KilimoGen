@@ -389,6 +389,7 @@ export function Farmers() {
 
       {/* The export farmers modal */}
         <Modal
+        title="Export Farmers"
           isOpen={exportFarmerModal}
           onClose={() => setExportFarmerModal(false)}
         >

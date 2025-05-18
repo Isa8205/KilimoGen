@@ -49,7 +49,7 @@ export function InventoryForm() {
 
     if (response.passed) {
       notify(response.passed, response.message);
-      e.target.reset();
+      (e.target as any).reset();
       setImagePreview('')
     } else {
       notify(response.passed, response.message);

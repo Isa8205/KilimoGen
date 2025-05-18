@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import errorImage from '@/assets/images/backgrounds/404_2.svg';
 import { useRecoilState } from 'recoil';
 import { sessionState } from '@/store/store';
+import { formatDistanceToNow } from 'date-fns';
 
 export function Inventory() {
   // Get the session data
@@ -164,7 +165,9 @@ export function Inventory() {
                   <td className="p-2 ">{item.quantity}</td>
                   <td className="p-2 ">{item.weight}</td>
                   <td className="p-2 ">
-                    {item.dateReceived.toLocaleDateString()}
+                    {formatDistanceToNow(new Date(item.dateReceived), {
+                      addSuffix: true})
+                    }
                   </td>
                   <td className="p-2 ">
                     {item.receivedBy.firstName} {item.receivedBy.lastName}
@@ -217,7 +220,11 @@ export function Inventory() {
                 {/* Checkbox */}
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-gray-500">
-                    {item.dateReceived.toLocaleDateString()}
+                    {
+                      formatDistanceToNow(new Date(item.dateReceived), {
+                        addSuffix: true,
+                      })
+                    }
                   </span>
                   <Tooltip text="Edit" className="" position="bottom">
                     <button className="hover:text-orange-500">

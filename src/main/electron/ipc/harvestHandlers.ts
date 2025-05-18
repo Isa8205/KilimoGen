@@ -13,7 +13,7 @@ function registerHarvestHandlers() {
   });
   
   ipcMain.handle("add-harvest", async (event, harvestData) => {
-    const { name, startDate, endDate, season, target, description } =
+    const { name, startDate, endDate, seasonId, target, description } =
       harvestData;
     const harvestRepository = AppDataSource.getRepository(Harvest);
     const seasonRepository = AppDataSource.getRepository(Season);
@@ -21,7 +21,7 @@ function registerHarvestHandlers() {
     const harvest = new Harvest();
     harvest.name = name;
     (harvest.season as any) = await seasonRepository.findOneBy({
-      id: parseInt(season),
+      id: parseInt(seasonId),
     });
     harvest.startDate = startDate;
     harvest.endDate = endDate;

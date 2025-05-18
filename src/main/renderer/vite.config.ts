@@ -4,6 +4,15 @@ import path from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
+  root: ".",
+  build: { 
+    outDir: 'dist', // folder to dump final output
+    emptyOutDir: true, // clean it before each build
+    sourcemap: true,
+    rollupOptions: {
+      input: './src/main.tsx', // entry file
+    },
+  },
   plugins: [react()],
   resolve: {
     alias: {

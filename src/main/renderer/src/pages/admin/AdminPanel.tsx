@@ -1,528 +1,379 @@
-import { useEffect, useState } from 'react';
-import { Plus, Calendar, Wheat, X, AlertCircle } from 'lucide-react';
-import axios from 'axios';
-import { ToastContainer } from 'react-toastify';
-import { Navigate, NavLink } from 'react-router-dom';
-import notify from '@/utils/ToastHelper';
-import { User, Package, Truck, MessageSquare, BarChart2 } from 'lucide-react';
+import { useEffect, useState } from "react"
+import {
+  Plus,
+  Calendar,
+  Wheat,
+  PlusCircle,
+  ChevronDown,
+  ChevronRight,
+  User,
+  Package,
+  Truck,
+  MessageSquare,
+  BarChart2,
+} from "lucide-react"
+import { NavLink } from "react-router-dom"
+import { formatDate } from "date-fns"
+import { OverviewCard } from "./OverviewCard" // Import OverviewCard component
+import { AddSeasonModal } from "./AddSeasonModal" // Import AddSeasonModal component
+import { AddHarvestModal } from "./AddHarvestModal" // Import AddHarvestModal component
 
 // Interfaces
-interface Season {
-  id: string;
-  name: string;
-  startDate: string;
-  endDate: string;
-  description: string;
+interface Harvest {
+  id: number
+  name: string
+  target: number
+  startDate: Date
+  endDate: Date
+  totalDeliveries: {
+    overall: number
+    mbuni: number
+    cherry: number
+  }
 }
 
-interface Harvest {
-  id: string;
-  seasonId: string;
-  type: string;
-  quantity: number;
-  harvestDate: string;
+interface Season {
+  id: number
+  name: string
+  startDate: string
+  endDate: string
+  description: string
+  harvests: Harvest[]
+}
+
+interface Clerk {
+  id: number
+  firstName: string
+  lastName: string
+  email: string
+  role: string
+  password: string
+  phone: string
+  avatar: string
 }
 
 export default function AdminPanel() {
-  const [showSeasonModal, setShowSeasonModal] = useState(false);
-  const [showHarvestModal, setShowHarvestModal] = useState(false);
-  const [seasons, setSeasons] = useState<Season[]>([]);
-  const [harvests, setHarvests] = useState<Harvest[]>([]);
-  const [clerks, setClerks] = useState<{ id: string; name: string; email: string; role: string; password: string; phone: string; avatar: string;}[]>([]);
-  const [selectedSeason, setSelectedSeason] = useState<string>('');
-  const [farmersCount, setFarmersCount] = useState(0);
-  const [inventoryCount, setInventoryCount] = useState(0);
-  const [deliveriesCount, setDeliveriesCount] = useState(0);
-  const [messagesCount, setMessagesCount] = useState(0);
-  const [productionCount, setProductionCount] = useState(0);
+  const [showSeasonModal, setShowSeasonModal] = useState(false)
+  const [seasons, setSeasons] = useState<Season[]>([])
+  const [clerks, setClerks] = useState<Clerk[]>([])
+  const [selectedSeasonId, setSelectedSeasonId] = useState<number | null>(null)
+  const [farmersCount, setFarmersCount] = useState(0)
+  const [inventoryCount, setInventoryCount] = useState(0)
+  const [deliveriesCount, setDeliveriesCount] = useState(0)
+  const [messagesCount, setMessagesCount] = useState(0)
+  const [productionCount, setProductionCount] = useState(0)
 
-  // Temporary data for demonstration
-  const demoSeasons: Season[] = [
-    {
-      id: '1',
-      name: 'Winter 2023',
-      startDate: '2023-11-01',
-      endDate: '2024-02-28',
-      description: 'Winter wheat and vegetable cultivation',
-    },
-  ];
+  // Season Card Component
+  function SeasonCard({
+    season,
+  }: {
+    season: Season
+  }) {
+    const [activeHarvestId, setActiveHarvestId] = useState<number | null>(null)
+    return (
+      <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-all duration-300">
+        <div className="p-6 bg-primary text-white">
+          <div className="flex items-center gap-3 mb-3">
+            <Calendar className="w-6 h-6" />
+            <h2 className="text-xl font-semibold">{season.name}</h2>
+          </div>
+          <p className="text-sm opacity-90">{season.description}</p>
+        </div>
 
-  const demoHarvests: Harvest[] = [
-    {
-      id: '1',
-      seasonId: '1',
-      type: 'Wheat',
-      quantity: 1500,
-      harvestDate: '2024-02-15',
-    },
-  ];
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="font-medium text-primary">Harvests</h3>
+            <button
+              onClick={() => setSelectedSeasonId(season.id)}
+              className="bg-accent/10 text-accent px-3 py-1 rounded-full text-sm font-medium hover:bg-accent/20 transition-colors"
+            >
+              Add
+            </button>
+          </div>
+
+          {season.harvests.length > 0 ? (
+            season.harvests.map((harvest) => (
+              <div
+                key={harvest.id}
+                className="mb-3 p-4 bg-background rounded-lg border border-gray-100 hover:border-primary/20 transition-colors"
+              >
+                <div className="flex justify-between items-center">
+                  <div className="inline-flex items-center gap-3">
+                    <div className="p-2 bg-primary/10 rounded-full">
+                      <Wheat className="w-4 h-4 text-primary" />
+                    </div>
+                    <p className="font-medium text-primary">{harvest.name}</p>
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      activeHarvestId === harvest.id ? setActiveHarvestId(null) : setActiveHarvestId(harvest.id)
+                    }
+                    className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                  >
+                    {activeHarvestId === harvest.id ? (
+                      <ChevronDown size={18} className="text-secondary" />
+                    ) : (
+                      <ChevronRight size={18} className="text-secondary" />
+                    )}
+                  </button>
+                </div>
+
+                {activeHarvestId === harvest.id && (
+                  <div className="mt-4 pl-10 text-sm">
+                    <p className="font-medium text-primary mb-2">Status</p>
+                    <ul className="space-y-1 text-secondary">
+                      <li className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-primary/60"></span>
+                        Start date: {formatDate(harvest.startDate, "dd-MMM-yyy")}
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-primary/60"></span>
+                        End date: {formatDate(harvest.endDate, "dd-MMM-yyy")}
+                      </li>
+                      <li className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-primary/60"></span>
+                        Target: {harvest.target.toLocaleString()} kg
+                      </li>
+                    </ul>
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-6 text-secondary">
+              <Wheat className="w-8 h-8 mx-auto mb-2 text-primary/30" />
+              <p>No harvests recorded yet</p>
+              <button
+                onClick={() => setSelectedSeasonId(season.id)}
+                className="mt-2 text-accent hover:underline text-sm"
+              >
+                Add your first harvest
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Backend fetching of data
+  const fetchSeasons = async () => {
+    try {
+      const res = await window.electron.invoke("seasons:get-all")
+      setSeasons(res.seasons)
+    } catch (err) {
+      console.error("Error fetching seasons: ", err)
+    }
+  }
+
+  const fetchClerks = async () => {
+    try {
+      const clerks = await window.electron.invoke("get-clerks")
+      setClerks(clerks)
+    } catch (err) {
+      console.error("Error fetching clerks: ", err)
+    }
+  }
 
   useEffect(() => {
-    const fetchClerks = async () => {
-      try {
-        const clerks = await window.electron.invoke('get-clerks');
-        setClerks(clerks);
-      } catch (err) {
-        console.error('Error fetching clerks: ', err);
-      }
-    }
+    fetchSeasons()
     fetchClerks()
-  }, []);
+  }, [])
 
   useEffect(() => {
     // Fetch data counts (replace with actual API calls)
-    setFarmersCount(120); // Example data
-    setInventoryCount(45);
-    setDeliveriesCount(30);
-    setMessagesCount(15);
-    setProductionCount(20);
-  }, []);
+    setFarmersCount(120) // Example data
+    setInventoryCount(45)
+    setDeliveriesCount(30)
+    setMessagesCount(15)
+    setProductionCount(20)
+  }, [])
 
   return (
-    <div className="min-h-screen bg-background text-primary">
+    <div className="min-h-screen overflow-auto bg-background text-primary">
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <NavLink to="/home/dashboard">
-            <h1 className="text-3xl font-bold text-teal-600">Kilimogen Admin</h1>
+      <header className="bg-white shadow-sm sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+          <NavLink to="/home/dashboard" className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+              <Wheat className="w-5 h-5 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-primary">Kilimogen Admin</h1>
           </NavLink>
+
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center">
+              <User className="w-5 h-5 text-primary" />
+            </div>
+          </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        <h2 className="text-2xl font-semibold mb-6">Overview</h2>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+          <h2 className="text-2xl font-bold mb-2 sm:mb-0">Dashboard Overview</h2>
+          <div className="flex gap-2">
+            <button
+              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
+              onClick={() => setShowSeasonModal(true)}
+            >
+              <Plus size={18} />
+              <span>New Season</span>
+            </button>
+            <button
+              className="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors flex items-center gap-2"
+              onClick={() => (window.location.href = "/auth/clerk/register")}
+            >
+              <Plus size={18} />
+              <span>New Clerk</span>
+            </button>
+          </div>
+        </div>
 
         {/* Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
           <OverviewCard
             title="Farmers"
             count={farmersCount}
-            icon={<User className="w-8 h-8 text-teal-600" />}
+            icon={<User className="w-6 h-6 text-white" />}
             link="/home/farmers"
+            color="bg-primary"
           />
           <OverviewCard
             title="Inventory"
             count={inventoryCount}
-            icon={<Package className="w-8 h-8 text-orange-500" />}
+            icon={<Package className="w-6 h-6 text-white" />}
             link="/home/inventory"
+            color="bg-accent"
           />
           <OverviewCard
             title="Deliveries"
             count={deliveriesCount}
-            icon={<Truck className="w-8 h-8 text-blue-500" />}
+            icon={<Truck className="w-6 h-6 text-white" />}
             link="/home/deliveries"
+            color="bg-primary"
           />
           <OverviewCard
             title="Messages"
             count={messagesCount}
-            icon={<MessageSquare className="w-8 h-8 text-purple-500" />}
+            icon={<MessageSquare className="w-6 h-6 text-white" />}
             link="/home/messaging"
+            color="bg-accent"
           />
           <OverviewCard
             title="Production"
             count={productionCount}
-            icon={<BarChart2 className="w-8 h-8 text-green-500" />}
+            icon={<BarChart2 className="w-6 h-6 text-white" />}
             link="/home/production"
+            color="bg-primary"
           />
         </div>
 
         {/* Seasons Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {demoSeasons.map((season) => (
-            <SeasonCard
-              key={season.id}
-              season={season}
-              harvests={demoHarvests.filter((h) => h.seasonId === season.id)}
-            />
-          ))}
+        <div className="mb-10">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Seasons</h2>
+            <button
+              className="text-accent hover:text-accent/80 inline-flex items-center gap-2 transition-colors"
+              onClick={() => setShowSeasonModal(true)}
+            >
+              <PlusCircle size={20} />
+              <span className="font-medium">Add Season</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {seasons.length > 0 ? (
+              seasons.map((season) => <SeasonCard key={season.id} season={season} />)
+            ) : (
+              <div className="col-span-full bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
+                <div className="mx-auto w-16 h-16 bg-background rounded-full flex items-center justify-center mb-4">
+                  <Calendar className="w-8 h-8 text-primary/60" />
+                </div>
+                <h3 className="text-xl font-medium text-primary mb-2">No Seasons Yet</h3>
+                <p className="text-secondary mb-4">Create your first season to start tracking harvests</p>
+                <button
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors inline-flex items-center gap-2"
+                  onClick={() => setShowSeasonModal(true)}
+                >
+                  <Plus size={18} />
+                  <span>Add Season</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Display the clerks in tabular form */}
-        <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-4">Clerks</h2>
-          <button className='p-2 bg-teal-700 text-white inline-flex' onClick={() => window.location.href = '/auth/clerk/register'}><Plus/> Add</button>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr>
-                  <th className="px-4 py-2 bg-teal-600 text-white">Name</th>
-                  <th className="px-4 py-2 bg-teal-600 text-white">Email</th>
-                  <th className="px-4 py-2 bg-teal-600 text-white">Role</th>
-                  <th className="px-4 py-2 bg-teal-600 text-white">Avatar</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clerks.map((clerk) => (
-                  <tr key={clerk.id}>
-                    <td className="border px-4 py-2">{clerk.firstName} {clerk.lastName}</td>
-                    <td className="border px-4 py-2">{clerk.email}</td>
-                    <td className="border px-4 py-2">{clerk.role}</td>
-                    <td className="border px-4 py-2"><img className='w-10 h-10 rounded-full object-cover' src={`data:image/png;base64,${clerk.avatar}`} alt="avatar" /></td>
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">Clerks</h2>
+            <button
+              className="text-accent hover:text-accent/80 inline-flex items-center gap-2 transition-colors"
+              onClick={() => (window.location.href = "/auth/clerk/register")}
+            >
+              <PlusCircle size={20} />
+              <span className="font-medium">Add Clerk</span>
+            </button>
+          </div>
+
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr>
+                    <th className="px-6 py-3 bg-primary text-white text-left text-sm font-medium">Name</th>
+                    <th className="px-6 py-3 bg-primary text-white text-left text-sm font-medium">Email</th>
+                    <th className="px-6 py-3 bg-primary text-white text-left text-sm font-medium">Role</th>
+                    <th className="px-6 py-3 bg-primary text-white text-left text-sm font-medium">Avatar</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {clerks.length > 0 ? (
+                    clerks.map((clerk) => (
+                      <tr key={clerk.id} className="hover:bg-background/50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-medium">
+                            {clerk.firstName} {clerk.lastName}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-secondary">{clerk.email}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
+                            {clerk.role}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20">
+                            <img
+                              className="w-full h-full object-cover"
+                              src={`data:image/png;base64,${clerk.avatar}`}
+                              alt={`${clerk.firstName} ${clerk.lastName}`}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan={4} className="px-6 py-8 text-center text-secondary">
+                        No clerks found. Add your first clerk to get started.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </main>
 
       {/* Modals */}
-      {showSeasonModal && (
-        <AddSeasonModal onClose={() => setShowSeasonModal(false)} />
-      )}
+      {showSeasonModal && <AddSeasonModal onClose={() => setShowSeasonModal(false)} />}
 
-      {showHarvestModal && (
-        <AddHarvestModal
-          seasons={demoSeasons}
-          onClose={() => setShowHarvestModal(false)}
-        />
-      )}
+      {selectedSeasonId && <AddHarvestModal seasonId={selectedSeasonId} onClose={() => setSelectedSeasonId(null)} />}
     </div>
-  );
-}
-
-// Season Card Component
-function SeasonCard({
-  season,
-  harvests,
-}: {
-  season: Season;
-  harvests: Harvest[];
-}) {
-  return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden">
-      <div className="p-6 bg-teal-600 text-white">
-        <div className="flex items-center gap-3 mb-3">
-          <Calendar className="w-6 h-6" />
-          <h2 className="text-xl font-semibold">{season.name}</h2>
-        </div>
-        <p className="text-sm opacity-90">{season.description}</p>
-      </div>
-
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-medium text-teal-600">Harvests</h3>
-          <span className="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-sm">
-            {harvests.length} records
-          </span>
-        </div>
-
-        {harvests.map((harvest) => (
-          <div
-            key={harvest.id}
-            className="flex items-center gap-3 mb-3 p-3 bg-teal-50 rounded-lg"
-          >
-            <Wheat className="w-5 h-5 text-teal-600" />
-            <div>
-              <p className="font-medium text-teal-900">{harvest.type}</p>
-              <p className="text-sm text-gray-600">
-                {harvest.quantity} kg · {harvest.harvestDate}
-              </p>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// Add Season Modal
-function AddSeasonModal({ onClose }: { onClose: () => void }) {
-  const [sending, setSending] = useState(false);
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSending(true);
-    const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData);
-
-    try {
-      const res = await window.electron.invoke(
-        'add-season',
-        data,
-      );
-
-      notify(res.passed, res.message);
-      e.currentTarget.reset;
-    } catch (err) {
-      console.error('Error submitting form: ', err);
-    } finally {
-      setSending(false);
-    }
-  };
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <ToastContainer />
-      <div className="bg-white rounded-xl w-full max-w-md p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold text-teal-600">
-            Add New Season
-          </h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X size={24} />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Season Name
-            </label>
-            <input
-              type="text"
-              name="seasonName"
-              className="w-full px-4 py-2 border rounded-lg eal-500 focus:border-teal-500"
-              placeholder="e.g., 2024/25"
-              required
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Start Date
-              </label>
-              <input
-                type="date"
-                name="startDate"
-                className="w-full px-4 py-2 border rounded-lg eal-500"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                End Date
-              </label>
-              <input
-                type="date"
-                name="endDate"
-                className="w-full px-4 py-2 border rounded-lg eal-500"
-                required
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Season Target(kg)
-            </label>
-            <input
-              type="number"
-              name="target"
-              className="w-full px-4 py-2 border rounded-lg eal-500 focus:border-teal-500"
-              placeholder="e.g., 1000"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description (optional)
-            </label>
-            <textarea
-              rows={3}
-              name="description"
-              className="w-full px-4 py-2 border rounded-lg eal-500"
-              placeholder="Season notes..."
-            />
-          </div>
-
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700"
-              disabled={sending}
-            >
-              {sending ? 'Saving...' : 'Create Season'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-// Add Harvest Modal
-function AddHarvestModal({
-  onClose,
-}: {
-  seasons: Season[];
-  onClose: () => void;
-}) {
-  const [seasons, setseasons] = useState<{ name: string; id: number }[]>([]);
-  const [sending, setSending] = useState(false);
-
-  useEffect(() => {
-    const fetchSeasons = async () => {
-      const res = await window.electron.invoke('get-seasons');
-      setseasons(res.seasons);
-    };
-    fetchSeasons();
-  }, []);
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setSending(true);
-    const formData = new FormData(e.currentTarget);
-    const data = Object.fromEntries(formData);
-
-    try {
-      const res = await window.electron.invoke(
-        'add-harvest',
-        data,
-      );
-
-      notify(res.passed, res.message);
-    } catch (err) {
-      console.error('Error submitting form: ', err);
-    } finally {
-      setSending(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <ToastContainer />
-      <div className="bg-white rounded-xl w-full max-w-md p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h3 className="text-xl font-semibold text-orange-600">
-            Record New Harvest
-          </h3>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-          >
-            <X size={24} />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Harvest Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              className="w-full px-4 py-2 border rounded-lg range-500"
-              placeholder="eg. Harverst 1"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Select Season
-            </label>
-            <select
-              name="season"
-              required
-              className="w-full px-4 py-2 border rounded-lg range-500"
-            >
-              <option value="">-----Select Season-----</option>
-              {seasons.map((season) => (
-                <option key={season.id} value={season.id}>
-                  {season.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Start Date
-              </label>
-              <input
-                type="date"
-                name="startDate"
-                className="w-full px-4 py-2 border rounded-lg range-500"
-                placeholder="e.g., Wheat"
-                required
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                End Date
-              </label>
-              <input
-                type="date"
-                name="endDate"
-                className="w-full px-4 py-2 border rounded-lg range-500"
-                placeholder="0"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Target
-            </label>
-            <input
-              type="number"
-              name="target"
-              className="w-full px-4 py-2 border rounded-lg range-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
-            <textarea
-              rows={3}
-              name="description"
-              className="w-full px-4 py-2 border rounded-lg range-500"
-            />
-          </div>
-
-          <div className="flex justify-end gap-3">
-            <button
-              disabled={sending}
-              type="submit"
-              className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
-            >
-              {sending ? 'Saving...' : 'Record Harvest'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-function OverviewCard({
-  title,
-  count,
-  icon,
-  link,
-}: {
-  title: string;
-  count: number;
-  icon: JSX.Element;
-  link: string;
-}) {
-  return (
-    <NavLink
-      to={link}
-      className="bg-white shadow-md rounded-lg p-6 flex items-center gap-4 hover:shadow-lg transition-shadow"
-    >
-      <div className="p-4 bg-teal-50 rounded-full">{icon}</div>
-      <div>
-        <h3 className="text-lg font-semibold text-primary">{title}</h3>
-        <p className="text-2xl font-bold text-teal-600">{count}</p>
-      </div>
-    </NavLink>
-  );
+  )
 }

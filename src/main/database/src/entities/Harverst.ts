@@ -18,7 +18,7 @@ export class Harvest {
     @Column({nullable: true})
     target: number;
 
-    @ManyToOne(() => Season, season => season.harversts)
+    @ManyToOne(() => Season, season => season.harvests)
     season: Season
 
     @OneToMany(() => Delivery, deliveries => deliveries.harvest)

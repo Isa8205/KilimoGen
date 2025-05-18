@@ -25,7 +25,7 @@ import TitleBar from "./layout/Titlebar";
 import NotificationsPage from "./pages/Notifications";
 
 function App() {
-  const [settings, setSettings] = useRecoilState(settingsState)
+  const [settings, setSettings] = useRecoilState(settingsState);
   const setSessionData = useRecoilState(sessionState)[1];
 
   // Get settings from localStorage and load it to recoil state
@@ -33,15 +33,15 @@ function App() {
     (async () => {
       const userSettings = await window.electron.invoke("get-settings");
       setSettings(userSettings);
-    })()
-  },[])
+    })();
+  }, []);
 
   // Ensure to sync the settings with the backend
   useEffect(() => {
-    (async () => {
-      await window.electron.invoke('set-settings', settings)
-    })
-  }, [settings])
+    async () => {
+      await window.electron.invoke("set-settings", settings);
+    };
+  }, [settings]);
 
   // Get current session if any
   useEffect(() => {
@@ -50,84 +50,87 @@ function App() {
       if (response.user) {
         setSessionData(response.user);
       }
-    })()
+    })();
   }, []);
 
   return (
     <div>
-      <TitleBar/>
-    <div className="relative ">
-      <Routes>
-        {/* Manager admin panel */}
-        <Route path="/admin">
-          <Route path="" element={<AdminPanel />} />
-        </Route>
+      <TitleBar />
 
-        {/* Landing Page Route */}
-        <Route path="/" element={<LandingPage />} />
-
-        {/* Authentication Routes */}
-        <Route path="/auth">
-          {/* Clerk Authentication */}
-          <Route path="clerk">
-            <Route path="login" element={<ClerkLogin />} />
-            <Route path="register" element={<ClerkRegister />} />
+      <div className="relative h-[calc(100vh-35px)] overflow-auto bg-background">
+        <Routes>
+          {/* Manager admin panel */}
+          <Route path="/admin">
+            <Route path="" element={<AdminPanel />} />
           </Route>
 
-          {/* Manager Authentication */}
-          <Route path="manager">
-            <Route path="login" element={<ManagerLogin />} />
-            <Route path="register" element={<ManagerRegister />} />
+          {/* Landing Page Route */}
+          <Route path="/" element={<LandingPage />} />
+
+          {/* Authentication Routes */}
+          <Route path="/auth">
+            {/* Clerk Authentication */}
+            <Route path="clerk">
+              <Route path="login" element={<ClerkLogin />} />
+              <Route path="register" element={<ClerkRegister />} />
+            </Route>
+
+            {/* Manager Authentication */}
+            <Route path="manager">
+              <Route path="login" element={<ManagerLogin />} />
+              <Route path="register" element={<ManagerRegister />} />
+            </Route>
+
+            {/* Password Management */}
+            <Route
+              path="forgot-password"
+              element={<div>Forgot Password</div>}
+            />
+            <Route path="reset-password" element={<div>Reset Password</div>} />
           </Route>
 
-          {/* Password Management */}
-          <Route path="forgot-password" element={<div>Forgot Password</div>} />
-          <Route path="reset-password" element={<div>Reset Password</div>} />
-        </Route>
+          {/* Main Application Routes */}
+          <Route path="/home" element={<Home />}>
+            {/* Dashboard */}
+            <Route path="dashboard" element={<Dashboard />} />
 
-        {/* Main Application Routes */}
-        <Route path="/home" element={<Home />}>
-          {/* Dashboard */}
-          <Route path="dashboard" element={<Dashboard />} />
+            {/* Members Management */}
+            <Route path="farmers">
+              <Route path="" element={<Farmers />} />
+              <Route path="add" element={<FarmerRegister />} />
+              <Route path="edit/:id" element={<div>Edit Member Form</div>} />
+              <Route path=":id" element={<FarmerProfile />} />
+            </Route>
 
-          {/* Members Management */}
-          <Route path="farmers">
-            <Route path="" element={<Farmers />} />
-            <Route path="add" element={<FarmerRegister />} />
-            <Route path="edit/:id" element={<div>Edit Member Form</div>} />
-            <Route path=":id" element={<FarmerProfile/>} />
+            {/* Production */}
+            <Route path="production" element={<Production />} />
+
+            {/* Deliveries */}
+            <Route path="deliveries" element={<Deliveries />} />
+
+            {/* Inventory Management */}
+            <Route path="inventory">
+              <Route path="" Component={Inventory} />
+              <Route path="add" Component={InventoryForm} />
+              <Route path="edit/:id" element={<div>Edit Inventory Form</div>} />
+              <Route path=":id" element={<div>View Inventory Details</div>} />
+            </Route>
+
+            {/* Reports */}
+            <Route path="reports" element={<Reports />} />
+
+            {/* Messaging */}
+            <Route path="messaging" element={<Messaging />} />
+
+            {/* Settings  */}
+            <Route path="settings" element={<SettingsPage />} />
           </Route>
 
-          {/* Production */}
-          <Route path="production" element={<Production />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
 
-          {/* Deliveries */}
-          <Route path="deliveries" element={<Deliveries />} />
-
-          {/* Inventory Management */}
-          <Route path="inventory">
-            <Route path="" Component={Inventory} />
-            <Route path="add" Component={InventoryForm} />
-            <Route path="edit/:id" element={<div>Edit Inventory Form</div>} />
-            <Route path=":id" element={<div>View Inventory Details</div>} />
-          </Route>
-
-          {/* Reports */}
-          <Route path="reports" element={<Reports />} />
-
-          {/* Messaging */}
-          <Route path="messaging" element={<Messaging />} />
-
-          {/* Settings  */}
-          <Route path="settings" element={<SettingsPage />} />
-        </Route>
-
-        <Route path="/notifications" element={<NotificationsPage/>}/>
-
-        <Route path="/settings" element={<SettingsPage/>} />
-      </Routes>
-    </div>
-
+          <Route path="/settings" element={<SettingsPage />} />
+        </Routes>
+      </div>
     </div>
   );
 }

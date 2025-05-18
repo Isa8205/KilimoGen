@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "outDir": "dist",                        // output directory for compiled files
     "target": "ESNext",
     "module": "ESNext",
     "lib": ["DOM", "ESNext"],
