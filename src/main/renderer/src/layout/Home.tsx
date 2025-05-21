@@ -264,7 +264,7 @@ const Home = () => {
 
           <Navbar />
 
-          <section className="content w-full text-white h-[calc(100vh-35px)] flex flex-col">
+          <section className="content w-full text-white h-[100vh] flex flex-col">
             {/* The header of the right section */}
             <div className="flex justify-end items-center bg-white text-black p-2 shadow-md ">
 

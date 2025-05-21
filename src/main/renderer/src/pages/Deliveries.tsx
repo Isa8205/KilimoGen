@@ -6,7 +6,7 @@ import {
   RefreshCcw,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Fuse, { FuseResult } from "fuse.js";
 import axios from "axios";
 import notify from "../utils/ToastHelper";
@@ -16,6 +16,8 @@ import { useRecoilState } from "recoil";
 import { sessionState } from "@/store/store";
 import { motion } from "framer-motion";
 import errorImage from "@/assets/images/backgrounds/404_2.svg";
+import Modal from "@/components/Modal/Modal";
+import useClickOutside from "@/hooks/useClickOutside";
 
 export function Deliveries() {
   // Get the session data
@@ -113,10 +115,12 @@ export function Deliveries() {
     }
   };
 
-  // Modal body and box
+  // Modal functionality
+  const addDeliveryRef = useRef<HTMLDivElement>(null);
+  useClickOutside(addDeliveryRef, () => {
+    setModalDisp(false);
+  });
   const [modalDisp, setModalDisp] = useState(false);
-  const Modal = () => {
-    const user = useRecoilState(sessionState)[0];
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const formData = new FormData(e.currentTarget);
@@ -133,97 +137,7 @@ export function Deliveries() {
         }, 1500);
       }
     };
-    return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-50">
-        <ToastContainer />
-        <form
-          onSubmit={handleSubmit}
-          className="bg-white rounded-lg shadow-lg w-full max-w-md"
-        >
-          {/* Dialog Header */}
-          <div className="border-b p-4">
-            <span className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Add New Delivery</h2>
-              <X
-                className="bg-gray-100 cursor-pointer hover:bg-red-500 hover:text-white rounded-sm"
-                onClick={() => setModalDisp(false)}
-              />
-            </span>
-            <p className="text-sm text-gray-600">
-              Enter the details for the new delivery.
-            </p>
-          </div>
-
-          {/* Dialog Content */}
-          <div className="p-4">
-            <div className="flex flex-col gap-2 justify-between">
-              <div className="flex justify-between">
-                {/* FarmerNumber Input */}
-                <div className="">
-                  <label
-                    htmlFor="farmer-number"
-                    className="text-right font-medium text-sm text-gray-700"
-                  >
-                    Farmer Number
-                  </label>
-                  <input
-                    min="1"
-                    required
-                    type="number"
-                    id="farmer-number"
-                    name="farmerNumber"
-                    className="col-span-3 p-2 border rounded-md focus:outline-none "
-                  />
-                </div>
-                {/* BerryType Input */}
-                <div className="">
-                  <label
-                    htmlFor="berryType"
-                    className="text-right font-medium text-sm text-gray-700"
-                  >
-                    Berry Type
-                  </label>
-                  <select
-                    name="berryType"
-                    id="berryType"
-                    className="w-full p-2 border rounded-md focus:outline-none"
-                  >
-                    <option value="CHERRY">CHERRY</option>
-                    <option value="MBUNI">MBUNI</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Quantity Input */}
-              <div className="flex flex-col items-start">
-                <label
-                  htmlFor="quantity"
-                  className="text-right font-medium text-sm text-gray-700"
-                >
-                  Quantity
-                </label>
-                <input
-                  min="1"
-                  required
-                  type="number"
-                  id="quantity"
-                  name="quantity"
-                  className="col-span-3 p-2 border rounded-md focus:outline-none "
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Dialog Footer */}
-          <div className="border-t p-4 flex justify-end">
-            <button className="bg-gray-100 text-gray-600 border-2 border-accent hover:text-white py-2 px-4 rounded-md hover:bg-accent focus:outline-none">
-              Add Delivery
-            </button>
-          </div>
-        </form>
-      </div>
-    );
-  };
+  
 
   // The component for the delivery filtering:
   const FilterDropdown = () => {
@@ -279,7 +193,6 @@ export function Deliveries() {
     <section className="text-gray-700">
       <ToastContainer />
       <div>
-        {modalDisp && <Modal />}
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold mb-4">Deliveries</h2>
 
@@ -470,6 +383,87 @@ export function Deliveries() {
           </div>
         ) : null}
       </div>
+
+      <Modal
+        ref={addDeliveryRef}
+        title="Add Delivery"
+        isOpen={modalDisp}
+        onClose={() => setModalDisp(false)}
+        >
+        <form
+          onSubmit={handleSubmit}
+          className=""
+        >
+          <ToastContainer/>
+          {/* Dialog Content */}
+          <div className="p-4">
+            <div className="flex flex-col gap-2 justify-between">
+                {/* FarmerNumber Input */}
+                <div className="my-2">
+                  <label
+                    htmlFor="farmer-number"
+                    className="block font-medium text-sm text-gray-700"
+                  >
+                    Farmer Number
+                  </label>
+                  <input
+                    min="1"
+                    required
+                    type="number"
+                    id="farmer-number"
+                    name="farmerNumber"
+                    className="w-full p-2 border rounded-md focus:outline-none "
+                  />
+                </div>
+                {/* BerryType Input */}
+                <div className="my-2">
+                  <label
+                    htmlFor="berryType"
+                    className="text-right font-medium text-sm text-gray-700"
+                  >
+                    Berry Type
+                  </label>
+                  <select
+                    name="berryType"
+                    id="berryType"
+                    className="w-full p-2 border rounded-md focus:outline-none"
+                  >
+                    <option value="CHERRY">CHERRY</option>
+                    <option value="MBUNI">MBUNI</option>
+                  </select>
+                </div>
+
+              {/* Quantity Input */}
+              <div className="my-2">
+                <label
+                  htmlFor="quantity"
+                  className="text-right font-medium text-sm text-gray-700"
+                >
+                  Quantity
+                </label>
+                <input
+                  min="1"
+                  required
+                  type="number"
+                  id="quantity"
+                  name="quantity"
+                  className="w-full p-2 border border-gray-200 rounded-md focus:outline-none "
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Dialog Footer */}
+          <div className="mt-4 flex justify-end">
+            <button type="button" onClick={() => setModalDisp(false)} className="text-white bg-gray-500 hover:bg-gray-600 text-sm py-2 px-4 rounded-md mr-2">
+              Cancel
+            </button>
+            <button className="bg-orange-500 hover:bg-orange-600 text-white py-2 px-4 rounded-md">
+              Add Delivery
+            </button>
+          </div>
+        </form>
+        </Modal>
     </section>
   );
 }

@@ -1,20 +1,21 @@
 {
   "compilerOptions": {
-    "outDir": "dist",                        // output directory for compiled files
-    "target": "ESNext",
-    "module": "ESNext",
-    "lib": ["DOM", "ESNext"],
-    "jsx": "react-jsx",                      // or "react" if using older React setup
-    "strict": true,
-    "esModuleInterop": true,
-    "moduleResolution": "Node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
     "baseUrl": ".",                          // allows us to use paths
     "paths": {
-      "@/*": ["src/*"]                       // adjust if your src is deeper
-    },
-    "skipLibCheck": true,                     // optional, speeds up TS
+      "@/*": ["./src/*"]                       // adjust if your src is deeper
+    },                       // output directory for compiled files
+    "target": "ES2020",
+    "module": "ESNext",
+    "lib": ["DOM", "ESNext"],                     // or "react" if using older React setup
+    "strict": true,
+    "skipLibCheck": true,
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
     "typeRoots": ["node_modules/@types", "src/types"]
   },
   "include": ["src/**/*"],

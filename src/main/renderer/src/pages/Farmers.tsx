@@ -14,10 +14,9 @@ import { motion } from "framer-motion";
 import { useRecoilState } from "recoil";
 import { farmersState, sessionState } from "@/store/store";
 import errorImage from "@/assets/images/backgrounds/404_2.svg";
-import { DropDown } from "@/components/DropDown";
 import Modal from "@/components/Modal/Modal";
 import { toast } from "react-toastify";
-import notify, { properties } from "@/utils/ToastHelper";
+import { properties } from "@/utils/ToastHelper";
 export function Farmers() {
   // Get the session data
   const user = useRecoilState(sessionState)[0];

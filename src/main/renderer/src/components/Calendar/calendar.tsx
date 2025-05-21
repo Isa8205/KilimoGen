@@ -3,8 +3,10 @@ import {
   ChevronRightCircle,
 } from "lucide-react";
 import React, { useEffect, useState } from "react";
-import EventAddModal from "./EventAddModal";
 import { formatMonth, generateCalendarDays, getFirstDayOfMonth } from "@/utils/CalendarDays";
+import Modal from "../Modal/Modal";
+import { formatDate } from "date-fns";
+import EventAddModalContent from "./EventAddModal";
 
 // Simple event interface
 interface Event {
@@ -50,12 +52,6 @@ const Calendar: React.FC = () => {
 
   return (
     <div className="">
-      {modalDisp && (
-        <EventAddModal
-          selectedDate={selectedDate}
-          setModalDisp={setModalDisp}
-        />
-      )}
       <header className="text-center mb-4">
         <div className="flex justify-between items-center">
           <div className="text-3xl font-semibold">
@@ -130,11 +126,11 @@ const Calendar: React.FC = () => {
             <div
               key={index}
               aria-label={`Day ${day.getDate()}`}
-              style={{
-                background:
-                  day.toDateString() === today.toDateString() ? "#fbbf24" : "",
-              }}
-              className="flex flex-col justify-start items-end pb-6 pr-2 border bg-white cursor-pointer hover:bg-orange-50 relative"
+              className={`flex flex-col justify-start items-end pb-6 pr-2 border cursor-pointer relative ${
+                today.toDateString() === day.toDateString()
+                  ? "border-2 border-orange-300 border-l-0"
+                  : "bg-white"
+              }`}
               onClick={() => {
                 setSelectedDate(day);
                 setModalDisp(true);
@@ -150,15 +146,28 @@ const Calendar: React.FC = () => {
                   ) : null
                 )}
               </div>
-              {selectedDate?.toDateString() === day.toDateString() && (
-                <div className="absolute top-1 left-1 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                  <span>!</span>
-                </div>
-              )}
             </div>
           );
         })}
       </div>
+
+      {/* Modal for adding events */}
+      <Modal 
+      title={`Add event for ${formatDate(selectedDate as Date, "dd/MMM/yyyy")}`}
+      isOpen={modalDisp}
+      onClose={() => {
+        setModalDisp(false);
+        setSelectedDate(null);
+      }}
+      >
+        <EventAddModalContent 
+        selectedDate={selectedDate}
+        onClose={() => {
+          setModalDisp(false);
+          setSelectedDate(null);
+        }}
+        />
+      </Modal>
     </div>
   );
 };

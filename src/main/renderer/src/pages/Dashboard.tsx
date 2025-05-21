@@ -62,7 +62,7 @@ export default function Dashboard() {
       </div>
 
       <div className=''>
-      <DeliveriesBarChart />
+      {/* <DeliveriesBarChart /> */}
       </div>
     </section>
   );

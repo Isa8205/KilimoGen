@@ -48,8 +48,6 @@ type Farmer = {
   advances: Advance[];
 };
 
-// ---------------- FLEX TAPE: COMPONENT ------------------
-
 const FarmerProfile: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"deliveries" | "advances">(
     "deliveries"

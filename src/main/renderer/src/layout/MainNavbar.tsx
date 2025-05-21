@@ -1,6 +1,6 @@
 import Logo from "@/components/Logo";
 import { motion } from "framer-motion";
-import { LayoutDashboard, User, Truck, Store, FileTextIcon, MessageSquareShare, ChevronLeft, Settings } from "lucide-react";
+import { LayoutDashboard, User, Truck, Store, FileTextIcon, MessageSquareShare, ChevronLeft, Settings, DollarSign, CreditCard, Coins } from "lucide-react";
 import { useState } from "react";
 import { useLocation, NavLink } from "react-router-dom";
 import  Tooltip  from "../components/Tooltips/Tooltip";
@@ -18,7 +18,8 @@ const Navbar = () => {
       // { icon: <BarChart />, label: "Analytics", route: "analytics", allowedRoles:['clerk', 'admin', 'guest']  },
       // { icon: <DollarSign />, label: "Financials", route: "financials", allowedRoles:['clerk', 'admin', 'guest']  },
       { icon: <FileTextIcon />, label: 'Reports', route: 'reports', allowedRoles:['clerk', 'admin', 'guest']  },
-      { icon: <MessageSquareShare />, label: 'Messaging', route: 'messaging', allowedRoles:['clerk', 'admin', 'guest']  },
+      { icon: <Coins />, label: 'Advances', route: 'advances', allowedRoles:['clerk', 'admin', 'guest']  },
+      // { icon: <MessageSquareShare />, label: 'Messaging', route: 'messaging', allowedRoles:['clerk', 'admin', 'guest']  },
     ];
 
     return (

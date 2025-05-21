@@ -37,3 +37,16 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #388E3C, #1B5E20);
 }
+
+/* Kill number input spinners globally */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  appearance: textfield; /* Safari */
+  -webkit-appearance: textfield; /* Safari */
+  -moz-appearance: textfield; /* Firefox */
+}

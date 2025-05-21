@@ -8,7 +8,7 @@ import {
   BrowserWindow,
   ipcMain,
 } from "electron";
-import path from "path";
+import path, { join } from "path";
 import url from "url";
 import { AppDataSource } from "../database/src/data-source";
 import registerClerkHandlers  from "@/main/electron/ipc/clerkHandlers";
@@ -38,8 +38,7 @@ app.whenReady().then(async () => {
     width: 800,
     height: 600,
     icon: path.join(__dirname, "assets/icon.ico"),
-    frame: false,
-    titleBarStyle: "hidden", // For macOS
+    frame: true,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
@@ -51,14 +50,8 @@ app.whenReady().then(async () => {
   if (NODE_ENV === "development") {
     mainWindow.loadURL("http://localhost:5173");
   } else {
-    mainWindow.loadURL(
-      url.format({
-        pathname: path.join(__dirname, "../renderer/index.html"),
-        protocol: "file:",
-        slashes: true,
-      })
-    );
-  }
+    await mainWindow.loadFile(join(__dirname, "../renderer/index.html"));
+    }
 
   // Window handlers
   ipcMain.handle("window-minimize", () => {

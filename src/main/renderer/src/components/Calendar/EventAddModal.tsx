@@ -5,12 +5,13 @@ import { ToastContainer } from "react-toastify";
 
 interface EventAddModalProps {
     selectedDate: Date | null;
-    setModalDisp: (state: boolean) => void;
+    onClose: () => void;
+
 }
 
-const EventAddModal: React.FC<EventAddModalProps> = ({
+const EventAddModalContent: React.FC<EventAddModalProps> = ({
     selectedDate,
-    setModalDisp,
+    onClose,
 }) => {
     const [dayEvents, setDayEvents] = useState<
       {
@@ -40,7 +41,7 @@ const EventAddModal: React.FC<EventAddModalProps> = ({
       if (response) {
         notify(response.passed, response.message);
         setTimeout(() => {
-          setModalDisp(false);
+          onClose()
         }, 2000);
       } else {
         notify(response.passed, response.message);
@@ -80,26 +81,10 @@ const EventAddModal: React.FC<EventAddModalProps> = ({
     const [isOtherVenue, setOtherVenue] = useState<boolean | null>(false);
 
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 text-black z-50 p-4">
-        <ToastContainer />
-        <div className="bg-white rounded-lg shadow-lg p-2 w-fit max-w-4xl flex flex-col">
-          <div className=" border-b flex justify-between items-center py-2 ">
-            <h2 className="text-lg font-semibold inline-flex items-center gap-2">
-              <CalendarDays className="w-5 h-5" /> Add New Event for{" "}
-              {selectedDate?.toDateString()}
-            </h2>
-            <button
-              type="button"
-              className="bg-gray-100 p-1 mt-0 rounded-md hover:bg-red-500 hover:text-white"
-              onClick={() => setModalDisp(false)}
-              aria-label="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+        <div className="w-full"> 
           <div className="flex items-start ">
             {/* Form Section */}
-            <form ref={formRef} onSubmit={handleSubmit} className="flex-1 p-5 border-r-2">
+            <form ref={formRef} onSubmit={handleSubmit} className="flex-1 p-5">
               {/* Dialog Header */}
 
               {/* Dialog Content */}
@@ -214,8 +199,8 @@ const EventAddModal: React.FC<EventAddModalProps> = ({
             </form>
 
             {/* Events List Section */}
-            {dayEvents.length > 0 && (
-              <div className="p-3">
+            {/* {dayEvents.length > 0 && (
+              <div className="p-3 border-l border-gray-200 h-full">
                 <div className="space-y-3 max-h-[500px] overflow-y-auto">
                   {dayEvents.map((event, index) => (
                     <div
@@ -233,11 +218,14 @@ const EventAddModal: React.FC<EventAddModalProps> = ({
                   ))}
                 </div>
               </div>
-            )}
+            )} */}
           </div>
 
           {/* Dialog Footer */}
-          <div className="border-t pt-4 flex justify-end">
+          <div className="flex justify-end">
+            <button type="button" onClick={onClose} className="bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 mr-2">
+              Cancel
+            </button>
             <button
               onClick={() => formRef.current ? formRef.current.requestSubmit() : null}
               type="submit"
@@ -247,8 +235,7 @@ const EventAddModal: React.FC<EventAddModalProps> = ({
             </button>
           </div>
         </div>
-      </div>
     );
   };
 
-  export default EventAddModal
+  export default EventAddModalContent

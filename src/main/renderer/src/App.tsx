@@ -21,8 +21,8 @@ import { sessionState, settingsState } from "./store/store";
 import Home from "./layout/Home";
 import FarmerProfile from "./pages/FarmerProfile";
 import { AppSettings } from "./types/appSettings";
-import TitleBar from "./layout/Titlebar";
 import NotificationsPage from "./pages/Notifications";
+import Advances from "./pages/Advances";
 
 function App() {
   const [settings, setSettings] = useRecoilState(settingsState);
@@ -55,9 +55,8 @@ function App() {
 
   return (
     <div>
-      <TitleBar />
 
-      <div className="relative h-[calc(100vh-35px)] overflow-auto bg-background">
+      <div className="relative h-[100vh] overflow-auto bg-background">
         <Routes>
           {/* Manager admin panel */}
           <Route path="/admin">
@@ -118,6 +117,9 @@ function App() {
 
             {/* Reports */}
             <Route path="reports" element={<Reports />} />
+
+            {/* Advances */}
+            <Route path="advances" element={<Advances />} />
 
             {/* Messaging */}
             <Route path="messaging" element={<Messaging />} />

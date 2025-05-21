@@ -101,26 +101,24 @@ export function Inventory() {
 
         <span className="flex gap-4 items-center">
           <span className="bg-white text-gray-600 py-1 px-2 gap-2 rounded inline-flex">
-            <Tooltip text="List" className="" position="bottom">
               <button
+                title='List'
                 className="hover:text-orange-500 p-1"
                 onClick={() => setGridDisplay(!gridDisplay)}
               >
                 <List
-                  className={`${!gridDisplay ? 'text-orange-500' : ''} text-xs`}
+                  className={`${!gridDisplay ? 'text-orange-500' : ''} text-xs z-auto`}
                 />
               </button>
-            </Tooltip>
-            <Tooltip text="Grid" className="" position="bottom">
               <button
+              title='Grid'
                 className="hover:text-orange-500 p-1"
                 onClick={() => setGridDisplay(!gridDisplay)}
               >
                 <Grid
-                  className={`${gridDisplay ? 'text-orange-500' : ''} text-xs`}
+                  className={`${gridDisplay ? 'text-orange-500' : ''} text-xs z-auto`}
                 />
               </button>
-            </Tooltip>
           </span>
         </span>
       </div>
@@ -140,7 +138,7 @@ export function Inventory() {
               <th className=" p-2">Category</th>
               <th className=" p-2">Quantity</th>
               <th className=" p-2">Weight/Volume</th>
-              <th className=" p-2">Received on</th>
+              <th className=" p-2">Received</th>
               <th className=" p-2">Received by</th>
               <th className=" p-2">Image</th>
             </tr>
@@ -226,11 +224,9 @@ export function Inventory() {
                       })
                     }
                   </span>
-                  <Tooltip text="Edit" className="" position="bottom">
-                    <button className="hover:text-orange-500">
+                    <button title="Edit" className="hover:text-orange-500">
                       <Edit className="w-4 h-4" />
                     </button>
-                  </Tooltip>
                 </div>
                 {/* Data fields */}
                 <h2 className="text-lg font-semibold text-gray-600">

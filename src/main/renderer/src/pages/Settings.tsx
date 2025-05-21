@@ -31,7 +31,7 @@ import Modal from "@/components/Modal/Modal"
 
 export default function SettingsPage() {
   const user = useRecoilState(sessionState)[0]
-  const [activeCategory, setActiveCategory] = useState("account")
+  const [activeCategory, setActiveCategory] = useState("general")
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
   const [showChangePass, setShowChangePass] = useState(false)
   const [showPassModal, setShowPassModal] = useState(false)
