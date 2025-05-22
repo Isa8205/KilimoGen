@@ -154,19 +154,19 @@ export default function registerDeliveryHandlers() {
     });
     let reportData: any = {cherryGrade: [], mbuniGrade: []};
 
-    if (reportType === "comprehensive") {
+    if (reportType === "all") {
       let cherryGrade: any[] = [];
       let mbuniGrade: any[] = [];
 
       deliveries.forEach((delivery) => {
-        if (delivery.berryType === "Cherry") {
+        if (delivery.berryType === "CHERRY") {
           cherryGrade.push({
             fullName: `${delivery.farmer.firstName} ${delivery.farmer.lastName}`,
             farmerNo: delivery.farmer.farmerNumber,
             grade: delivery.berryType,
             quantity: delivery.quantity,
           });
-        } else if (delivery.berryType === "Mbuni") {
+        } else if (delivery.berryType === "MBUNI") {
           mbuniGrade.push({
             fullName: `${delivery.farmer.firstName} ${delivery.farmer.lastName}`,
             farmerNo: delivery.farmer.farmerNumber,
@@ -181,7 +181,7 @@ export default function registerDeliveryHandlers() {
       let cherryGrade: any[] = [];
 
       deliveries.forEach((delivery) => {
-        if (delivery.berryType === "Cherry") {
+        if (delivery.berryType === "CHERRY") {
           cherryGrade.push({
             fullName: `${delivery.farmer.firstName} ${delivery.farmer.lastName}`,
             farmerNo: delivery.farmer.farmerNumber,
@@ -195,7 +195,7 @@ export default function registerDeliveryHandlers() {
       let mbuniGrade: any[] = [];
 
       deliveries.forEach((delivery) => {
-        if (delivery.berryType === "Mbuni") {
+        if (delivery.berryType === "MBUNI") {
           mbuniGrade.push({
             fullName: `${delivery.farmer.firstName} ${delivery.farmer.lastName}`,
             farmerNo: delivery.farmer.farmerNumber,
@@ -206,8 +206,13 @@ export default function registerDeliveryHandlers() {
       });
       reportData.mbuniGrade = mbuniGrade;
     }
-    console.log(reportData);
 
-    generateDeliveryReport(reportData, reportTitle)
+    const isSaved = generateDeliveryReport(reportData, reportTitle)
+
+    if (isSaved) {
+      return {passed: true, message: "Report generated successfully"}
+    } else {
+      return { passed: false, message: "Encountered an error. Try again"}
+    }
   });
 }

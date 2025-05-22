@@ -7,6 +7,7 @@ import { ArrowLeft, ArrowRight, ChevronDown, Eye, Filter, RefreshCcw, Search } f
 import { report } from "process"
 import useClickOutside from "@/hooks/useClickOutside"
 import Modal from "@/components/Modal/Modal"
+import notify from "@/utils/ToastHelper"
 
 export default function ReportsComponent() {
   const [currentPage, setCurrentPage] = useState(1)
@@ -61,7 +62,7 @@ export default function ReportsComponent() {
   })
 
   return (
-    <section className="text-gray-800">
+    <section className="text-gray-500">
       <div className="flex justify-between mb-4">
         <h2 className="text-2xl font-bold">Reports</h2>
 
@@ -258,8 +259,16 @@ export default function ReportsComponent() {
             e.preventDefault()
             const formData = new FormData(e.currentTarget)
             const data = Object.fromEntries(formData as any)
-            await window.electron.invoke("delivery:generate-report", data)
-            console.log(data)
+            const res = await window.electron.invoke("delivery:generate-report", data)
+
+            if (res.passed) {
+              notify(res.passed, res.message)
+              setTimeout(() => {
+                setDeliveryGenModal(false)
+              }, 2500);
+            } else {
+              notify(res.passed, res.message)
+            }
           }}
           >
           <div className="flex flex-col gap-4">
@@ -282,9 +291,9 @@ export default function ReportsComponent() {
               className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#F65A11]"
               required
             >
-              <option value="Comprehensive">Comprehensive</option>
-              <option value="Cherry">Cherry</option>
-              <option value="Mbuni">Mbuni</option>
+              <option value="all">Comprehensive</option>
+              <option value="cherry">Cherry</option>
+              <option value="mbuni">Mbuni</option>
             </select>
 
 
