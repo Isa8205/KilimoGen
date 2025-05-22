@@ -224,9 +224,6 @@ export function Inventory() {
                       })
                     }
                   </span>
-                    <button title="Edit" className="hover:text-orange-500">
-                      <Edit className="w-4 h-4" />
-                    </button>
                 </div>
                 {/* Data fields */}
                 <h2 className="text-lg font-semibold text-gray-600">

@@ -9,19 +9,13 @@ import {
   Smartphone,
   RefreshCw,
   CreditCard,
-  ChevronRight,
   Eye,
   EyeOff,
   Check,
   X,
   Edit,
   TrashIcon,
-  Wrench,
-  Clock,
-  Activity,
   Globe,
-  Home,
-  Globe2,
 } from "lucide-react"
 import { useRecoilState } from "recoil"
 import { sessionState, settingsState } from "@/store/store"
@@ -38,7 +32,7 @@ export default function SettingsPage() {
   const settings = useRecoilState(settingsState)[0]
 
   const categories = [
-    { id: "general", name: "General", icon: <Globe size={20}/>},
+    { id: "general", name: "General", icon: <Globe size={20} /> },
     { id: "account", name: "Account & Security", icon: <User size={20} /> },
     { id: "profile", name: "Profile Settings", icon: <Palette size={20} /> },
     { id: "notifications", name: "Notification Settings", icon: <Bell size={20} /> },
@@ -49,35 +43,32 @@ export default function SettingsPage() {
   ]
 
   return (
-    <div className="flex flex-col md:flex-row w-full bg-white rounded-lg shadow-sm overflow-hidden">
-      {/* Sidebar Navigation */}
-      <div className="w-full md:w-64 bg-gray-50 border-r border-gray-200">
-        <div className="p-4 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-800">Settings</h2>
+    <div className="w-full bg-white rounded-lg shadow-sm overflow-hidden">
+      <div className="border-b border-gray-200">
+        <div className="p-4">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Settings</h2>
+          <div className="flex flex-wrap gap-2">
+            {categories.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => setActiveCategory(category.id)}
+                className={`flex items-center px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  activeCategory === category.id
+                    ? "bg-orange-50 text-orange-600 border-b-2 border-orange-600"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+              >
+                <span className="mr-2">{category.icon}</span>
+                <span>{category.name}</span>
+              </button>
+            ))}
+          </div>
         </div>
-        <nav className="p-2">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setActiveCategory(category.id)}
-              className={`w-full flex items-center p-3 mb-1 rounded-md text-left transition-colors ${
-                activeCategory === category.id ? "bg-orange-50 text-orange-600" : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              <span className="mr-3">{category.icon}</span>
-              <span className="flex-1">{category.name}</span>
-              <ChevronRight
-                size={16}
-                className={activeCategory === category.id ? "text-orange-600" : "text-gray-400"}
-              />
-            </button>
-          ))}
-        </nav>
       </div>
 
       {/* Content Area */}
       <div className="flex-1 p-6 overflow-auto text-black">
-      {activeCategory === "general" && (
+        {activeCategory === "general" && (
           <div className="space-y-8">
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">General Settings</h3>
@@ -107,11 +98,10 @@ export default function SettingsPage() {
                     <div>
                       <p className="text-sm text-gray-700">Default Receipt Printer</p>
                       <span>{settings.printing.defaultReceiptPrinter || "-----Not set----"}</span>
-                      <select
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500">
+                      <select className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500">
                         <option>Printer 1</option>
                         <option>Printer 2</option>
-                        </select>
+                      </select>
                     </div>
                   </div>
                   <div className="space-y-4">
@@ -155,25 +145,25 @@ export default function SettingsPage() {
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">Account & Security Settings</h3>
               <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Profile picture / avatar</label>
-                  <div className="flex items-center justify-between space-x-4">
-                    <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                      <img
-                        src={user?.avatar ? `data:image/png;base64,${user?.avatar}` : defaultUser}
-                        alt="Profile"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <button className="inline-flex gap-2 px-3 py-1.5 bg-orange-600 text-white rounded-md text-sm hover:bg-orange-700">
-                        <Edit size={16} /> Edit
-                      </button>
-                      <button className="inline-flex gap-2 px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-red-500 hover:text-white">
-                        <TrashIcon size={16}/> Remove
-                      </button>
-                    </div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Profile picture / avatar</label>
+                <div className="flex items-center justify-between space-x-4">
+                  <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                    <img
+                      src={user?.avatar ? `data:image/png;base64,${user?.avatar}` : defaultUser}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <button className="inline-flex gap-2 px-3 py-1.5 bg-orange-600 text-white rounded-md text-sm hover:bg-orange-700">
+                      <Edit size={16} /> Edit
+                    </button>
+                    <button className="inline-flex gap-2 px-3 py-1.5 border border-gray-300 text-gray-700 rounded-md text-sm hover:bg-red-500 hover:text-white">
+                      <TrashIcon size={16} /> Remove
+                    </button>
                   </div>
                 </div>
+              </div>
               <div className="space-y-6">
                 <div>
                   <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
@@ -200,8 +190,13 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                <div>                  
-                  <button className="mt-2 text-sm text-orange-600 hover:text-orange-800" onClick={() => setShowChangePass(true)}>Change password</button>
+                <div>
+                  <button
+                    className="mt-2 text-sm text-orange-600 hover:text-orange-800"
+                    onClick={() => setShowChangePass(true)}
+                  >
+                    Change password
+                  </button>
                 </div>
 
                 <div>
@@ -923,27 +918,35 @@ export default function SettingsPage() {
 
       {showChangePass && (
         <Modal title="Change Password" isOpen={showChangePass} onClose={() => setShowChangePass(false)}>
-          <form className="text-black" onSubmit={async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.currentTarget);
-            const data = Object.fromEntries(formData as any);
-            if (data.new !== data.confirm) {
-              notify(false, "New passwords do not match");
-              return;
-            }
-            try {
-              const res = await window.electron.invoke('change-password', data);
-              notify(res.passed, res.message);
-            } catch (err) {
-              console.error('Error submitting form: ', err);
-            }
-          }}>
-
+          <form
+            className="text-black"
+            onSubmit={async (e) => {
+              e.preventDefault()
+              const formData = new FormData(e.currentTarget)
+              const data = Object.fromEntries(formData as any)
+              if (data.new !== data.confirm) {
+                notify(false, "New passwords do not match")
+                return
+              }
+              try {
+                const res = await window.electron.invoke("change-password", data)
+                notify(res.passed, res.message)
+              } catch (err) {
+                console.error("Error submitting form: ", err)
+              }
+            }}
+          >
             <div className="mt-4">
               <label htmlFor="current" className="block text-sm font-medium text-gray-700">
                 Current Password
               </label>
-              <input type="password" name="current" id="current" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500" required />
+              <input
+                type="password"
+                name="current"
+                id="current"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                required
+              />
             </div>
 
             <div className="mt-4">
@@ -951,9 +954,19 @@ export default function SettingsPage() {
                 New Password
               </label>
               <div className="relative">
-                <input type={showPassModal ? "text" : "password"} name="new" id="new" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500" required />
-                <button type="button" onClick={() => setShowPassModal(!showPassModal)} className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-black leading-5">
-                  {!showPassModal ? <Eye size={16}/> : <EyeOff size={16}/>}
+                <input
+                  type={showPassModal ? "text" : "password"}
+                  name="new"
+                  id="new"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassModal(!showPassModal)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-black leading-5"
+                >
+                  {!showPassModal ? <Eye size={16} /> : <EyeOff size={16} />}
                 </button>
               </div>
             </div>
@@ -962,14 +975,26 @@ export default function SettingsPage() {
               <label htmlFor="confirm" className="block text-sm font-medium text-gray-700">
                 Confirm New Password
               </label>
-                <input type={showPassModal ? "text" : "password"} name="confirm" id="confirm" className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500" required /> 
+              <input
+                type={showPassModal ? "text" : "password"}
+                name="confirm"
+                id="confirm"
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                required
+              />
             </div>
 
             <div className="mt-4 flex gap-2 justify-end">
-              <button className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500" onClick={() => setShowChangePass(false)}>
+              <button
+                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                onClick={() => setShowChangePass(false)}
+              >
                 Cancel
               </button>
-              <button type="submit" className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+              <button
+                type="submit"
+                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+              >
                 Change Password
               </button>
             </div>

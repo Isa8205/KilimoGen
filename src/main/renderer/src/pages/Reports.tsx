@@ -2,9 +2,11 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { ArrowLeft, ArrowRight, ChevronDown, Eye, Filter, RefreshCcw, Search } from "lucide-react"
 import { report } from "process"
+import useClickOutside from "@/hooks/useClickOutside"
+import Modal from "@/components/Modal/Modal"
 
 export default function ReportsComponent() {
   const [currentPage, setCurrentPage] = useState(1)
@@ -15,6 +17,9 @@ export default function ReportsComponent() {
   const [selectedReports, setSelectedReports] = useState<number[]>([])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [selectedFilter, setSelectedFilter] = useState("All")
+  const [generateDropdown, setGenerateDropdown] = useState(false)
+  const [deliveryGenModal, setDeliveryGenModal] = useState(false)
+  const generateRef = useRef<HTMLDivElement>(null)
 
   // Mock data for demonstration
   const reports = [
@@ -25,26 +30,6 @@ export default function ReportsComponent() {
     { id: 5, name: "Customer Satisfaction Survey", date: "2025-05-18", type: "Customer" },
     { id: 6, name: "Monthly Sales Report", date: "2025-05-20", type: "Financial" },
   ]
-
-//   // Filter reports based on search query
-//   const filteredReports = reports.filter(
-//     (report) =>
-//       report.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-//       report.type.toLowerCase().includes(searchQuery.toLowerCase()),
-//   )
-
-//   // Sort reports based on column and direction
-//   const sortedReports = [...filteredReports].sort((a, b) => {
-//     if (sortColumn === "date") {
-//       return sortDirection === "asc"
-//         ? new Date(a.date).getTime() - new Date(b.date).getTime()
-//         : new Date(b.date).getTime() - new Date(a.date).getTime()
-//     } else {
-//       return sortDirection === "asc"
-//         ? a[sortColumn].localeCompare(b[sortColumn])
-//         : b[sortColumn].localeCompare(a[sortColumn])
-//     }
-//   })
 
   // Pagination
   const reportsPerPage = 5
@@ -63,22 +48,6 @@ export default function ReportsComponent() {
     setSearchQuery(e.target.value)
   }
 
-  const handleSelect = (id: number) => {
-    if (selectedReports.includes(id)) {
-      setSelectedReports(selectedReports.filter((item) => item !== id))
-    } else {
-      setSelectedReports([...selectedReports, id])
-    }
-  }
-
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.checked) {
-      setSelectedReports(paginatedReports.map((report) => report.id))
-    } else {
-      setSelectedReports([])
-    }
-  }
-
   const handleView = (reportId: number) => {
     // This will be handled by the parent component
     console.log(`View report ${reportId}`)
@@ -86,14 +55,33 @@ export default function ReportsComponent() {
 
   const filters = ["All", "Financial", "Analytics", "Marketing"]
 
+  // New report dropdown and modal logic
+  useClickOutside(generateRef, () => {
+    setGenerateDropdown(false)
+  })
+
   return (
     <section className="text-gray-800">
       <div className="flex justify-between mb-4">
         <h2 className="text-2xl font-bold">Reports</h2>
 
-        <span className="inline-flex gap-2 text-sm font-semibold">
-          <button className="bg-white text-black shadow-sm py-1 px-4 rounded">Export</button>
-          <button className="bg-[#F65A11] text-white py-1 px-4 rounded">Add</button>
+        <span className="relative text-sm font-semibold">
+          <button
+            onClick={() => setGenerateDropdown(true)} 
+            className="bg-[#F65A11] text-white py-1 px-4 rounded text-sm">
+              Generate Report
+            </button>
+
+          {/* Dropdown for generating reports */}
+          {generateDropdown && (              
+            <div ref={generateRef} className="absolute right-0 left-0 mt-2 bg-white shadow-md rounded-md">
+              <div className="py-2 px-2 text-gray-700">
+                <button className="w-full block rounded px-2 py-2 text-start hover:bg-gray-100" onClick={() => {setDeliveryGenModal(true); setGenerateDropdown(false)}}>
+                  Deliveries
+                </button>
+              </div>
+            </div>
+          )}
         </span>
       </div>
 
@@ -106,11 +94,6 @@ export default function ReportsComponent() {
         <span className="flex-grow border-e-2 border-gray-400 px-6">
           <p>Financial</p>
           <span className="font-bold">{reports.filter((r) => r.type === "Financial").length}</span>
-        </span>
-
-        <span className="flex-grow border-e-2 border-gray-400 px-6">
-          <p>Selected</p>
-          <span className="font-bold">{selectedReports.length}</span>
         </span>
       </div>
 
@@ -175,15 +158,7 @@ export default function ReportsComponent() {
       <table className={`bg-white ${!loading ? "shadow-md" : ""} rounded-md p-2 w-full table-auto border-collapse`}>
         <thead className="bg-gray-200 rounded-md">
           <tr className="text-center">
-            <th className="p-2">
-              <input
-                onChange={handleSelectAll}
-                checked={selectedReports.length === paginatedReports.length && paginatedReports.length > 0}
-                type="checkbox"
-                name="select-all"
-                id="all"
-              />
-            </th>
+
             <th className="p-2">Report Name</th>
             <th className="p-2">Date</th>
             <th className="p-2">Type</th>
@@ -200,14 +175,6 @@ export default function ReportsComponent() {
                   key={report.id}
                   className={`border-b last:border-none text-center ${index % 2 === 0 ? "bg-gray-50" : ""}`}
                 >
-                  <td className="p-2">
-                    <input
-                      onChange={() => handleSelect(report.id)}
-                      checked={selectedReports.includes(report.id)}
-                      type="checkbox"
-                      value={report.id}
-                    />
-                  </td>
                   <td className="p-2 text-start">
                     <a href="#" className="hover:text-[#F65A11]">
                       {report.name}
@@ -279,6 +246,64 @@ export default function ReportsComponent() {
           </button>
         </div>
       ) : null}
+
+      {/* Delivery Generation Modal */}
+      <Modal
+        title="Deliveries Report"
+        isOpen={deliveryGenModal}
+        onClose={() => setDeliveryGenModal(false)}
+      >
+        <form
+          onSubmit={ async (e) => {
+            e.preventDefault()
+            const formData = new FormData(e.currentTarget)
+            const data = Object.fromEntries(formData as any)
+            await window.electron.invoke("delivery:generate-report", data)
+            console.log(data)
+          }}
+          >
+          <div className="flex flex-col gap-4">
+            {/* Set the title of the report */}
+            <label htmlFor="reportTitle" className="text-sm font-semibold">Report Title <b className="text-red-600">*</b></label>
+            <input
+              type="text"
+              id="reportTitle"
+              name="reportTitle"
+              placeholder="Enter report title"
+              className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#F65A11]"
+              required
+            />
+
+            {/* Select the report type (comprehensive, Cherry, Mbuni) */}
+            <label htmlFor="reportType" className="text-sm font-semibold">Report Coverage <b className="text-red-600">*</b></label>
+            <select
+              id="reportType"
+              name="reportType"
+              className="border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-[#F65A11]"
+              required
+            >
+              <option value="Comprehensive">Comprehensive</option>
+              <option value="Cherry">Cherry</option>
+              <option value="Mbuni">Mbuni</option>
+            </select>
+
+
+            <div className="flex justify-end gap-4">
+            <button
+              type="button"
+              className="bg-gray-300 text-gray-700 py-2 px-4 rounded-md"
+              onClick={() => setDeliveryGenModal(false)}
+            >
+              Cancel
+            </button>
+            <button type="submit" className="bg-[#F65A11] text-white py-2 px-4 rounded-md">
+              Generate
+            </button>
+
+            </div>
+          </div>
+        </form>
+      </Modal>  
     </section>
   )
 }

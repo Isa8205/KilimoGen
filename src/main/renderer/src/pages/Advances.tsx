@@ -218,20 +218,9 @@ export default function Advances() {
       >
         <thead className="bg-gray-200 rounded-md">
           <tr className="text-center">
-            <th className="p-2">
-              <input
-                onChange={handleSelectAll}
-                checked={
-                  selectedAdvances.length === paginatedAdvances.length &&
-                  paginatedAdvances.length > 0
-                }
-                type="checkbox"
-                name="select-all"
-                id="all"
-              />
-            </th>
-            <th className="p-2">Farmer Name</th>
+            <th>No.</th>
             <th className="p-2">Farmer Number</th>
+            <th className="p-2">Farmer Name</th>
             <th className="p-2">Date Given</th>
             <th className="p-2">Date Expected</th>
             <th className="p-2">Status</th>
@@ -252,15 +241,17 @@ export default function Advances() {
                     index % 2 === 0 ? "bg-gray-50" : ""
                   }`}
                 >
+                  <td>{index + 1}</td>
+
                   <td className="p-2">
-                    <input
-                      onChange={() => handleSelect(advance.id)}
-                      checked={selectedAdvances.includes(advance.id)}
-                      type="checkbox"
-                      value={advance.id}
-                    />
+                  {advance.farmer.farmerNumber > 100
+                      ? `0${advance.farmer.farmerNumber}`
+                      : advance.farmer.farmerNumber > 10
+                      ? `0${advance.farmer.farmerNumber}`
+                      : advance.farmer.farmerNumber < 10
+                      ? `00${advance.farmer.farmerNumber}`
+                      : `0${advance.farmer.farmerNumber}`}
                   </td>
-                  <td className="p-2">{advance.farmer.farmerNumber}</td>
                   <td className="p-2 text-center">
                     <a href="#" className="hover:text-[#F65A11]">
                       {advance.farmer.firstName} {advance.farmer.lastName}

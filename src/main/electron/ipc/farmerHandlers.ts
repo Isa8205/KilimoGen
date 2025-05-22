@@ -169,7 +169,6 @@ export const registerFarmerHandlers = () => {
       return result;
     };
 
-    const farmerRepository = AppDataSource.getRepository(Farmer);
     let farmers;
     const dbFarmes = AppDataSource.getRepository(Farmer)
       .createQueryBuilder("farmer")

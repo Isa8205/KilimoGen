@@ -5,64 +5,63 @@ import { Farmer } from "@/main/database/src/entities/Farmer";
 import { Harvest } from "@/main/database/src/entities/Harverst";
 import { getSession } from "@/main/electron/session/sessinStore";
 import generateCode from "@/main/utils/codeGenerator";
+import generateDeliveryReport from "@/main/utils/GenerateDeliveryReport";
 import printReceipt from "@/main/utils/printReceipt";
 import sendSms from "@/main/utils/sendSms";
 import { ipcMain } from "electron";
 
 export default function registerDeliveryHandlers() {
   ipcMain.handle("get-deliveries", async (event, data) => {
-      const filter = data.filter
-      const sort = data.sortType || "desc";
-      const page = parseInt(data.page) || 1;
-      const itemsPerPage = parseInt(data.limit) || 20;
-    
-      try {
-        const query = AppDataSource.getRepository(Delivery)
-          .createQueryBuilder("delivery")
-          .leftJoinAndSelect("delivery.farmer", "farmer")
-          .leftJoinAndSelect("delivery.servedBy", "clerks")
-          .select([
-            "delivery.id",
-            "delivery.deliveryCode",
-            "delivery.deliveryDate",
-            "delivery.quantity",
-            "delivery.berryType",
-            "delivery.servedBy",
-            "farmer.id",
-            "farmer.firstName",
-            "farmer.lastName",
-            "clerks.id",
-            "clerks.firstName",
-            "clerks.lastName",
-          ])
-          .orderBy("delivery.deliveryDate", "DESC")
-          .skip((page - 1) * itemsPerPage)
-          .take(itemsPerPage)
-          .orderBy("delivery.deliveryDate", sort === "asc" ? "ASC" : "DESC");
-    
-        if (filter && filter !== "All") {
-          query.andWhere("delivery.berrytype = :filter", { filter });
-        }
-    
-        const deliveries = await query.getManyAndCount();
-    
-    
-        // Get total count of deliveries for correct paginatio
-        const totalPages = Math.ceil(deliveries[1] / itemsPerPage);
-    
-        const res = {
-          passed: true,
-          deliveries: deliveries[0],
-          totalPages: totalPages,
-        };
-        return res
-      } catch (err) {
-        console.log(err);
-        const res = { passed: false };
-        return res
+    const filter = data.filter;
+    const sort = data.sortType || "desc";
+    const page = parseInt(data.page) || 1;
+    const itemsPerPage = parseInt(data.limit) || 20;
+
+    try {
+      const query = AppDataSource.getRepository(Delivery)
+        .createQueryBuilder("delivery")
+        .leftJoinAndSelect("delivery.farmer", "farmer")
+        .leftJoinAndSelect("delivery.servedBy", "clerks")
+        .select([
+          "delivery.id",
+          "delivery.deliveryCode",
+          "delivery.deliveryDate",
+          "delivery.quantity",
+          "delivery.berryType",
+          "delivery.servedBy",
+          "farmer.id",
+          "farmer.firstName",
+          "farmer.lastName",
+          "clerks.id",
+          "clerks.firstName",
+          "clerks.lastName",
+        ])
+        .orderBy("delivery.deliveryDate", "DESC")
+        .skip((page - 1) * itemsPerPage)
+        .take(itemsPerPage)
+        .orderBy("delivery.deliveryDate", sort === "asc" ? "ASC" : "DESC");
+
+      if (filter && filter !== "All") {
+        query.andWhere("delivery.berrytype = :filter", { filter });
       }
-    
-  })
+
+      const deliveries = await query.getManyAndCount();
+
+      // Get total count of deliveries for correct paginatio
+      const totalPages = Math.ceil(deliveries[1] / itemsPerPage);
+
+      const res = {
+        passed: true,
+        deliveries: deliveries[0],
+        totalPages: totalPages,
+      };
+      return res;
+    } catch (err) {
+      console.log(err);
+      const res = { passed: false };
+      return res;
+    }
+  });
   ipcMain.handle("add-delivery", async (event, deliveryData) => {
     const farmerRepository = AppDataSource.getRepository(Farmer);
     const deliveryRepository = AppDataSource.getRepository(Delivery);
@@ -78,15 +77,17 @@ export default function registerDeliveryHandlers() {
 
     try {
       const farmerNumber = parseInt(deliveryData.farmerNumber);
-      const farmer = await farmerRepository.findOneBy({ farmerNumber: farmerNumber });
+      const farmer = await farmerRepository.findOneBy({
+        farmerNumber: farmerNumber,
+      });
       const harverst = await harvestRepository.findOneBy({ id: 1 });
       const delivery = new Delivery();
       let message: string, passed: boolean;
-      const date = new Date()
+      const date = new Date();
 
       if (farmer) {
-        delivery.deliveryCode = generateCode(),
-        delivery.deliveryDate = date.toISOString();
+        (delivery.deliveryCode = generateCode()),
+          (delivery.deliveryDate = date.toISOString());
         delivery.quantity = parseInt(deliveryData.quantity);
         delivery.berryType = deliveryData.berryType;
         delivery.farmerNumber = farmerNumber;
@@ -95,23 +96,35 @@ export default function registerDeliveryHandlers() {
         (delivery.harvest as any) = harverst;
 
         await deliveryRepository.save(delivery);
-        const farmerDeliveries = await farmerRepository.createQueryBuilder("farmer").leftJoinAndSelect('farmer.deliveries', 'deliveries').where("farmer.farmerNumber = :farmerNumber").setParameter('farmerNumber', farmerNumber).getOne()
+        const farmerDeliveries = await farmerRepository
+          .createQueryBuilder("farmer")
+          .leftJoinAndSelect("farmer.deliveries", "deliveries")
+          .where("farmer.farmerNumber = :farmerNumber")
+          .setParameter("farmerNumber", farmerNumber)
+          .getOne();
         const receiptData = {
-          date: delivery.deliveryDate.slice(0,10).split('-').reverse().join('-'),
+          date: delivery.deliveryDate
+            .slice(0, 10)
+            .split("-")
+            .reverse()
+            .join("-"),
           time: `${date.getHours()}:${date.getMinutes()}`,
           servedBy: delivery.servedBy.firstName,
           farmerName: `${delivery.farmer.firstName} ${delivery.farmer.lastName}`,
           farmerNumber: farmer.farmerNumber,
           berryType: delivery.berryType,
           weight: delivery.quantity,
-          seasonTotal: farmerDeliveries?.deliveries.reduce((acc: number, delivery: Delivery) => acc + delivery.quantity, 0)
+          seasonTotal: farmerDeliveries?.deliveries.reduce(
+            (acc: number, delivery: Delivery) => acc + delivery.quantity,
+            0
+          ),
         };
 
-        printReceipt(receiptData)
+        printReceipt(receiptData);
         const smsText = `
         Delivery of ${receiptData.berryType} to ${receiptData.farmerName} is ready. Weight: ${receiptData.weight}kg. Season total: ${receiptData.seasonTotal}kg.
-        `
-        sendSms(farmer.phone.toString(), smsText)
+        `;
+        sendSms(farmer.phone.toString(), smsText);
         passed = true;
         message = "Delivery added successfully";
       } else {
@@ -130,5 +143,71 @@ export default function registerDeliveryHandlers() {
       const res = { passed: false, error: err, message: "Failed. Try again" };
       return res;
     }
+  });
+
+  ipcMain.handle("delivery:generate-report", async (event, data) => {
+    const { reportTitle, reportType } = data;
+    const deliveryRepository = AppDataSource.getRepository(Delivery);
+    const deliveries = await deliveryRepository.find({
+      relations: ["farmer"],
+      order: { deliveryDate: "DESC" },
+    });
+    let reportData: any = {cherryGrade: [], mbuniGrade: []};
+
+    if (reportType === "comprehensive") {
+      let cherryGrade: any[] = [];
+      let mbuniGrade: any[] = [];
+
+      deliveries.forEach((delivery) => {
+        if (delivery.berryType === "Cherry") {
+          cherryGrade.push({
+            fullName: `${delivery.farmer.firstName} ${delivery.farmer.lastName}`,
+            farmerNo: delivery.farmer.farmerNumber,
+            grade: delivery.berryType,
+            quantity: delivery.quantity,
+          });
+        } else if (delivery.berryType === "Mbuni") {
+          mbuniGrade.push({
+            fullName: `${delivery.farmer.firstName} ${delivery.farmer.lastName}`,
+            farmerNo: delivery.farmer.farmerNumber,
+            grade: delivery.berryType,
+            quantity: delivery.quantity,
+          });
+        }
+      });
+      reportData.cherryGrade = cherryGrade;
+      reportData.mbuniGrade = mbuniGrade;
+    } else if (reportType === "cherry") {
+      let cherryGrade: any[] = [];
+
+      deliveries.forEach((delivery) => {
+        if (delivery.berryType === "Cherry") {
+          cherryGrade.push({
+            fullName: `${delivery.farmer.firstName} ${delivery.farmer.lastName}`,
+            farmerNo: delivery.farmer.farmerNumber,
+            grade: delivery.berryType,
+            quantity: delivery.quantity,
+          });
+        }
+      });
+      reportData.cherryGrade = cherryGrade;
+    } else if (reportType === "mbuni") {
+      let mbuniGrade: any[] = [];
+
+      deliveries.forEach((delivery) => {
+        if (delivery.berryType === "Mbuni") {
+          mbuniGrade.push({
+            fullName: `${delivery.farmer.firstName} ${delivery.farmer.lastName}`,
+            farmerNo: delivery.farmer.farmerNumber,
+            grade: delivery.berryType,
+            quantity: delivery.quantity,
+          });
+        }
+      });
+      reportData.mbuniGrade = mbuniGrade;
+    }
+    console.log(reportData);
+
+    generateDeliveryReport(reportData, reportTitle)
   });
 }
