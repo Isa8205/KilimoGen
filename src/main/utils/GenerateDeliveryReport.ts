@@ -1,14 +1,20 @@
-import { app } from "electron";
-import path from "path";
-import fs from "fs";
-import { BrowserWindow } from "electron";
+import { BrowserWindow, app } from "electron";
+import * as fs from "fs";
+import * as path from "path";
+import { once } from "events";
 
-export default function generateDeliveryReport(
-  data: { cherryGrade: []; mbuniGrade: [] },
+type GradeEntry = {
+  fullName: string;
+  farmerNo: string;
+  grade: string;
+  quantity: number;
+};
+
+export default async function generateDeliveryReport(
+  data: { cherryGrade: GradeEntry[]; mbuniGrade: GradeEntry[] },
   reportTitle: string
-): boolean {
+): Promise<boolean> {
   const reportTemplate = `
-
   <!DOCTYPE html>
   <html lang="en">
   <head>
@@ -251,8 +257,8 @@ export default function generateDeliveryReport(
   </body>
   </html>
       
-    `;
-  let saved = false;
+    
+  `;
 
   const window = new BrowserWindow({
     show: false,
@@ -260,24 +266,27 @@ export default function generateDeliveryReport(
       contextIsolation: true,
     },
   });
-  window.loadURL(
+
+  await window.loadURL(
     "data:text/html;charset=utf-8," + encodeURIComponent(reportTemplate)
   );
-  window.webContents.on("did-finish-load", async () => {
-    const data = await window.webContents.printToPDF({
+
+  await once(window.webContents, "did-finish-load");
+
+  try {
+    const pdfBuffer = await window.webContents.printToPDF({
       printBackground: true,
       pageSize: "A4",
     });
 
     const filePath = path.join(app.getPath("desktop"), `${reportTitle}.pdf`);
-    fs.writeFile(filePath, data, (error) => {
-      if (error) {
-        console.error("Error saving PDF:", error);
-      } else {
-        saved = true;
-      }
-    });
-  });
+    fs.writeFileSync(filePath, pdfBuffer);
 
-  return saved;
+    window.close();
+    return true;
+  } catch (error) {
+    console.error("Failed to generate PDF:", error);
+    window.close();
+    return false;
+  }
 }
