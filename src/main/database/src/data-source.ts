@@ -11,6 +11,7 @@ import { Notification } from "@/main/database/src/entities/Notification";
 import { Season } from "@/main/database/src/entities/Seasons";
 import { Session } from "@/main/database/src/entities/Session";
 import { DataSource } from "typeorm";
+import { Report } from '@/main/database/src/entities/Report';
 
 export const AppDataSource = new DataSource({
   type: "sqlite",
@@ -29,6 +30,7 @@ export const AppDataSource = new DataSource({
     Season,
     Session,
     Manager,
+    Report
   ],
   migrations: [],
   subscribers: [],

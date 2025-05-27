@@ -9,7 +9,6 @@ import {
   ipcMain,
 } from "electron";
 import path, { join } from "path";
-import url from "url";
 import { AppDataSource } from "../database/src/data-source";
 import registerClerkHandlers  from "@/main/electron/ipc/clerkHandlers";
 import { registerAuthHandlers } from "@/main/electron/ipc/authHandlers";
@@ -23,6 +22,7 @@ import registerInventoryHandlers from "@/main/electron/ipc/inventoryHandlers";
 import { registerPrinterHandlers } from "@/main/electron/ipc/printHandlers";
 import registerSettingsHandlers from "@/main/electron/ipc/settingsHandlers";
 import registerAdvanceHandlers from "@/main/electron/ipc/advanceHandlers";
+import registerReportHandlers from "@/main/electron/ipc/reportHandlers";
 
 
 dotenv.config();
@@ -82,6 +82,7 @@ app.whenReady().then(async () => {
   registerSettingsHandlers(app)
   registerNotificationHandlers()
   registerAdvanceHandlers()
+  registerReportHandlers(app)
 });
 
 app.on("window-all-closed", () => {
