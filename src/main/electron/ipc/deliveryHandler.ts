@@ -207,7 +207,7 @@ export default function registerDeliveryHandlers() {
       reportData.mbuniGrade = mbuniGrade;
     }
 
-    const isSaved = generateDeliveryReport(reportData, reportTitle)
+    const isSaved = await generateDeliveryReport(reportData, reportTitle)
 
     if (isSaved) {
       return {passed: true, message: "Report generated successfully"}
