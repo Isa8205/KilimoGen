@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { ArrowLeft, ArrowRight, ChevronDown, Download, Eye, Filter, RefreshCcw, Search } from "lucide-react"
 import { report } from "process"
 import useClickOutside from "@/hooks/useClickOutside"
@@ -30,7 +30,6 @@ export default function ReportsComponent() {
     setLoading(true)
     try {
       const data = await window.electron.invoke("report:get-all")
-      console.log("Reports data:", data)
       setReports(data.reports)
     } catch (error) {
       console.error("Error fetching reports:", error)
@@ -73,7 +72,14 @@ export default function ReportsComponent() {
     }
   }
 
-  const filters = ["All", "Financial", "Analytics", "Marketing"]
+  const dataFilters = useMemo(() => {
+    const uniqueCategories = new Set<string>()
+    reports.forEach((report) => {
+      uniqueCategories.add(report.reportType)
+    })
+    return Array.from(uniqueCategories)
+  }, [reports])
+  const filters = ["All", ...dataFilters]
 
   // New report dropdown and modal logic
   useClickOutside(generateRef, () => {
@@ -85,7 +91,7 @@ export default function ReportsComponent() {
   }, [])
 
   return (
-    <section className="text-gray-500">
+    <section className="text-black">
       <div className="flex justify-between mb-4">
         <h2 className="text-2xl font-bold">Reports</h2>
 
@@ -182,7 +188,7 @@ export default function ReportsComponent() {
       <table className={`bg-white ${!loading ? "shadow-md" : ""} rounded-md p-2 w-full table-auto border-collapse`}>
         <thead className="bg-gray-200 rounded-md">
           <tr className="text-center">
-
+            <th className="p-2">No.</th>
             <th className="p-2">Report Name</th>
             <th className="p-2">Date</th>
             <th className="p-2">Type</th>
@@ -199,11 +205,8 @@ export default function ReportsComponent() {
                   key={report.id}
                   className={`border-b last:border-none text-center ${index % 2 === 0 ? "bg-gray-50" : ""}`}
                 >
-                  <td className="p-2 text-center">
-                    <a href="#" className="hover:text-[#F65A11]">
-                      {report.reportName}
-                    </a>
-                  </td>
+                  <td className="p-2">{index + 1}</td>
+                  <td className="p-2">{report.reportName}</td>
                   <td className="p-2">{formatDate(new Date(report.dateGenerated), 'dd-MMM-yyyy')}</td>
                   <td className="p-2">{report.reportType}</td>
                   <td className="p-2">
@@ -286,6 +289,7 @@ export default function ReportsComponent() {
 
             if (res.passed) {
               notify(res.passed, res.message)
+              fetchReports() // Refresh the reports list
               setTimeout(() => {
                 setDeliveryGenModal(false)
               }, 2500);

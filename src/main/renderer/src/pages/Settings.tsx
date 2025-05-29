@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   User,
   Palette,
@@ -16,6 +16,7 @@ import {
   Edit,
   TrashIcon,
   Globe,
+  Package,
 } from "lucide-react"
 import { useRecoilState } from "recoil"
 import { sessionState, settingsState } from "@/store/store"
@@ -30,17 +31,31 @@ export default function SettingsPage() {
   const [showChangePass, setShowChangePass] = useState(false)
   const [showPassModal, setShowPassModal] = useState(false)
   const settings = useRecoilState(settingsState)[0]
+  let devicePrinters;
 
   const categories = [
     { id: "general", name: "General", icon: <Globe size={20} /> },
     { id: "account", name: "Account & Security", icon: <User size={20} /> },
-    { id: "profile", name: "Profile Settings", icon: <Palette size={20} /> },
-    { id: "notifications", name: "Notification Settings", icon: <Bell size={20} /> },
-    { id: "privacy", name: "Privacy Settings", icon: <Shield size={20} /> },
-    { id: "device", name: "Device & App Settings", icon: <Smartphone size={20} /> },
-    { id: "sync", name: "Sync & Integration", icon: <RefreshCw size={20} /> },
-    { id: "billing", name: "Billing & Subscription", icon: <CreditCard size={20} /> },
+    { id: "production", name: "Production", icon: <Package size={20} /> },
+    // { id: "profile", name: "Profile Settings", icon: <Palette size={20} /> },
+    // { id: "notifications", name: "Notification Settings", icon: <Bell size={20} /> },
+    // { id: "privacy", name: "Privacy Settings", icon: <Shield size={20} /> },
+    // { id: "device", name: "Device & App Settings", icon: <Smartphone size={20} /> },
+    // { id: "sync", name: "Sync & Integration", icon: <RefreshCw size={20} /> },
+    // { id: "billing", name: "Billing & Subscription", icon: <CreditCard size={20} /> },
   ]
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await window.electron.invoke("printer:get-all")
+        devicePrinters = res
+        
+      } catch (error) {
+        notify(false, "Failed to fetch device printers")
+      }
+    })()
+  })
 
   return (
     <div className="w-full bg-white rounded-lg shadow-sm overflow-hidden">
@@ -73,24 +88,6 @@ export default function SettingsPage() {
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">General Settings</h3>
 
-              <div className="bg-orange-50 border border-orange-200 rounded-md p-4 mb-6">
-                <div className="flex items-center">
-                  <div className="mr-4">
-                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
-                      <img
-                        src="/placeholder.svg?height=48&width=48"
-                        alt="Profile"
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <h4 className="font-medium">John Doe</h4>
-                    <p className="text-sm text-gray-600">Pro Plan · Member since May 2023</p>
-                  </div>
-                </div>
-              </div>
-
               <div className="space-y-6">
                 <div>
                   <h4 className="text-md font-medium text-gray-700 mb-3">Default preferences</h4>
@@ -105,34 +102,7 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div className="space-y-4">
-                    <div>
-                      <label htmlFor="default-page" className="block text-sm text-gray-700 mb-1">
-                        Default page
-                      </label>
-                      <select
-                        id="default-page"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
-                      >
-                        <option>Dashboard</option>
-                        <option>Projects</option>
-                        <option>Messages</option>
-                        <option>Analytics</option>
-                      </select>
-                    </div>
 
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">Show welcome screen on login</span>
-                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
-                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
-                      </button>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">Enable keyboard shortcuts</span>
-                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
-                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
-                      </button>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -224,6 +194,16 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+        )}
+
+        {activeCategory === "production" && (
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-4">Production Settings</h3>
+
+              <div>
+
+              </div>
+            </div>
         )}
 
         {activeCategory === "profile" && (

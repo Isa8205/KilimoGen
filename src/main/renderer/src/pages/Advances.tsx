@@ -81,8 +81,6 @@ export default function Advances() {
   };
 
   const handlePay = (advanceId: number) => {
-    // This will be handled by the parent component
-    console.log(`Pay advance ${advanceId}`);
   };
 
   // Add modal logic
@@ -96,7 +94,6 @@ export default function Advances() {
     setLoading(true);
     try {
       const data = await window.electron.invoke("advance:get-all");
-      console.log("Advances data:", data);
       setAdvances(data.advances);
     } catch (error) {
       console.error("Error fetching advances:", error);
