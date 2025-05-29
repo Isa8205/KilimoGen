@@ -3,7 +3,7 @@ import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import { Settings, User, LogIn, LogOut, BellIcon, MailOpenIcon, TriangleAlert, RefreshCcw } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import  Tooltip  from "../components/Tooltips/Tooltip";
 import Navbar from "./MainNavbar";
@@ -13,8 +13,10 @@ import defaultAvatar from "@/assets/images/defaultUser.png"
 import useClickOutside from "@/hooks/useClickOutside";
 import { formatDistanceToNow } from "date-fns";
 
+interface DropdownMenuProps {}
+
 const Home = () => {
-    interface DropdownMenuProps {}
+  const location = useLocation();
 
     const ProfileDropdownMenu: React.FC<DropdownMenuProps> = () => {
       const [isOpen, setIsOpen] = useState(false);
@@ -35,7 +37,6 @@ const Home = () => {
           if (res.passed) {
             setTimeout(() => {
               setUser(null)
-              window.location.href = '/home/dashboard';
             }, 1500);
           }
         } catch (err) {
@@ -111,9 +112,9 @@ const Home = () => {
                       </button>
                     </NavLink>
                   ) : (
-                    <NavLink to="/auth/clerk/login">
+                    <NavLink to="/auth/clerk/login" state={{ from: location }}>
                       <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none">
-                        <LogIn className="mr-2 h-4 w-4" />
+                        <LogIn className="mr-2 h-4 w-4"/>
                         login
                       </button>
                     </NavLink>
@@ -269,9 +270,7 @@ const Home = () => {
             <div className="flex justify-end items-center bg-white text-black p-2 shadow-md ">
 
               <div className="relative flex gap-4 items-center">
-                <Tooltip text="Notifications" position="bottom">
                   <NotificationDropdown />
-                </Tooltip>
                 <ProfileDropdownMenu />
               </div>
             </div>
