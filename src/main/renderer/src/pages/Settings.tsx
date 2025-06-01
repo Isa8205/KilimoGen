@@ -3,12 +3,6 @@
 import { useEffect, useState } from "react"
 import {
   User,
-  Palette,
-  Bell,
-  Shield,
-  Smartphone,
-  RefreshCw,
-  CreditCard,
   Eye,
   EyeOff,
   Check,
@@ -16,7 +10,9 @@ import {
   Edit,
   TrashIcon,
   Globe,
-  Package,
+  Coffee,
+  CreditCard,
+  RefreshCw,
 } from "lucide-react"
 import { useRecoilState } from "recoil"
 import { sessionState, settingsState } from "@/store/store"
@@ -25,37 +21,42 @@ import notify from "@/utils/ToastHelper"
 import Modal from "@/components/Modal/Modal"
 
 export default function SettingsPage() {
+  const setSettings = useRecoilState(settingsState)[1]
   const user = useRecoilState(sessionState)[0]
   const [activeCategory, setActiveCategory] = useState("general")
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false)
+  const settings = useRecoilState(settingsState)[0]
+  const [dbSeasons, setDbSeasons] = useState([])
+
+  // Modal handlers
   const [showChangePass, setShowChangePass] = useState(false)
   const [showPassModal, setShowPassModal] = useState(false)
-  const settings = useRecoilState(settingsState)[0]
-  let devicePrinters;
+  const [showSeasonSelectModal, setShowSeasonSelectModal] = useState(false)
+  const [selectedSeason, setSelectedSeason] = useState<string | null>(null)
+
+  const getSeasons = async () => {
+    try {
+      const response = await window.electron.invoke("seasons:get-all")
+      setDbSeasons(response.seasons)
+    } catch (error) {
+      console.error("Error fetching seasons:", error)
+      notify(false, "Failed to fetch seasons")
+    }
+  }
 
   const categories = [
     { id: "general", name: "General", icon: <Globe size={20} /> },
     { id: "account", name: "Account & Security", icon: <User size={20} /> },
-    { id: "production", name: "Production", icon: <Package size={20} /> },
-    // { id: "profile", name: "Profile Settings", icon: <Palette size={20} /> },
-    // { id: "notifications", name: "Notification Settings", icon: <Bell size={20} /> },
-    // { id: "privacy", name: "Privacy Settings", icon: <Shield size={20} /> },
-    // { id: "device", name: "Device & App Settings", icon: <Smartphone size={20} /> },
-    // { id: "sync", name: "Sync & Integration", icon: <RefreshCw size={20} /> },
-    // { id: "billing", name: "Billing & Subscription", icon: <CreditCard size={20} /> },
+    { id: "production", name: "Production", icon: <Coffee size={20} /> },
+    { id: "sync", name: "Sync & Integration", icon: <RefreshCw size={20} /> },
+    { id: "billing", name: "Billing & Subscription", icon: <CreditCard size={20} /> },
   ]
 
   useEffect(() => {
     (async () => {
-      try {
-        const res = await window.electron.invoke("printer:get-all")
-        devicePrinters = res
-        
-      } catch (error) {
-        notify(false, "Failed to fetch device printers")
-      }
+      await getSeasons()
     })()
-  })
+  }, [])
 
   return (
     <div className="w-full bg-white rounded-lg shadow-sm overflow-hidden">
@@ -88,6 +89,24 @@ export default function SettingsPage() {
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">General Settings</h3>
 
+              <div className="bg-orange-50 border border-orange-200 rounded-md p-4 mb-6">
+                <div className="flex items-center">
+                  <div className="mr-4">
+                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden">
+                      <img
+                        src="/placeholder.svg?height=48&width=48"
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-medium">John Doe</h4>
+                    <p className="text-sm text-gray-600">Pro Plan · Member since May 2023</p>
+                  </div>
+                </div>
+              </div>
+
               <div className="space-y-6">
                 <div>
                   <h4 className="text-md font-medium text-gray-700 mb-3">Default preferences</h4>
@@ -102,10 +121,67 @@ export default function SettingsPage() {
                     </div>
                   </div>
                   <div className="space-y-4">
+                    <div>
+                      <label htmlFor="default-page" className="block text-sm text-gray-700 mb-1">
+                        Default page
+                      </label>
+                      <select
+                        id="default-page"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
+                      >
+                        <option>Dashboard</option>
+                        <option>Projects</option>
+                        <option>Messages</option>
+                        <option>Analytics</option>
+                      </select>
+                    </div>
 
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">Show welcome screen on login</span>
+                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
+                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
+                      </button>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-700">Enable keyboard shortcuts</span>
+                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
+                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {activeCategory === "production" && (
+          <div className="space-y-8">
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-6">Production Settings</h3>
+
+              {/* Farm Overview Card */}
+              <div className="bg-gradient-to-r from-green-50 to-amber-50 border border-green-200 rounded-lg p-6 mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="text-lg font-semibold text-green-800">Olmismis FCS</h4>
+                    <div className="inline-flex gap-4">
+                      <span>
+                        <p className="text-sm text-green-600 mt-1">Current Season: {settings.farm.currentSeason}</p>
+                        <p className="text-sm text-green-600 mt-1">Current Harvest: { settings.farm.currentHarvest}</p>
+                      </span>
+
+                      <button title="Edit" onClick={() => setShowSeasonSelectModal(true)}><Edit className="hover:text-orange-600" size={20}/></button>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-amber-700">150</div>
+                    <div className="text-sm text-amber-600">tons projected this season</div>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
         )}
@@ -194,16 +270,6 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-        )}
-
-        {activeCategory === "production" && (
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Production Settings</h3>
-
-              <div>
-
-              </div>
-            </div>
         )}
 
         {activeCategory === "profile" && (
@@ -322,364 +388,11 @@ export default function SettingsPage() {
           </div>
         )}
 
-        {activeCategory === "notifications" && (
-          <div className="space-y-8">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Notification Settings</h3>
-              <div className="space-y-6">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Email notifications</h4>
-                  <div className="space-y-3">
-                    {["New messages", "Account updates", "Product updates", "Marketing emails"].map((item) => (
-                      <div key={item} className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">{item}</span>
-                        <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
-                          <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Push notifications</h4>
-                  <div className="space-y-3">
-                    {["New messages", "Mentions", "Friend requests", "Updates"].map((item) => (
-                      <div key={item} className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">{item}</span>
-                        <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
-                          <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">In-app notifications</h4>
-                  <div className="space-y-3">
-                    {["Activity on your posts", "New followers", "System notifications"].map((item) => (
-                      <div key={item} className="flex items-center justify-between">
-                        <span className="text-sm text-gray-700">{item}</span>
-                        <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
-                          <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Frequency controls</h4>
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="email-frequency" className="block text-sm text-gray-700 mb-1">
-                        Email digest frequency
-                      </label>
-                      <select
-                        id="email-frequency"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
-                      >
-                        <option>Real-time</option>
-                        <option>Daily summary</option>
-                        <option>Weekly digest</option>
-                        <option>Never</option>
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeCategory === "privacy" && (
-          <div className="space-y-8">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Privacy Settings</h3>
-              <div className="space-y-6">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Who can see your profile</h4>
-                  <div className="space-y-2">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="profile-visibility"
-                        className="h-4 w-4 text-orange-600"
-                        defaultChecked
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Everyone</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input type="radio" name="profile-visibility" className="h-4 w-4 text-orange-600" />
-                      <span className="ml-2 text-sm text-gray-700">Only followers</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input type="radio" name="profile-visibility" className="h-4 w-4 text-orange-600" />
-                      <span className="ml-2 text-sm text-gray-700">Only people you follow</span>
-                    </label>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Who can contact you</h4>
-                  <div className="space-y-2">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="contact-permissions"
-                        className="h-4 w-4 text-orange-600"
-                        defaultChecked
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Everyone</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input type="radio" name="contact-permissions" className="h-4 w-4 text-orange-600" />
-                      <span className="ml-2 text-sm text-gray-700">Only followers</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input type="radio" name="contact-permissions" className="h-4 w-4 text-orange-600" />
-                      <span className="ml-2 text-sm text-gray-700">Nobody</span>
-                    </label>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Blocked users</h4>
-                  <div className="border border-gray-200 rounded-md divide-y max-h-40 overflow-y-auto">
-                    <div className="p-3 flex justify-between items-center">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-gray-200 mr-3"></div>
-                        <span>blockeduser1</span>
-                      </div>
-                      <button className="text-orange-600 text-sm hover:text-orange-800">Unblock</button>
-                    </div>
-                    <div className="p-3 flex justify-between items-center">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 rounded-full bg-gray-200 mr-3"></div>
-                        <span>spammer123</span>
-                      </div>
-                      <button className="text-orange-600 text-sm hover:text-orange-800">Unblock</button>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Ad tracking / data sharing preferences</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">Allow personalized ads</span>
-                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
-                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">Share usage data</span>
-                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
-                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">Allow third-party cookies</span>
-                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
-                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Search visibility</h4>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-700">Show profile in search results</span>
-                    <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
-                      <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeCategory === "device" && (
-          <div className="space-y-8">
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Device & App Settings</h3>
-              <div className="space-y-6">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Mobile vs. Desktop toggles</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">Use mobile layout on tablets</span>
-                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
-                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">Optimize for touch on desktop</span>
-                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
-                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Auto-play media</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">Auto-play videos</span>
-                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
-                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">Auto-play GIFs</span>
-                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
-                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Download quality</h4>
-                  <div>
-                    <label htmlFor="video-quality" className="block text-sm text-gray-700 mb-1">
-                      Video quality
-                    </label>
-                    <select
-                      id="video-quality"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
-                    >
-                      <option>Auto (recommended)</option>
-                      <option>Low - Save data</option>
-                      <option>Medium</option>
-                      <option>High</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Accessibility options</h4>
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="text-size" className="block text-sm text-gray-700 mb-1">
-                        Text size
-                      </label>
-                      <select
-                        id="text-size"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-orange-500 focus:border-orange-500"
-                      >
-                        <option>Small</option>
-                        <option>Medium (default)</option>
-                        <option>Large</option>
-                        <option>Extra Large</option>
-                      </select>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">High contrast mode</span>
-                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
-                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">Screen reader support</span>
-                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-orange-600">
-                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-6" />
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-700">Reduce animations</span>
-                      <button className="relative inline-flex h-6 w-11 items-center rounded-full bg-gray-200">
-                        <span className="inline-block h-4 w-4 transform rounded-full bg-white translate-x-1" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {activeCategory === "sync" && (
           <div className="space-y-8">
             <div>
               <h3 className="text-lg font-medium text-gray-900 mb-4">Sync & Integration Settings</h3>
               <div className="space-y-6">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Linked accounts</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                          <span className="text-blue-600 font-bold">G</span>
-                        </div>
-                        <div>
-                          <p className="font-medium">Google</p>
-                          <p className="text-xs text-gray-500">Connected as john.doe@gmail.com</p>
-                        </div>
-                      </div>
-                      <button className="text-red-600 text-sm hover:text-red-800">Disconnect</button>
-                    </div>
-                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center mr-3">
-                          <span className="text-white font-bold">f</span>
-                        </div>
-                        <div>
-                          <p className="font-medium">Facebook</p>
-                          <p className="text-xs text-gray-500">Not connected</p>
-                        </div>
-                      </div>
-                      <button className="text-orange-600 text-sm hover:text-orange-800">Connect</button>
-                    </div>
-                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 bg-gray-900 rounded-full flex items-center justify-center mr-3">
-                          <span className="text-white font-bold">A</span>
-                        </div>
-                        <div>
-                          <p className="font-medium">Apple</p>
-                          <p className="text-xs text-gray-500">Not connected</p>
-                        </div>
-                      </div>
-                      <button className="text-orange-600 text-sm hover:text-orange-800">Connect</button>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-3">Third-party app access</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                          <span className="text-purple-600 font-bold">S</span>
-                        </div>
-                        <div>
-                          <p className="font-medium">Spotify</p>
-                          <p className="text-xs text-gray-500">Access to profile and playlists</p>
-                        </div>
-                      </div>
-                      <button className="text-red-600 text-sm hover:text-red-800">Revoke</button>
-                    </div>
-                    <div className="flex items-center justify-between p-3 border border-gray-200 rounded-md">
-                      <div className="flex items-center">
-                        <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                          <span className="text-green-600 font-bold">C</span>
-                        </div>
-                        <div>
-                          <p className="font-medium">Calendar App</p>
-                          <p className="text-xs text-gray-500">Access to calendar events</p>
-                        </div>
-                      </div>
-                      <button className="text-red-600 text-sm hover:text-red-800">Revoke</button>
-                    </div>
-                  </div>
-                </div>
-
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 mb-3">Cloud sync</h4>
                   <div className="space-y-3">
@@ -896,7 +609,7 @@ export default function SettingsPage() {
         )}
       </div>
 
-      {showChangePass && (
+        {/* Chage Password modal */}
         <Modal title="Change Password" isOpen={showChangePass} onClose={() => setShowChangePass(false)}>
           <form
             className="text-black"
@@ -980,7 +693,90 @@ export default function SettingsPage() {
             </div>
           </form>
         </Modal>
-      )}
+
+        {/* Select season and harvest modal */}
+        <Modal title="Select Season and Harvest" isOpen={showSeasonSelectModal} onClose={() => setShowSeasonSelectModal(false)}>
+          <form
+            className="text-black"
+            onSubmit={async (e) => {
+              e.preventDefault()
+              const formData = new FormData(e.currentTarget)
+              const season: any = formData.get("season")
+              const harvest: any = formData.get("harvest")
+
+              const newSettings = {
+                ...settings,
+                farm: {
+                  ...settings.farm,
+                  currentHarvest: harvest,
+                  currentSeason: season,
+                }
+              }
+              
+              setSettings(newSettings)
+              await window.electron.invoke("set-settings", newSettings)
+              setShowSeasonSelectModal(false)
+            }}
+          >
+            <div className="mt-4">
+              <label htmlFor="season" className="block text-sm font-medium text-gray-700">
+                Season
+              </label>
+                  <select
+                    required
+                    onChange={(e) => setSelectedSeason(e.target.value)}
+                    name="season" 
+                    id="season"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                    >
+                  <option value="">-----select-----</option>
+                  {dbSeasons.map((season: any) => (
+                    <option key={season.id} value={season.name}>
+                      {season.name}
+                    </option>
+                  ))}
+                </select>
+            </div>
+
+            <div className="mt-4">
+              <label htmlFor="new" className="block text-sm font-medium text-gray-700">
+                Harvest
+              </label>
+              <div className="">
+                <select
+                    required
+                    name="harvest" 
+                    id="harvest"
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                    >
+                  <option value="">-----select-----</option>
+                  {dbSeasons.map((season: any) => (
+                    season.name === selectedSeason && season.harvests.map((harvest: any) => (
+                      <option key={harvest.id} value={harvest.name}>
+                        {harvest.name}
+                      </option>
+                    ))
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-4 flex gap-2 justify-end">
+              <button
+                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                onClick={() => setShowSeasonSelectModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+              >
+                Set Season
+              </button>
+            </div>
+          </form>
+        </Modal>
     </div>
   )
 }
