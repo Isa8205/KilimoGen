@@ -104,14 +104,15 @@ const Home = () => {
                       Settings
                     </button>
                   </NavLink>
-                  {user ? (
+                  {user?.role === "Manager" && (
                     <NavLink to="/admin">
                       <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none">
                         <User className="mr-2 h-4 w-4" />
-                        Profile
+                        Admin Panel
                       </button>
                     </NavLink>
-                  ) : (
+                  )} 
+                  {!user &&(
                     <NavLink to="/auth/clerk/login" state={{ from: location }}>
                       <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none">
                         <LogIn className="mr-2 h-4 w-4"/>

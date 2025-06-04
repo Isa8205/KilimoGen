@@ -60,10 +60,6 @@ export function Inventory() {
 
         {user && (
           <span className="inline-flex gap-2 text-sm font-semibold">
-            <button className="bg-white text-black py-1 px-4 rounded">
-              {/* // TODO: Add export function */}
-              Export CSV
-            </button>
             <NavLink to="/home/inventory/add">
               <button className="bg-accent text-white py-1 px-4 rounded">
                 Add
@@ -129,10 +125,6 @@ export function Inventory() {
         >
           <thead className="bg-gray-200 rounded-md">
             <tr className="text-center">
-              {/* Checkbox header */}
-              <th className=" p-2">
-                <input type="checkbox" name="select-all" id="all" />
-              </th>
               {/* Table headers */}
               <th className=" p-2">Item</th>
               <th className=" p-2">Category</th>
@@ -153,10 +145,6 @@ export function Inventory() {
                     index % 2 === 0 ? 'bg-gray-50' : ''
                   }`}
                 >
-                  {/* Checkbox for each row */}
-                  <td className="p-2">
-                    <input type="checkbox" />
-                  </td>
                   {/* Data cells */}
                   <td className="p-2 ">{item.productName}</td>
                   <td className="p-2 ">{item.category}</td>

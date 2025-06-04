@@ -37,36 +37,40 @@ export const registerAuthHandlers = () => {
   // --------------------------
   //  Clerk related logic
   // --------------------------
-  ipcMain.handle("clerk-login", async (event, data) => {
+  ipcMain.handle("user-login", async (event, data) => {
     try {
+      let role = "Clerk";
+      let fetchedUser: Clerk[] | Manager[] | null = null;
       const clerkRepository = AppDataSource.getRepository(Clerk);
-      const clerk =
-        (await clerkRepository.findOneBy({ username: data.username })) ||
-        (await clerkRepository.findOneBy({ email: data.email }));
+      const managerRepository = AppDataSource.getRepository(Manager);
 
-      if (!clerk) {
-        return { message: "The user was not found!", success: false };
+      fetchedUser = await clerkRepository.find({ where: { username: data.username } }) || await clerkRepository.find({ where: { email: data.email }});
+
+      if (fetchedUser.length === 0) {
+        fetchedUser = await managerRepository.find({ where: { username: data.username } }) || await managerRepository.find({ where: { email: data.email }});
+        role = "Manager"
       }
 
-      const islegit = await bcrypt.compare(data.password, clerk.password);
+      const user = fetchedUser[0];
+      const islegit = await bcrypt.compare(data.password, user!.password);
 
       if (islegit) {
 
-        const user = {
-          id: clerk.id,
-          firstName: clerk.firstName,
-          lastName: clerk.lastName,
-          email: clerk.email,
-          username: clerk.username,
-          avatar: getImageBase64(clerk.avatar, process.env.SECRET_KEY!),
-          role: "clerk",
+        const userData = {
+          id: user!.id,
+          firstName: user!.firstName,
+          lastName: user!.lastName,
+          email: user!.email,
+          username: user!.username,
+          avatar: getImageBase64(user!.avatar, process.env.SECRET_KEY!),
+          role: role
         };
 
         const token = uuidv4();
-        createSession(token, user);
+        createSession(token, userData);
         setSessionCookie(token);
 
-        return { message: "Login successfull", passed: islegit, user: user };
+        return { message: "Login successfull", passed: islegit, user: userData };
       } else {
         return {
           message: "Invalid details! Check and try again.",
@@ -84,7 +88,7 @@ export const registerAuthHandlers = () => {
 
   ipcMain.handle("register-clerk", async (event, data) => {
     try {
-      const clerkRepository = AppDataSource.getRepository(Clerk);
+      const clerkRepository = AppDataSource.getRepository(Manager);
       const clerk = clerkRepository.create(data);
       await clerkRepository.save(clerk);
       return { message: "Clerk added successfully", success: true };
@@ -100,37 +104,6 @@ export const registerAuthHandlers = () => {
   // --------------------------
   //  Admin related logic
   // --------------------------
-
-  ipcMain.handle('manager-login', async (event, data) => {
-    try {
-      const managerRepository = AppDataSource.getRepository(Manager);
-      const manager = await managerRepository.findOneBy({ email: data.email });
-
-      if (!manager) {
-        return { message: "The user was not found!", success: false };
-      }
-
-      const islegit = await bcrypt.compare(data.password, manager.password);
-      if (islegit) {
-        const token = uuidv4()
-        const user = {
-          firstName: manager.firstName,
-          lastName: manager.lastName,
-          email: manager.email,
-          avatar: getImageBase64(manager.avatar, process.env.SECRET_KEY!),
-          token: token,
-        };
-
-        return { message: "Login successfull", success: islegit, user: user };
-      }
-
-      return { message: "Login successfull", success: islegit };
-    } catch (err) {
-      console.log(err);
-      return false;
-    }
-  });
-
   ipcMain.handle("admin-register", async (event, data) => {
     try {
       const clerkRepository = AppDataSource.getRepository(Clerk);

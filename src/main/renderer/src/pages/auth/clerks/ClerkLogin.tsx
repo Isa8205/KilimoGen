@@ -21,7 +21,7 @@ export default function ClerkLogin() {
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData as any);
 
-    const res = await window.electron.invoke('clerk-login', data)
+    const res = await window.electron.invoke('user-login', data)
     notify(res.passed, res.message)
     if (res.user) {
       setUser(res.user)

@@ -17,7 +17,7 @@ export const AppDataSource = new DataSource({
   type: "sqlite",
   database: "db.sqlite",
   synchronize: true,
-  logging: false,
+  logging: true,
   entities: [
     Advance,
     Clerk,

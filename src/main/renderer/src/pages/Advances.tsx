@@ -112,9 +112,6 @@ export default function Advances() {
         <h2 className="text-2xl font-bold">Advances</h2>
 
         <span className="inline-flex gap-2 text-sm font-semibold">
-          <button className="bg-white text-black shadow-sm py-1 px-4 rounded">
-            Export
-          </button>
           <button
             onClick={() => setShowAddModal(true)}
             className="bg-[#F65A11] text-white py-1 px-4 rounded"

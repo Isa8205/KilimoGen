@@ -3,7 +3,7 @@ export default function Production() {
     return (
       <div >
         <div className="flex justify-between">
-            <span className="text-2xl">Productio</span>
+            <span className="text-2xl">Production</span>
         </div>
 
         <div>

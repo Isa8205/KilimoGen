@@ -266,19 +266,6 @@ export function Deliveries() {
         <table className="bg-white shadow-md rounded-md  w-full table-auto border-collapse">
           <thead className="bg-gray-200 rounded-md p-2">
             <tr className="text-center">
-              {/* Checkbox header */}
-              <th className=" p-2">
-                <input
-                  type="checkbox"
-                  onChange={(e) => handleselectall(e)}
-                  checked={
-                    deliveries.length > 0 &&
-                    selectedDeliveries.length === deliveries.length
-                  }
-                  name="select-all"
-                  id="all"
-                />
-              </th>
               {/* Table headers */}
               <th className=" p-2">Farmer</th>
               <th className=" p-2">Quantity (kgs)</th>
@@ -295,16 +282,6 @@ export function Deliveries() {
                   key={index}
                   className="even:bg-gray-50 last:border-none border-b border-gray-200 hover:bg-gray-100"
                 >
-                  <td className=" p-2">
-                    <input
-                      type="checkbox"
-                      onChange={() => handleSelect(delivery.id.toString())}
-                      checked={selectedDeliveries.includes(
-                        delivery.id.toString()
-                      )}
-                      id="all"
-                    />
-                  </td>
                   <td className="py-3 text-center">
                     {delivery.farmer.firstName + " " + delivery.farmer.lastName}
                   </td>
