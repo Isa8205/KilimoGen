@@ -17,6 +17,8 @@ import { formatDate } from "date-fns"
 import { OverviewCard } from "./OverviewCard" // Import OverviewCard component
 import { AddSeasonModal } from "./AddSeasonModal" // Import AddSeasonModal component
 import { AddHarvestModal } from "./AddHarvestModal" // Import AddHarvestModal component
+import { useRecoilState } from "recoil"
+import { sessionState } from "@/store/store"
 
 // Interfaces
 interface Harvest {
@@ -53,6 +55,7 @@ interface Clerk {
 }
 
 export default function AdminPanel() {
+  const user = useRecoilState(sessionState)[0]
   const [showSeasonModal, setShowSeasonModal] = useState(false)
   const [seasons, setSeasons] = useState<Season[]>([])
   const [clerks, setClerks] = useState<Clerk[]>([])
@@ -204,7 +207,7 @@ export default function AdminPanel() {
 
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center">
-              <User className="w-5 h-5 text-primary" />
+              <img src={`data:image/png;base64, ${user?.avatar}`} className="w-8 h-8 rounded-full" alt="avatar" />
             </div>
           </div>
         </div>

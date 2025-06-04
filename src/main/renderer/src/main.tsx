@@ -5,7 +5,6 @@ import { BrowserRouter } from "react-router-dom";
 import { RecoilRoot } from "recoil";
 import App from "./App";
 
-console.log("React entry file loaded");
 window.addEventListener('error', e => console.error("Global error:", e.error));
 window.addEventListener('unhandledrejection', e => console.error("Unhandled rejection:", e.reason));
 

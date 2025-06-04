@@ -32,7 +32,7 @@ export default function NotificationsPage() {
   }, []);
 
   // Get unique categories for filter dropdown
-  const categories = useMemo(() => {
+  const   categories = useMemo(() => {
     const uniqueCategories = new Set<string>();
     notifications.forEach((notification) =>
       uniqueCategories.add(notification.category)

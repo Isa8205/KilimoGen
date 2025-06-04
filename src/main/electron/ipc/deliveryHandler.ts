@@ -47,13 +47,36 @@ export default function registerDeliveryHandlers() {
 
       const deliveries = await query.getManyAndCount();
 
-      // Get total count of deliveries for correct paginatio
+      // Get total count of deliveries for correct pagination
       const totalPages = Math.ceil(deliveries[1] / itemsPerPage);
+
+      // calculate total weight of deliveries
+      const totalDeliveries = await AppDataSource.getRepository(Delivery).find()
+      const totalWeight = totalDeliveries.reduce(
+        (acc: number, delivery: Delivery) => acc + delivery.quantity,
+        0
+      );
+
+      // Calculate total weight for the current day
+      const today = new Date();
+      const todayDeliveries = await AppDataSource.getRepository(Delivery).find();
+      const todayWeight = todayDeliveries.reduce(
+        (acc: number, delivery: Delivery) => {
+          if (today.toISOString().slice(0, 10) === new Date(delivery.deliveryDate).toISOString().slice(0, 10)) {
+            // If the delivery date is today, add its quantity to the total
+            return acc + delivery.quantity
+          }
+          return acc;
+        },
+        0
+      );
 
       const res = {
         passed: true,
         deliveries: deliveries[0],
         totalPages: totalPages,
+        totalWeight: totalWeight,
+        todayWeight: todayWeight,
       };
       return res;
     } catch (err) {

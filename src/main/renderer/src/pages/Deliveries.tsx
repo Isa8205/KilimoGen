@@ -13,7 +13,7 @@ import notify from "../utils/ToastHelper";
 import { ToastContainer } from "react-toastify";
 import Loader from "../components/Loaders/Loader1";
 import { useRecoilState } from "recoil";
-import { sessionState } from "@/store/store";
+import { sessionState, settingsState } from "@/store/store";
 import { motion } from "framer-motion";
 import errorImage from "@/assets/images/backgrounds/404_2.svg";
 import Modal from "@/components/Modal/Modal";
@@ -22,6 +22,7 @@ import useClickOutside from "@/hooks/useClickOutside";
 export function Deliveries() {
   // Get the session data
   const user = useRecoilState(sessionState)[0];
+  const settings = useRecoilState(settingsState)[0];
   // Get the data from the server
   const itemsPerPage = 20;
   const [currentPage, setCurrentPage] = useState(1);
@@ -30,6 +31,8 @@ export function Deliveries() {
     { id: number; farmer: string; farmerNumber: string }[]
   >([]);
   const [fetching, setfetching] = useState(true);
+  const [seasonTotal, setSeasonTotal] = useState(0);
+  const [todayTotal, setTodayTotal] = useState(0);
 
   // Function to fetch deliveries data
   const [selectedFilter, setSelectedFilter] = useState("All");
@@ -41,6 +44,8 @@ export function Deliveries() {
       );
       setData(response.deliveries);
       setTotalPages(response.totalPages);
+      setSeasonTotal(response.totalWeight);
+      setTodayTotal(response.todayWeight);
     } catch (error) {
       console.error(error);
     } finally {
@@ -209,25 +214,24 @@ export function Deliveries() {
         <div className="bg-white text-gray-700 p-5 flex shadow-md rounded-md">
           <span className="flex-grow border-x-2 border-gray-400 px-6">
             <p>season</p>
-            <span className="font-bold">2024/25</span>
+            <span className="font-bold">{settings.farm.currentSeason}</span>
           </span>
 
           <span className="flex-grow border-e-2 border-gray-400 px-6">
             <p>Harvest</p>
-            <span className="font-bold">1</span>
+            <span className="font-bold">{settings.farm.currentHarvest}</span>
           </span>
 
           <span className="flex-grow border-e-2 border-gray-400 px-6">
             <p>Season Total</p>
             <span className="font-bold">
-              {deliveries.reduce((acc, delivery) => acc + delivery.quantity, 0)}{" "}
-              kgs
+              {seasonTotal} kgs
             </span>
           </span>
 
           <span className="flex-grow border-e-2 border-gray-400 px-6">
             <p>Today's Total</p>
-            <span className="font-bold"> kgs</span>
+            <span className="font-bold">{todayTotal} kgs</span>
           </span>
 
           <span className="flex-grow border-e-2 border-gray-400 px-6">
@@ -262,19 +266,6 @@ export function Deliveries() {
         <table className="bg-white shadow-md rounded-md  w-full table-auto border-collapse">
           <thead className="bg-gray-200 rounded-md p-2">
             <tr className="text-center">
-              {/* Checkbox header */}
-              <th className=" p-2">
-                <input
-                  type="checkbox"
-                  onChange={(e) => handleselectall(e)}
-                  checked={
-                    deliveries.length > 0 &&
-                    selectedDeliveries.length === deliveries.length
-                  }
-                  name="select-all"
-                  id="all"
-                />
-              </th>
               {/* Table headers */}
               <th className=" p-2">Farmer</th>
               <th className=" p-2">Quantity (kgs)</th>
@@ -291,16 +282,6 @@ export function Deliveries() {
                   key={index}
                   className="even:bg-gray-50 last:border-none border-b border-gray-200 hover:bg-gray-100"
                 >
-                  <td className=" p-2">
-                    <input
-                      type="checkbox"
-                      onChange={() => handleSelect(delivery.id.toString())}
-                      checked={selectedDeliveries.includes(
-                        delivery.id.toString()
-                      )}
-                      id="all"
-                    />
-                  </td>
                   <td className="py-3 text-center">
                     {delivery.farmer.firstName + " " + delivery.farmer.lastName}
                   </td>

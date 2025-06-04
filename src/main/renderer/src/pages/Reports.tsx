@@ -2,14 +2,17 @@
 
 import type React from "react"
 
-import { useRef, useState } from "react"
-import { ArrowLeft, ArrowRight, ChevronDown, Eye, Filter, RefreshCcw, Search } from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
+import { ArrowLeft, ArrowRight, ChevronDown, Download, Eye, Filter, RefreshCcw, Search } from "lucide-react"
 import { report } from "process"
 import useClickOutside from "@/hooks/useClickOutside"
 import Modal from "@/components/Modal/Modal"
-import notify from "@/utils/ToastHelper"
+import notify, { properties } from "@/utils/ToastHelper"
+import { toast } from "react-toastify"
+import { formatDate } from "date-fns"
 
 export default function ReportsComponent() {
+  const [reports, setReports] = useState<{id: number, reportName: string, dateGenerated: Date, reportType: string}[]>([])
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState("")
   const [sortColumn, setSortColumn] = useState<'id' | 'name' | 'date' | 'type'>("date")
@@ -22,15 +25,20 @@ export default function ReportsComponent() {
   const [deliveryGenModal, setDeliveryGenModal] = useState(false)
   const generateRef = useRef<HTMLDivElement>(null)
 
-  // Mock data for demonstration
-  const reports = [
-    { id: 1, name: "Q1 Financial Report", date: "2025-03-31", type: "Financial" },
-    { id: 2, name: "User Activity Analysis", date: "2025-04-15", type: "Analytics" },
-    { id: 3, name: "Marketing Campaign Results", date: "2025-05-02", type: "Marketing" },
-    { id: 4, name: "Product Performance", date: "2025-05-10", type: "Product" },
-    { id: 5, name: "Customer Satisfaction Survey", date: "2025-05-18", type: "Customer" },
-    { id: 6, name: "Monthly Sales Report", date: "2025-05-20", type: "Financial" },
-  ]
+  // Fetch data from the database
+  const fetchReports = async () => {
+    setLoading(true)
+    try {
+      const data = await window.electron.invoke("report:get-all")
+      setReports(data.reports)
+    } catch (error) {
+      console.error("Error fetching reports:", error)
+      notify(false, "Failed to fetch reports")
+    } finally {
+      setLoading(false)
+    }
+    }
+  
 
   // Pagination
   const reportsPerPage = 5
@@ -49,20 +57,41 @@ export default function ReportsComponent() {
     setSearchQuery(e.target.value)
   }
 
-  const handleView = (reportId: number) => {
-    // This will be handled by the parent component
-    console.log(`View report ${reportId}`)
+  // Handle file save
+  const handleFileSave = async (reportId: number) => {
+    try {
+      const res = await window.electron.invoke("report:save-fs", reportId)
+      if (res.passed) {
+        toast.info(res.message, properties)
+      } else {
+        notify(res.passed, res.message)
+      }
+    } catch (error) {
+      console.error("Error saving file:", error)
+      notify(false, "Failed to save file")
+    }
   }
 
-  const filters = ["All", "Financial", "Analytics", "Marketing"]
+  const dataFilters = useMemo(() => {
+    const uniqueCategories = new Set<string>()
+    reports.forEach((report) => {
+      uniqueCategories.add(report.reportType)
+    })
+    return Array.from(uniqueCategories)
+  }, [reports])
+  const filters = ["All", ...dataFilters]
 
   // New report dropdown and modal logic
   useClickOutside(generateRef, () => {
     setGenerateDropdown(false)
   })
 
+  useEffect(() => {
+    fetchReports()
+  }, [])
+
   return (
-    <section className="text-gray-500">
+    <section className="text-black">
       <div className="flex justify-between mb-4">
         <h2 className="text-2xl font-bold">Reports</h2>
 
@@ -94,7 +123,7 @@ export default function ReportsComponent() {
 
         <span className="flex-grow border-e-2 border-gray-400 px-6">
           <p>Financial</p>
-          <span className="font-bold">{reports.filter((r) => r.type === "Financial").length}</span>
+          <span className="font-bold">{reports.filter((r) => r.reportType === "Financial").length}</span>
         </span>
       </div>
 
@@ -159,7 +188,7 @@ export default function ReportsComponent() {
       <table className={`bg-white ${!loading ? "shadow-md" : ""} rounded-md p-2 w-full table-auto border-collapse`}>
         <thead className="bg-gray-200 rounded-md">
           <tr className="text-center">
-
+            <th className="p-2">No.</th>
             <th className="p-2">Report Name</th>
             <th className="p-2">Date</th>
             <th className="p-2">Type</th>
@@ -170,26 +199,23 @@ export default function ReportsComponent() {
         {!loading ? (
           <tbody>
             {paginatedReports
-              .filter((item) => (selectedFilter === "All" ? true : item.type === selectedFilter))
+              .filter((item) => (selectedFilter === "All" ? true : item.reportType === selectedFilter))
               .map((report, index) => (
                 <tr
                   key={report.id}
                   className={`border-b last:border-none text-center ${index % 2 === 0 ? "bg-gray-50" : ""}`}
                 >
-                  <td className="p-2 text-start">
-                    <a href="#" className="hover:text-[#F65A11]">
-                      {report.name}
-                    </a>
-                  </td>
-                  <td className="p-2">{new Date(report.date).toLocaleDateString()}</td>
-                  <td className="p-2">{report.type}</td>
+                  <td className="p-2">{index + 1}</td>
+                  <td className="p-2">{report.reportName}</td>
+                  <td className="p-2">{formatDate(new Date(report.dateGenerated), 'dd-MMM-yyyy')}</td>
+                  <td className="p-2">{report.reportType}</td>
                   <td className="p-2">
                     <button
-                      onClick={() => handleView(report.id)}
-                      className="text-[#F65A11] hover:text-[#d44c0e] p-1 inline-flex items-center gap-1"
+                      onClick={() => handleFileSave(report.id)}
+                      className="text-gray-800 border border-gray-200 bg-gray-50 px-2 py-1 rounded-md shadow-sm hover:text-accent p-1 inline-flex items-center gap-1"
                     >
-                      <Eye size={18} />
-                      <span>View</span>
+                      <Download size={18} />
+                      <span>Save</span>
                     </button>
                   </td>
                 </tr>
@@ -263,6 +289,7 @@ export default function ReportsComponent() {
 
             if (res.passed) {
               notify(res.passed, res.message)
+              fetchReports() // Refresh the reports list
               setTimeout(() => {
                 setDeliveryGenModal(false)
               }, 2500);

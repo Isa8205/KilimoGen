@@ -186,19 +186,14 @@ export function Farmers() {
       <div className="bg-white p-5 flex shadow-md rounded-md">
         <span className="flex-grow border-x-2 border-gray-400 px-6">
           <p>Total</p>
-          <span className="font-bold" id="totalFarmers">
-            0
+          <span className="font-bold">
+            {farmers.length}
           </span>
         </span>
 
         <span className="flex-grow border-e-2 border-gray-400 px-6">
           <p>Active</p>
           <span className="font-bold">{farmers.length}</span>
-        </span>
-
-        <span className="flex-grow border-e-2 border-gray-400 px-6">
-          <p>Selected</p>
-          <span className="font-bold">{selectedFarmers.length}</span>
         </span>
       </div>
 
@@ -239,18 +234,6 @@ export function Farmers() {
       >
         <thead className="bg-gray-200 rounded-md">
           <tr className="text-center">
-            {/* Checkbox header */}
-            {user && (
-              <th className=" p-2">
-                <input
-                  onChange={(e) => handleselectall(e)}
-                  checked={selectedFarmers.length === farmers.length}
-                  type="checkbox"
-                  name="select-all"
-                  id="all"
-                />
-              </th>
-            )}
             {/* Table headers */}
             <th className="p-2">Name</th>
             <th className="p-2">Farmer No.</th>
@@ -278,19 +261,8 @@ export function Farmers() {
                     index % 2 === 0 ? "bg-gray-50" : ""
                   }`}
                 >
-                  {/* Checkbox for each row */}
-                  {user && (
-                    <td className="p-2">
-                      <input
-                        onChange={() => handleSelect(item.id.toString())}
-                        checked={selectedFarmers.includes(item.id.toString())}
-                        type="checkbox"
-                        value={item.id}
-                      />
-                    </td>
-                  )}
                   {/* Data cells */}
-                  <td className="p-2 text-start">
+                  <td className="p-2 text-center">
                     <NavLink
                       to={`/home/farmers/${item.id}`}
                       className="hover:text-accent"

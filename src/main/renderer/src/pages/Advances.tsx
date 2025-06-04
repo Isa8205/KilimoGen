@@ -81,8 +81,6 @@ export default function Advances() {
   };
 
   const handlePay = (advanceId: number) => {
-    // This will be handled by the parent component
-    console.log(`Pay advance ${advanceId}`);
   };
 
   // Add modal logic
@@ -96,7 +94,6 @@ export default function Advances() {
     setLoading(true);
     try {
       const data = await window.electron.invoke("advance:get-all");
-      console.log("Advances data:", data);
       setAdvances(data.advances);
     } catch (error) {
       console.error("Error fetching advances:", error);
@@ -115,9 +112,6 @@ export default function Advances() {
         <h2 className="text-2xl font-bold">Advances</h2>
 
         <span className="inline-flex gap-2 text-sm font-semibold">
-          <button className="bg-white text-black shadow-sm py-1 px-4 rounded">
-            Export
-          </button>
           <button
             onClick={() => setShowAddModal(true)}
             className="bg-[#F65A11] text-white py-1 px-4 rounded"

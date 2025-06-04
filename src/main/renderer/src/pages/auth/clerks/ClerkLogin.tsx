@@ -1,32 +1,32 @@
 import axios from 'axios';
 import { ArrowLeft, Home, EyeIcon, EyeOff } from 'lucide-react';
 import { useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import notify from '@/utils/ToastHelper';
 import { useRecoilState } from 'recoil';
 import { sessionState } from '@/store/store';
 
-export default function ClerkLogin({ nextUrl }: {nextUrl?: string}) {
+export default function ClerkLogin() {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const formRef = useRef<HTMLFormElement>(null)!;
   const setUser = useRecoilState(sessionState)[1];
+  
+  const location = useLocation();
+  const from = location.state?.from?.pathname || '/home/dashboard';
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData as any);
 
-    const res = await window.electron.invoke('clerk-login', data)
+    const res = await window.electron.invoke('user-login', data)
     notify(res.passed, res.message)
     if (res.user) {
       setUser(res.user)
       setTimeout(() => {
-        if (nextUrl) {
-          navigate(nextUrl)
-        }
-        navigate('/home/dashboard')
+        navigate(from)
       }, 2000);
     }
   };

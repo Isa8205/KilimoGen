@@ -4,12 +4,13 @@ export default function Production() {
       <div >
         <div className="flex justify-between">
             <span className="text-2xl">Production</span>
-            <span>
-                <button>Add</button>
-            </span>
         </div>
 
-        <div></div>
+        <div>
+            <p className="text-gray-500 mt-2">
+                This page is under construction. Please check back later.
+            </p>
+        </div>
       </div>
     )
 }
