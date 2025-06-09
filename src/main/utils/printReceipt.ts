@@ -1,7 +1,7 @@
 import {  BrowserWindow } from "electron";
 
-function printReceipt({berryType, date,  time, weight, servedBy, farmerName, farmerNumber, seasonTotal}: any, printerName?: string) {
-    printerName = "POS Printer 80250 Series";
+function printReceipt({berryType, date,  time, weight, servedBy, farmerName, farmerNumber, seasonTotal}: any, printerToUse?: string) {
+  const printerName = printerToUse || "POS Printer 80250 Series";
   // Create a hidden window for printing.
   const printWindow = new BrowserWindow({
     width: 800,

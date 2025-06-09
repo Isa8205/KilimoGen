@@ -19,6 +19,7 @@ import { sessionState, settingsState } from "@/store/store";
 import defaultUser from "@/assets/images/defaultUser.png";
 import notify from "@/utils/ToastHelper";
 import Modal from "@/components/Modal/Modal";
+import { ToastContainer } from "react-toastify";
 
 export default function SettingsPage() {
   const setSettings = useRecoilState(settingsState)[1];
@@ -64,6 +65,7 @@ export default function SettingsPage() {
 
   return (
     <div className="w-full bg-white rounded-lg shadow-sm overflow-hidden">
+      <ToastContainer/>
       <div className="border-b border-gray-200">
         <div className="p-4">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">Settings</h2>

@@ -3,6 +3,7 @@ import { Clerk } from "@/main/database/src/entities/Clerk";
 import { Delivery } from "@/main/database/src/entities/Delivery";
 import { Farmer } from "@/main/database/src/entities/Farmer";
 import { Harvest } from "@/main/database/src/entities/Harverst";
+import { Season } from "@/main/database/src/entities/Seasons";
 import { getSession } from "@/main/electron/session/sessinStore";
 import generateCode from "@/main/utils/codeGenerator";
 import generateDeliveryReport from "@/main/utils/GenerateDeliveryReport";
@@ -12,6 +13,8 @@ import { ipcMain } from "electron";
 
 export default function registerDeliveryHandlers() {
   ipcMain.handle("get-deliveries", async (event, data) => {
+    const harvestName = data.harvestName;
+    const seasonName = data.seasonName;
     const filter = data.filter;
     const sort = data.sortType || "desc";
     const page = parseInt(data.page) || 1;
@@ -22,6 +25,7 @@ export default function registerDeliveryHandlers() {
         .createQueryBuilder("delivery")
         .leftJoinAndSelect("delivery.farmer", "farmer")
         .leftJoinAndSelect("delivery.servedBy", "clerks")
+        .leftJoinAndSelect("delivery.harvest", "harvest")
         .select([
           "delivery.id",
           "delivery.deliveryCode",
@@ -36,6 +40,7 @@ export default function registerDeliveryHandlers() {
           "clerks.firstName",
           "clerks.lastName",
         ])
+        .where("harvest.name = :harvestName", { harvestName })
         .orderBy("delivery.deliveryDate", "DESC")
         .skip((page - 1) * itemsPerPage)
         .take(itemsPerPage)
@@ -51,7 +56,12 @@ export default function registerDeliveryHandlers() {
       const totalPages = Math.ceil(deliveries[1] / itemsPerPage);
 
       // calculate total weight of deliveries
-      const totalDeliveries = await AppDataSource.getRepository(Delivery).find()
+      const totalDeliveries = await AppDataSource.getRepository(Delivery)
+      .createQueryBuilder("delivery")
+      .leftJoinAndSelect("delivery.harvest", "harvest")
+      .leftJoinAndSelect("harvest.season", "season")
+      .where("season.name = :seasonName", { seasonName })
+      .getMany();
       const totalWeight = totalDeliveries.reduce(
         (acc: number, delivery: Delivery) => acc + delivery.quantity,
         0
@@ -85,25 +95,36 @@ export default function registerDeliveryHandlers() {
       return res;
     }
   });
-  ipcMain.handle("add-delivery", async (event, deliveryData) => {
-    const farmerRepository = AppDataSource.getRepository(Farmer);
-    const deliveryRepository = AppDataSource.getRepository(Delivery);
-    const harvestRepository = AppDataSource.getRepository(Harvest);
-    const clerkRepository = AppDataSource.getRepository(Clerk);
 
-    const clerkId = deliveryData.servedBy;
-    const servedBy = await clerkRepository.findOneBy({ id: clerkId });
-    if (!servedBy) {
-      const res = { passed: false, message: "You should be logged in!" };
-      return res;
-    }
-
+  ipcMain.handle("add-delivery", async (event, data) => {
     try {
+      const deliveryData = data.deliveryData;
+      const printerToUse = data.printerToUse;
+      const harvestName = data.harvestName;
+      const farmerRepository = AppDataSource.getRepository(Farmer);
+      const deliveryRepository = AppDataSource.getRepository(Delivery);
+      const clerkRepository = AppDataSource.getRepository(Clerk);
+      const seasonRepository = AppDataSource.getRepository(Season);
+
+      const clerkId = deliveryData.servedBy;
+      const servedBy = await clerkRepository.findOneBy({ id: clerkId });
+      if (!servedBy) {
+        const res = { passed: false, message: "You should be logged in!" };
+        return res;
+      }
+
+      const season = await seasonRepository.createQueryBuilder('season').leftJoinAndSelect('season.harvests', 'harvest').where('harvest.name = :harvestName').setParameter('harvestName', harvestName).getOne();
+      const harverst = season?.harvests[0];
+
+      if (!harverst) {
+        const res = { passed: false, message: "Please set harvest and season first!" };
+        return res;
+      }
+
       const farmerNumber = parseInt(deliveryData.farmerNumber);
       const farmer = await farmerRepository.findOneBy({
         farmerNumber: farmerNumber,
       });
-      const harverst = await harvestRepository.findOneBy({ id: 1 });
       const delivery = new Delivery();
       let message: string, passed: boolean;
       const date = new Date();
@@ -143,7 +164,7 @@ export default function registerDeliveryHandlers() {
           ),
         };
 
-        printReceipt(receiptData);
+        printReceipt(receiptData, printerToUse);
         const smsText = `
         Delivery of ${receiptData.berryType} to ${receiptData.farmerName} is ready. Weight: ${receiptData.weight}kg. Season total: ${receiptData.seasonTotal}kg.
         `;

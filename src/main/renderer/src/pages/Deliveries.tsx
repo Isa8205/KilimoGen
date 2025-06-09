@@ -40,7 +40,7 @@ export function Deliveries() {
     setfetching(true); // Set loading state
     try {
       const response = await window.electron.invoke('get-deliveries',
-        {page: currentPage, limit: itemsPerPage, filter: selectedFilter}
+        {page: currentPage, limit: itemsPerPage, filter: selectedFilter, harvestName: settings.farm.currentHarvest, seasonName: settings.farm.currentSeason}
       );
       setData(response.deliveries);
       setTotalPages(response.totalPages);
@@ -129,8 +129,10 @@ export function Deliveries() {
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const formData = new FormData(e.currentTarget);
-      const data = Object.fromEntries(formData as any);
-      data.servedBy = user?.id;
+      const formObject = Object.fromEntries(formData as any);
+      formObject.servedBy = user?.id;
+
+      const data = { deliveryData: formObject, harvestName: settings.farm.currentHarvest, printerToUse: settings.printing.defaultReceiptPrinter };
 
       const res = await window.electron.invoke("add-delivery", data);
 
@@ -151,7 +153,7 @@ export function Deliveries() {
     const filters = ["All", "CHERRY", "MBUNI"];
 
     return (
-      <div className="relative inline-block text-left z-10">
+      <div className="relative inline-block text-left">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-md transition"
@@ -172,7 +174,7 @@ export function Deliveries() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg z-10"
+            className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg"
           >
             <ul className="py-2 text-gray-700">
               {filters.map((filter) => (

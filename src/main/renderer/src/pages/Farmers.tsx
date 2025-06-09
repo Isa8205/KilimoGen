@@ -95,7 +95,7 @@ export function Farmers() {
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg z-10">
+          <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg">
             <ul className="py-2 text-gray-700">
               {filters.map((filter) => (
                 <li
@@ -184,16 +184,11 @@ export function Farmers() {
       </div>
 
       <div className="bg-white p-5 flex shadow-md rounded-md">
-        <span className="flex-grow border-x-2 border-gray-400 px-6">
+        <span className=" border-s-2 border-gray-400 px-6">
           <p>Total</p>
           <span className="font-bold">
             {farmers.length}
           </span>
-        </span>
-
-        <span className="flex-grow border-e-2 border-gray-400 px-6">
-          <p>Active</p>
-          <span className="font-bold">{farmers.length}</span>
         </span>
       </div>
 
@@ -218,14 +213,7 @@ export function Farmers() {
         </span>
       </div>
 
-      {/* Display the number of people selected */}
-      {selectedFarmers.length > 0 && (
-        <div>
-          <span className="text-sm font-semibold">
-            {selectedFarmers.length} selected
-          </span>
-        </div>
-      )}
+
 
       <table
         className={`bg-white ${

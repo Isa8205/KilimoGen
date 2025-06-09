@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
-import { Bell, Check, Filter, RefreshCcw, Trash2, X } from "lucide-react";
+import { ArrowLeft, Bell, Check, Filter, RefreshCcw, Trash2, X } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "react-router-dom";
 
 // Type definition based on the provided data structure
 type Notification = {
@@ -16,6 +17,7 @@ export default function NotificationsPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showFilterMenu, setShowFilterMenu] = useState(false);
+  const navigator = useNavigate();
 
   const fetchNotifications = async () => {
     const response = await window.electron.invoke("get-notifications");
@@ -74,8 +76,9 @@ export default function NotificationsPage() {
   };
 
   // Clear all notifications
-  const clearAllNotifications = () => {
-    setNotifications([]);
+  const clearAllNotifications = async () => {
+    await window.electron.invoke("notification:delete-all");
+    fetchNotifications();
     setSelectedCategory(null);
   };
 
@@ -84,7 +87,9 @@ export default function NotificationsPage() {
       <div className="bg-white rounded-lg shadow-lg p-4 max-w-3xl mx-auto">
         {/* Header */}
         <div className="border-b border-gray-200 p-4 flex justify-between items-center">
+          <button onClick={() => navigator(-1)} className="inline-flex items-center gap-2 mr-4 text-sm text-gray-600 border border-gray-200 px-3 py-1 rounded-full hover:bg-gray-100 hover:shadow-sm"><ArrowLeft className="text-sm"/> Back</button>
           <div className="flex items-center">
+            {/* Back navigation Button */}
             <Bell className="text-orange-500 mr-2" size={20} />
             <h1 className="text-xl font-semibold text-gray-800">
               Notifications

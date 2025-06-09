@@ -11,7 +11,7 @@ const registerClerkHandlers = (app: Electron.App) => {
   ipcMain.handle("get-clerks", async () => {
     try {
       const clerkRepository = AppDataSource.getRepository(Clerk);
-      const clerks = await clerkRepository.find();
+      const clerks = await clerkRepository.find({select: ["id", "firstName", "lastName", "email", "avatar", "phone"]});
 
       const data = clerks.map((clerk) => {
         if (clerk.avatar) {

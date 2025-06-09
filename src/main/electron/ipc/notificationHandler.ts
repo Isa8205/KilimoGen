@@ -31,4 +31,15 @@ export default function registerNotificationHandlers() {
             return {passed: false, message: 'Failed to mark notification as read. Try again'}
         }
     })
+
+    ipcMain.handle("notification:delete-all", async(event) => {
+        try {
+            const notificationRepository = AppDataSource.getRepository(Notification)
+            await notificationRepository.clear()
+            return {passed: true, message: 'All notifications deleted'}
+        } catch (err) {
+            console.error("Error in notification: ", err)
+            return {passed: false, message: 'Failed to delete notifications. Try again'}
+        }
+    })
 }

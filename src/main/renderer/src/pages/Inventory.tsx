@@ -70,17 +70,7 @@ export function Inventory() {
       </div>
 
       <div className="bg-white p-5 flex shadow-md rounded-md">
-        <span className="flex-grow border-x-2 border-gray-400 px-6">
-          <p>Total</p>
-          <span className="font-bold">{items.length}</span>
-        </span>
-
-        <span className="flex-grow border-e-2 border-gray-400 px-6">
-          <p>Total</p>
-          <span className="font-bold">{items.length}</span>
-        </span>
-
-        <span className="flex-grow border-e-2 border-gray-400 px-6">
+        <span className="flex-grow border-s-2 border-gray-400 px-6">
           <p>Total</p>
           <span className="font-bold">{items.length}</span>
         </span>

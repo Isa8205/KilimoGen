@@ -8,7 +8,7 @@ interface OnlyAdminProps {
 const OnlyAdmin: React.FC<OnlyAdminProps> = ({children}) => {
     const user = useRecoilState(sessionState)[0]
 
-    if (user?.role !== 'Admin') {
+    if (user?.role !== "Manager") {
         return
     }
 

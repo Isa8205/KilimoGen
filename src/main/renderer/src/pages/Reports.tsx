@@ -157,7 +157,7 @@ export default function ReportsComponent() {
             </button>
 
             {isFilterOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg z-10">
+              <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-lg">
                 <ul className="py-2 text-gray-700">
                   {filters.map((filter) => (
                     <li

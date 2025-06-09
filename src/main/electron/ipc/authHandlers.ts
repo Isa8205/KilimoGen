@@ -63,7 +63,7 @@ export const registerAuthHandlers = () => {
           email: user!.email,
           username: user!.username,
           avatar: getImageBase64(user!.avatar, process.env.SECRET_KEY!),
-          role: role
+          role: fetchedUser instanceof Clerk ? "Clerk" : "Manager",
         };
 
         const token = uuidv4();

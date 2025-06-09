@@ -326,17 +326,17 @@ export default function AdminPanel() {
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
-                  <tr>
-                    <th className="px-6 py-3 bg-primary text-white text-left text-sm font-medium">Name</th>
-                    <th className="px-6 py-3 bg-primary text-white text-left text-sm font-medium">Email</th>
-                    <th className="px-6 py-3 bg-primary text-white text-left text-sm font-medium">Role</th>
-                    <th className="px-6 py-3 bg-primary text-white text-left text-sm font-medium">Avatar</th>
+                  <tr className="bg-primary text-white">
+                    <th className="px-6 py-3 text-center text-sm font-medium">Name</th>
+                    <th className="px-6 py-3 text-center text-sm font-medium">Email</th>
+                    <th className="px-6 py-3 text-center text-sm font-medium">Phone</th>
+                    <th className="px-6 py-3 text-center text-sm font-medium">Avatar</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {clerks.length > 0 ? (
                     clerks.map((clerk) => (
-                      <tr key={clerk.id} className="hover:bg-background/50 transition-colors">
+                      <tr key={clerk.id} className="hover:bg-background/50 transition-colors text-center">
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="font-medium">
                             {clerk.firstName} {clerk.lastName}
@@ -344,11 +344,9 @@ export default function AdminPanel() {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-secondary">{clerk.email}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium">
-                            {clerk.role}
-                          </span>
+                         0{clerk.phone}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap inline-flex justify-center">
                           <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20">
                             <img
                               className="w-full h-full object-cover"

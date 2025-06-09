@@ -22,5 +22,5 @@ export class Season {
     description: string;
 
     @OneToMany(() => Harvest, harverst => harverst.season)
-    harvests: Harvest;
+    harvests: Harvest[];
 }
