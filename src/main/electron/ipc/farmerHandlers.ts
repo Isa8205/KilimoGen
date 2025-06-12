@@ -67,6 +67,7 @@ export const registerFarmerHandlers = () => {
           "farmer.lastName",
           "farmer.phone",
           "farmer.avatar",
+          "deliveries.id",
           "deliveries.quantity",
           "deliveries.berryType",
         ])
