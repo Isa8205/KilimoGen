@@ -1,9 +1,8 @@
 import Logo from "@/components/Logo";
 import { motion } from "framer-motion";
-import { LayoutDashboard, User, Truck, Store, FileTextIcon, MessageSquareShare, ChevronLeft, Settings, DollarSign, CreditCard, Coins } from "lucide-react";
+import { LayoutDashboard, User, Truck, Store, FileTextIcon, MessageSquareShare, ChevronLeft, Settings, DollarSign, CreditCard, Coins, BarChart2, Coffee, Warehouse } from "lucide-react";
 import { useState } from "react";
 import { useLocation, NavLink } from "react-router-dom";
-import  Tooltip  from "../components/Tooltips/Tooltip";
 
 const Navbar = () => {
     const [isExpanded, setExpanded] = useState(true);
@@ -12,10 +11,10 @@ const Navbar = () => {
     const navItems = [
       { icon: <LayoutDashboard />, label: 'Dashboard', route: 'dashboard', allowedRoles:['clerk', 'admin', 'guest'] },
       { icon: <User />, label: 'Farmers', route: 'farmers', allowedRoles:['clerk', 'admin', 'guest']  },
-      // { icon: <Package />, label: "Production", route: "production", allowedRoles:['clerk', 'admin', 'guest']  },
+      { icon: <Coffee />, label: "Production", route: "production", allowedRoles:['clerk', 'admin', 'guest']  },
       { icon: <Truck />, label: 'Deliveries', route: 'deliveries', allowedRoles:['clerk', 'admin', 'guest']  },
       { icon: <Store />, label: 'Inventory', route: 'inventory', allowedRoles:['clerk', 'admin', 'guest']  },
-      // { icon: <BarChart />, label: "Analytics", route: "analytics", allowedRoles:['clerk', 'admin', 'guest']  },
+      // { icon: <BarChart2 />, label: "Analytics", route: "analytics", allowedRoles:['clerk', 'admin', 'guest']  },
       // { icon: <DollarSign />, label: "Financials", route: "financials", allowedRoles:['clerk', 'admin', 'guest']  },
       { icon: <FileTextIcon />, label: 'Reports', route: 'reports', allowedRoles:['clerk', 'admin', 'guest']  },
       { icon: <Coins />, label: 'Advances', route: 'advances', allowedRoles:['clerk', 'admin', 'guest']  },
@@ -59,11 +58,6 @@ const Navbar = () => {
                     location.pathname.includes(nav.route) ? 'bg-teal-800' : ''
                   }`}
                 >
-                  <Tooltip
-                    text={isExpanded ? '' : nav.label}
-                    className=""
-                    position="right"
-                  >
                     <NavLink
                       to={nav.route}
                       className="inline-flex py-2 ps-2 gap-2 justify-start items-center"
@@ -78,7 +72,6 @@ const Navbar = () => {
                         {nav.label}
                       </motion.p>
                     </NavLink>
-                  </Tooltip>
                 </li>
               ))}
             </ul>
@@ -92,7 +85,6 @@ const Navbar = () => {
                 location.pathname.includes('settings') ? 'bg-teal-800' : ''
               }`}
             >
-              <Tooltip text={isExpanded ? '' : 'Settings'} position="right">
                 <NavLink
                   to="settings"
                   className="inline-flex py-2 ps-2 gap-2 justify-start items-center"
@@ -109,7 +101,6 @@ const Navbar = () => {
                     Settings
                   </motion.p>
                 </NavLink>
-              </Tooltip>
             </li>
           </ul>
         </div>

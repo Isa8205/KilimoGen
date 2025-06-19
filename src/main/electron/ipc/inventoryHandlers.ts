@@ -1,6 +1,7 @@
 import { AppDataSource } from "@/main/database/src/data-source";
 import { Clerk } from "@/main/database/src/entities/Clerk";
 import { InventoryItem } from "@/main/database/src/entities/InventoryItem";
+import { InventoryTransaction } from "@/main/database/src/entities/InventoryTransaction";
 import { getImageBase64 } from "@/main/utils/getImageBase64";
 import { saveFile } from "@/main/utils/saveFile";
 import { ipcMain } from "electron";
@@ -12,11 +13,11 @@ export default function registerInventoryHandlers(app: Electron.App) {
       .leftJoinAndSelect("inventory.receivedBy", "receivedBy")
       .select([
         "inventory.id",
-        "inventory.productName",
+        "inventory.itemName",
         "inventory.category",
-        "inventory.quantity",
+        "inventory.unitWeight",
         "inventory.description",
-        "inventory.weight",
+        "inventory.unit",
         "inventory.dateReceived",
         "receivedBy.id",
         "receivedBy.firstName",
@@ -37,34 +38,44 @@ export default function registerInventoryHandlers(app: Electron.App) {
     return res;
   });
 
-  ipcMain.handle("add-inventory", async (_event, itemData) => {
+  ipcMain.handle("inventory:add-item", async (_event, itemData) => {
     try {
       const {
-        productName,
+        itemName,
         category,
         quantity,
         description,
-        weight,
-        dateReceived,
         image,
+        unit,
+        unitWeight,
+        clerkId
       } = itemData;
 
       const inventoryRepository = AppDataSource.getRepository(InventoryItem);
+      const inventoryTransactionRepository = AppDataSource.getRepository(InventoryTransaction)
       const clerkRepository = AppDataSource.getRepository(Clerk);
-      const clerk = await clerkRepository.findOneBy({ id: 1 });
+      const clerk = await clerkRepository.findOneBy({ id: Number(clerkId) });
 
-      const inventory = new InventoryItem();
-      inventory.productName = productName;
-      inventory.category = category;
-      inventory.quantity = parseInt(quantity);
-      inventory.description = description;
-      inventory.weight = weight;
-      inventory.dateReceived = new Date(dateReceived);
-      (inventory.receivedBy as Clerk | null) = clerk;
-      image.data.length > 0 &&
-        (inventory.image = saveFile(image, "Inventory/images"));
+      const inventoryItem = new InventoryItem();
+      inventoryItem.itemName = itemName;
+      inventoryItem.category = category;
+      inventoryItem.unit = unit;
+      inventoryItem.unitWeight = "20ml"
+      inventoryItem.description = description;
+      inventoryItem.dateReceived = new Date();
+      (inventoryItem.receivedBy as Clerk | null) = clerk;
+      image.data.length > 0 && (inventoryItem.image = saveFile(image, "Inventory/images"));
 
-      await inventoryRepository.save(inventory);
+      const inventoryTransaction = new InventoryTransaction
+      inventoryTransaction.item = inventoryItem;
+      inventoryTransaction.note = "Initial Stock"
+      inventoryTransaction.quantity = quantity
+      inventoryTransaction.updateType = "allocation"
+      inventoryTransaction.updatedAt = new Date();
+      (inventoryTransaction.clerk as Clerk | null) = clerk
+
+      await inventoryRepository.save(inventoryItem);
+      await inventoryTransactionRepository.save(inventoryTransaction)
       const res = { passed: true, message: "Inventory added successfully" };
       return res;
     } catch (err) {
@@ -73,4 +84,54 @@ export default function registerInventoryHandlers(app: Electron.App) {
       return res;
     }
   });
+
+  ipcMain.handle("inventory:stock-update", async (_event, itemData) => {
+    try {
+      const allowedActions = ["restock", "allocate"]
+      const { itemId, quantity, action, note, clerkId} = itemData;
+
+      if (!allowedActions.includes(action)) {
+        return {passed: false, message: "Only restock and allocate action permitted"}
+      }
+
+      const inventoryTransactionRepository = AppDataSource.getRepository(InventoryTransaction);
+      const intentoryItemRepository = AppDataSource.getRepository(InventoryItem)
+      const clerkRepository = AppDataSource.getRepository(Clerk)
+      const clerk = await clerkRepository.findOneBy({id: Number(clerkId)})
+      const inventoryItem = await intentoryItemRepository.findOneBy({id: Number(itemId)})
+
+      if (!clerk) return { passed: false, message: "You should be logged in as a clerk"};
+
+      const inventoryTransaction = new InventoryTransaction;
+      inventoryTransaction.quantity = quantity;
+      inventoryTransaction.note = note;
+      inventoryTransaction.updateType = action;
+      inventoryTransaction.updatedAt = new Date();
+      (inventoryTransaction.clerk as Clerk | null) = clerk;
+      (inventoryTransaction.item as InventoryItem | null) = inventoryItem;
+
+      await inventoryTransactionRepository.save(inventoryTransaction)
+      return { passed: true, message: "Transaction successfull" };
+    } catch (err) {
+      console.error(err);
+      return { passed: false, message: "Failed to update item", error: err };
+    }
+  });
 }
+
+ipcMain.handle("inventory:remove", async (_event, itemId) => {
+  try {
+    const inventoryRepository = AppDataSource.getRepository(InventoryItem);
+    const item = await inventoryRepository.findOneBy({ id: itemId });
+
+    if (!item) {
+      return { passed: false, message: "Item not found" };
+    }
+
+    await inventoryRepository.remove(item);
+    return { passed: true, message: "Item removed successfully" };
+  } catch (err) {
+    console.error(err);
+    return { passed: false, message: "Failed to remove item", error: err };
+  }
+});

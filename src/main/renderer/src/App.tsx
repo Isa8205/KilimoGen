@@ -23,13 +23,30 @@ import FarmerProfile from "./pages/FarmerProfile";
 import { AppSettings } from "./types/appSettings";
 import NotificationsPage from "./pages/Notifications";
 import Advances from "./pages/Advances";
+import InventoryItemDetail from "./pages/InventoryItemView";
+import InventoryItemForm from "./pages/InventoryItemEdit";
+import CoffeeProduction from "./pages/Production";
 
+const defaultSettings: AppSettings = {
+  general: {
+    theme: "dark",
+  },
+  farm: {
+    currentSeason: "",
+    currentHarvest: "",
+  },
+  printing: {
+    defaultReceiptPrinter: "",
+    defaultReportPrinter: "",
+  },
+}
 function App() {
   const [settings, setSettings] = useRecoilState(settingsState);
   const setSessionData = useRecoilState(sessionState)[1];
 
   // Get settings from localStorage and load it to recoil state
   useEffect(() => {
+    setSettings(defaultSettings);
     (async () => {
       const userSettings = await window.electron.invoke("get-settings");
       setSettings(userSettings);
@@ -38,9 +55,9 @@ function App() {
 
   // Ensure to sync the settings with the backend
   useEffect(() => {
-    async () => {
+    (async () => {
       await window.electron.invoke("set-settings", settings);
-    };
+    })();
   }, [settings]);
 
   // Get current session if any
@@ -111,8 +128,8 @@ function App() {
             <Route path="inventory">
               <Route path="" Component={Inventory} />
               <Route path="add" Component={InventoryForm} />
-              <Route path="edit/:id" element={<div>Edit Inventory Form</div>} />
-              <Route path=":id" element={<div>View Inventory Details</div>} />
+              <Route path="edit/:id" element={<InventoryItemForm />} />
+              <Route path=":id" element={<InventoryItemDetail />} />
             </Route>
 
             {/* Reports */}
@@ -122,7 +139,7 @@ function App() {
             <Route path="advances" element={<Advances />} />
 
             {/* Messaging */}
-            <Route path="messaging" element={<Messaging />} />
+            <Route path="production" element={<CoffeeProduction />} />
 
             {/* Settings  */}
             <Route path="settings" element={<SettingsPage />} />

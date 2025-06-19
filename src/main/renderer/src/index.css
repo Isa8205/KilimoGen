@@ -2,6 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
+* {
+  -webkit-user-select: none;
+  user-select: none;
+  cursor: default;
+}
+button, a {
+  cursor: pointer;
+}
+input, textarea {
+  user-select: text;
+}
+
 #root {
   height: 100vh;
   width: 100vw;

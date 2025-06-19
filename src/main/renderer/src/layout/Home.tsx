@@ -5,7 +5,6 @@ import { Settings, User, LogIn, LogOut, BellIcon, MailOpenIcon, TriangleAlert, R
 import React, { useState, useEffect, useRef } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
-import  Tooltip  from "../components/Tooltips/Tooltip";
 import Navbar from "./MainNavbar";
 import { useRecoilState } from "recoil";
 import { sessionState } from "@/store/store";

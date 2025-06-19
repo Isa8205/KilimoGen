@@ -2,8 +2,11 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import notify from "../utils/ToastHelper";
+import { useRecoilState } from "recoil";
+import { sessionState } from "@/store/store";
 
 export function InventoryForm() {
+  const user = useRecoilState(sessionState)[0]
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,6 +37,7 @@ export function InventoryForm() {
     const formData = new FormData(e.currentTarget); // Collect form data
     const data = Object.fromEntries(formData as any); // Convert to an object
     data.weight = `${data.weight}${data.units}`;
+    data.clerkId = user?.id
 
     const file = data.image;
     if (data.image) {
@@ -45,7 +49,7 @@ export function InventoryForm() {
       };
     }
 
-    const response = await window.electron.invoke("add-inventory", data);
+    const response = await window.electron.invoke("inventory:add-item", data);
 
     if (response.passed) {
       notify(response.passed, response.message);
@@ -72,15 +76,15 @@ export function InventoryForm() {
         {/* Product Name */}
         <div className="grid grid-cols-4 items-center gap-4">
           <label
-            htmlFor="productName"
+            htmlFor="itemName"
             className="text-right font-medium text-sm text-gray-700"
           >
-            Product Name
+            Item Name
           </label>
           <input
             required
-            id="productName"
-            name="productName"
+            id="itemName"
+            name="itemName"
             className="col-span-3 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
@@ -156,7 +160,7 @@ export function InventoryForm() {
               className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
             <select
-              name="units"
+              name="unit"
               className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
             >
               <option value="ml">ml</option>
@@ -164,23 +168,6 @@ export function InventoryForm() {
               <option value="kgs">kg(s)</option>
             </select>
           </div>
-        </div>
-
-        {/* Date Received */}
-        <div className="grid grid-cols-4 items-center gap-4">
-          <label
-            htmlFor="dateReceived"
-            className="text-right font-medium text-sm text-gray-700"
-          >
-            Date Received
-          </label>
-          <input
-            required
-            id="dateReceived"
-            name="dateReceived"
-            type="date"
-            className="col-span-3 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
         </div>
 
         {/* Image Upload */}

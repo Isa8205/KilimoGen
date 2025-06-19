@@ -1,9 +1,8 @@
 import axios from 'axios';
-import { Edit, Grid, List, MoreHorizontal, RefreshCcw } from 'lucide-react';
+import { Edit, Grid, List, MoreHorizontal, RefreshCcw, View } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Loader from '../components/Loaders/Loader1';
-import { NavLink } from 'react-router-dom';
-import Tooltip from '../components/Tooltips/Tooltip';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import errorImage from '@/assets/images/backgrounds/404_2.svg';
 import { useRecoilState } from 'recoil';
@@ -11,6 +10,7 @@ import { sessionState } from '@/store/store';
 import { formatDistanceToNow } from 'date-fns';
 
 export function Inventory() {
+  const navigate = useNavigate();
   // Get the session data
   const user = useRecoilState(sessionState)[0];
 
@@ -202,6 +202,10 @@ export function Inventory() {
                       })
                     }
                   </span>
+
+                  <button onClick={() => navigate(`/home/inventory/${item.id}`)}>
+                    <View className="w-5 h-5 text-gray-500 hover:text-accent" />
+                  </button>
                 </div>
                 {/* Data fields */}
                 <h2 className="text-lg font-semibold text-gray-600">

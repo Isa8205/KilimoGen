@@ -1,25 +1,25 @@
 import { PrimaryGeneratedColumn, Column, Entity, ManyToMany, ManyToOne } from "typeorm";
 import { Clerk } from "./Clerk";
 
-@Entity('inventory', { name: "InventoryItem" })
+@Entity('inventory_items', { name: "InventoryItem" })
 export class InventoryItem {
     @PrimaryGeneratedColumn()
     id: number;
 
     @Column({unique: true})
-    productName: string;
+    itemName: string;
 
     @Column()
     category: string;
 
-    @Column({ type: 'int' })
-    quantity: number;
+    @Column()
+    unit: "ml" | "kgs" | "bags";
+
+    @Column()
+    unitWeight: string;
 
     @Column({ length: 150, nullable: true })
     description: string;
-
-    @Column({ nullable: true })
-    weight: number;
 
     @Column()
     dateReceived: Date;
@@ -29,4 +29,5 @@ export class InventoryItem {
 
     @Column({nullable: true})
     image: string;
+
 }
