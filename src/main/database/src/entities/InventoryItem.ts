@@ -1,33 +1,60 @@
-import { PrimaryGeneratedColumn, Column, Entity, ManyToMany, ManyToOne } from "typeorm";
+import { PrimaryGeneratedColumn, Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { Clerk } from "./Clerk";
+import { InventoryTransaction } from "@/main/database/src/entities/InventoryTransaction";
 
 @Entity('inventory_items', { name: "InventoryItem" })
 export class InventoryItem {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({unique: true})
+    @Column({ unique: true })
     itemName: string;
 
     @Column()
     category: string;
 
     @Column()
-    unit: "ml" | "kgs" | "bags";
+    quantity: number;
 
     @Column()
-    unitWeight: string;
+    unitWeight: number;
+
+    @Column()
+    unit: string;
+
+    @Column()
+    location: string;
+
+    @Column()
+    zone: string;
+
+    @Column()
+    supplier: string;
+
+    @Column()
+    minStock: number;
+
+    @Column()
+    maxStock: number;
+
+    @Column()
+    dateReceived: Date;
 
     @Column({ length: 150, nullable: true })
     description: string;
 
     @Column()
-    dateReceived: Date;
+    batchNumber: string;
+
+    @Column()
+    origin: string;
+
+    @Column("varchar",{ nullable: true })
+    images: string;
 
     @ManyToOne(() => Clerk)
     receivedBy: Clerk;
 
-    @Column({nullable: true})
-    image: string;
-
+    @OneToMany(() => InventoryTransaction, (transaction) => transaction.item)
+    transactions: InventoryTransaction[];
 }

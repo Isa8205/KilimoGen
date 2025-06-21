@@ -127,7 +127,7 @@ function App() {
             {/* Inventory Management */}
             <Route path="inventory">
               <Route path="" Component={Inventory} />
-              <Route path="add" Component={InventoryForm} />
+              <Route path="add" Component={InventoryItemForm} />
               <Route path="edit/:id" element={<InventoryItemForm />} />
               <Route path=":id" element={<InventoryItemDetail />} />
             </Route>

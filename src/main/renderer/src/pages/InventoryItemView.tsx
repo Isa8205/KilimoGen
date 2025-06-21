@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   ArrowLeft,
   Package,
@@ -55,7 +55,7 @@ export default function InventoryItemDetail() {
     category: "Green Coffee",
     variety: "Bourbon",
     processMethod: "Washed",
-    quantity: 0,
+    quantity: 1260,
     unit: "kg",
     location: "Warehouse A",
     zone: "Section 3-B",
@@ -132,6 +132,10 @@ export default function InventoryItemDetail() {
       alert("Failed to delete item")
     }
   }
+
+  useEffect(() => {
+    fetchItemData()
+  })
 
   return (
     <div className="min-h-screen">

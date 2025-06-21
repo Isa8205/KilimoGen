@@ -2,13 +2,21 @@ import { AppDataSource } from "@/main/database/src/data-source";
 import { Clerk } from "@/main/database/src/entities/Clerk";
 import { InventoryItem } from "@/main/database/src/entities/InventoryItem";
 import { InventoryTransaction } from "@/main/database/src/entities/InventoryTransaction";
+import getSessionUser from "@/main/electron/session/getSessionUser";
 import { getImageBase64 } from "@/main/utils/getImageBase64";
 import { saveFile } from "@/main/utils/saveFile";
 import { ipcMain } from "electron";
 
 export default function registerInventoryHandlers(app: Electron.App) {
+  let user: Clerk | null = null;
+  getSessionUser().then((sessionUser) => {
+    user = sessionUser;
+  });
+  const inventoryItemRepository = AppDataSource.getRepository(InventoryItem);
+  const clerkRepository = AppDataSource.getRepository(Clerk)
+  const inventoryTransactionRepository = AppDataSource.getRepository(InventoryTransaction)
   ipcMain.handle("get-inventory", async (_event) => {
-    const querriedItems = await AppDataSource.getRepository(InventoryItem)
+    const querriedItems = await inventoryItemRepository
       .createQueryBuilder("inventory")
       .leftJoinAndSelect("inventory.receivedBy", "receivedBy")
       .select([
@@ -27,9 +35,9 @@ export default function registerInventoryHandlers(app: Electron.App) {
       .getMany();
 
     const items = querriedItems.map((item) => {
-      if (item.image) {
-        const imageString = getImageBase64(item.image, process.env.SECRET_KEY!);
-        (item.image as any) = imageString;
+      if (item.images) {
+        const imageString = getImageBase64(item.images[0], process.env.SECRET_KEY!);
+        (item.images as any) = imageString;
       }
       return item;
     });
@@ -38,33 +46,72 @@ export default function registerInventoryHandlers(app: Electron.App) {
     return res;
   });
 
+  ipcMain.handle("inventory:get-item-data", async (_event, id) => {
+    try {
+
+      if (!id) return { passed: false, message: "Failed. Provide the id", itemData: []}
+
+      const dbItem = await inventoryItemRepository.findOneBy({ id: id })
+      const currentStock = dbItem?.transactions.reduce((acc: number, transaction: InventoryTransaction) => {
+        if (transaction.updateType === "allocation") {
+          return acc - transaction.quantity
+        } else if (transaction.updateType === "restock") {
+          return acc + transaction.quantity
+        }
+
+        return acc
+      }, 0)
+      return { passed: true, itemData: {currentStock: currentStock, item: dbItem} }
+    } catch (err) {
+      console.error(err)
+      return { passed: false, message: "Encountered an error while geting data", itemData: []}
+    }
+  })
+
   ipcMain.handle("inventory:add-item", async (_event, itemData) => {
     try {
       const {
-        itemName,
+        name,
         category,
         quantity,
-        description,
-        image,
-        unit,
         unitWeight,
-        clerkId
+        unit,
+        location,
+        zone,
+        minStock,
+        maxStock,
+        description,
+        batchNumber,
+        origin,
+        images,
       } = itemData;
 
-      const inventoryRepository = AppDataSource.getRepository(InventoryItem);
-      const inventoryTransactionRepository = AppDataSource.getRepository(InventoryTransaction)
-      const clerkRepository = AppDataSource.getRepository(Clerk);
-      const clerk = await clerkRepository.findOneBy({ id: Number(clerkId) });
+      if (!user) return {passed: false, message: "Please ensure you are logged in!"}
+      const clerk = await clerkRepository.findOneBy({ id: user.id });
 
       const inventoryItem = new InventoryItem();
-      inventoryItem.itemName = itemName;
+      inventoryItem.itemName = name;
       inventoryItem.category = category;
       inventoryItem.unit = unit;
-      inventoryItem.unitWeight = "20ml"
+      inventoryItem.unitWeight = Number(unitWeight);
       inventoryItem.description = description;
       inventoryItem.dateReceived = new Date();
+      inventoryItem.location = location;
+      inventoryItem.zone = zone;
+      inventoryItem.minStock = minStock;
+      inventoryItem.maxStock = maxStock;
+      inventoryItem.supplier = origin;
+      inventoryItem.batchNumber = batchNumber;
       (inventoryItem.receivedBy as Clerk | null) = clerk;
-      image.data.length > 0 && (inventoryItem.image = saveFile(image, "Inventory/images"));
+      // Save the images and get the image strings
+      if (images.data.length > 0) {
+        let imagesArray: string[] = [];
+        images.data.forEach((image: any) => {
+          const imageString = saveFile({data: image}, "Inventory/images");
+          imagesArray.push(imageString);
+        });
+        inventoryItem.images = imagesArray.join(";");
+      }
 
       const inventoryTransaction = new InventoryTransaction
       inventoryTransaction.item = inventoryItem;
@@ -74,7 +121,7 @@ export default function registerInventoryHandlers(app: Electron.App) {
       inventoryTransaction.updatedAt = new Date();
       (inventoryTransaction.clerk as Clerk | null) = clerk
 
-      await inventoryRepository.save(inventoryItem);
+      await inventoryItemRepository.save(inventoryItem);
       await inventoryTransactionRepository.save(inventoryTransaction)
       const res = { passed: true, message: "Inventory added successfully" };
       return res;
@@ -93,12 +140,8 @@ export default function registerInventoryHandlers(app: Electron.App) {
       if (!allowedActions.includes(action)) {
         return {passed: false, message: "Only restock and allocate action permitted"}
       }
-
-      const inventoryTransactionRepository = AppDataSource.getRepository(InventoryTransaction);
-      const intentoryItemRepository = AppDataSource.getRepository(InventoryItem)
-      const clerkRepository = AppDataSource.getRepository(Clerk)
       const clerk = await clerkRepository.findOneBy({id: Number(clerkId)})
-      const inventoryItem = await intentoryItemRepository.findOneBy({id: Number(itemId)})
+      const inventoryItem = await inventoryItemRepository.findOneBy({id: Number(itemId)})
 
       if (!clerk) return { passed: false, message: "You should be logged in as a clerk"};
 
@@ -117,21 +160,21 @@ export default function registerInventoryHandlers(app: Electron.App) {
       return { passed: false, message: "Failed to update item", error: err };
     }
   });
+
+  ipcMain.handle("inventory:remove", async (_event, itemId) => {
+    try {
+      const item = await inventoryItemRepository.findOneBy({ id: itemId });
+  
+      if (!item) {
+        return { passed: false, message: "Item not found" };
+      }
+  
+      await inventoryItemRepository.remove(item);
+      return { passed: true, message: "Item removed successfully" };
+    } catch (err) {
+      console.error(err);
+      return { passed: false, message: "Failed to remove item", error: err };
+    }
+  });
 }
 
-ipcMain.handle("inventory:remove", async (_event, itemId) => {
-  try {
-    const inventoryRepository = AppDataSource.getRepository(InventoryItem);
-    const item = await inventoryRepository.findOneBy({ id: itemId });
-
-    if (!item) {
-      return { passed: false, message: "Item not found" };
-    }
-
-    await inventoryRepository.remove(item);
-    return { passed: true, message: "Item removed successfully" };
-  } catch (err) {
-    console.error(err);
-    return { passed: false, message: "Failed to remove item", error: err };
-  }
-});

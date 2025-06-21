@@ -27,7 +27,7 @@ export const registerAuthHandlers = () => {
         const user = JSON.parse(data?.data)
         return {user: user, message: `Welcome back ${user.firstName}`}
       }  else {
-        return {user: false, message: 'No session availabel'}
+        return {user: false, message: 'No session available'}
       }
     } catch (err) {
       console.log("Error retreiving session: ", err);

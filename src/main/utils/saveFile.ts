@@ -3,7 +3,7 @@ import { app } from "electron";
 import fs from "fs";
 import path from "path";
 
-export function saveFile(fileData: {type: string, data: Uint8Array, name: string}, saveDir: string): string {
+export function saveFile(fileData: {type?: string, data: Uint8Array, name?: string}, saveDir: string): string {
 
       const filename = Date.now().toString();
       let profilePath = "";
