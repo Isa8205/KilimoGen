@@ -63,7 +63,7 @@ export const registerAuthHandlers = () => {
           email: user!.email,
           username: user!.username,
           avatar: getImageBase64(user!.avatar, process.env.SECRET_KEY!),
-          role: fetchedUser instanceof Clerk ? "Clerk" : "Manager",
+          role: fetchedUser[0] instanceof Clerk ? "Clerk" : "Manager",
         };
 
         const token = uuidv4();
@@ -88,7 +88,7 @@ export const registerAuthHandlers = () => {
 
   ipcMain.handle("register-clerk", async (event, data) => {
     try {
-      const clerkRepository = AppDataSource.getRepository(Manager);
+      const clerkRepository = AppDataSource.getRepository(Clerk);
       const clerk = clerkRepository.create(data);
       await clerkRepository.save(clerk);
       return { message: "Clerk added successfully", success: true };

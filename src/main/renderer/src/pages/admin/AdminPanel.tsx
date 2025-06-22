@@ -346,13 +346,15 @@ export default function AdminPanel() {
                         <td className="px-6 py-4 whitespace-nowrap">
                          0{clerk.phone}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap inline-flex justify-center">
-                          <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20">
-                            <img
-                              className="w-full h-full object-cover"
-                              src={`data:image/png;base64,${clerk.avatar}`}
-                              alt={`${clerk.firstName} ${clerk.lastName}`}
-                            />
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex justify-center">
+                             <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20">
+                               <img
+                                 className="w-full h-full object-cover"
+                                 src={`data:image/png;base64,${clerk.avatar}`}
+                                 alt={`${clerk.firstName} ${clerk.lastName}`}
+                               />
+                             </div>
                           </div>
                         </td>
                       </tr>

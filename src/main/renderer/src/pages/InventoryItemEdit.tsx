@@ -37,20 +37,20 @@ interface FormData {
   images: File[]
 }
 
-export default function InventoryItemForm({ isEdit = false, existingData = null }: { isEdit?: boolean; existingData?: FormData | null }) {
+export default function InventoryItemForm({ isEdit = false }: { isEdit?: boolean; }) {
   const [formData, setFormData] = useState<FormData>({
-    name: existingData?.name || "",
-    category: existingData?.category || "Green Coffee",
-    unitWeight: existingData?.unitWeight || 0,
-    quantity: existingData?.quantity || 0,
-    unit: existingData?.unit || "kg",
-    location: existingData?.location || "",
-    zone: existingData?.zone || "",
-    minStock: existingData?.minStock || 0,
-    maxStock: existingData?.maxStock || 0,
-    description: existingData?.description || "",
-    batchNumber: existingData?.batchNumber || "",
-    origin: existingData?.origin || "",
+    name:"",
+    category: "",
+    unitWeight: 0,
+    quantity: 0,
+    unit:"kg",
+    location: "",
+    zone:"",
+    minStock: 0,
+    maxStock: 0,
+    description:"",
+    batchNumber:"",
+    origin:"",
     images: [],
   })
 
@@ -114,20 +114,19 @@ export default function InventoryItemForm({ isEdit = false, existingData = null 
     // }
 
     const images = formData.images
-    let imgaeBuffers: Uint8Array<ArrayBuffer>[] = []
-    images.forEach(async(image) => {
+    const imgaeBuffers: any[] = await Promise.all(images.map(async (image) => {
       const imagerArrayBuffer = await image.arrayBuffer()
       const imageUnit8Array = new Uint8Array(imagerArrayBuffer)
-      imgaeBuffers.push(imageUnit8Array)
-    });
-    // Modify the images array on the formData
-    (formData.images as any) = imgaeBuffers
+      return { type: image.type, data: imageUnit8Array, name: image.name }
+    }));
+    // Create new object to avoid mutating state directly and add images as Uint8Array
+    const sendFormData = { ...formData, images: imgaeBuffers }
 
     setIsSubmitting(true)
 
     try {
-      const res = await window.electron.invoke("inventory:add-item", formData)
-      console.log("Form submitted:", formData)
+      const res = await window.electron.invoke("inventory:add-item", sendFormData)
+      console.log("Form submitted:", sendFormData)
       notify(res.passed, res.message)
     } catch (error) {
       console.error("Error submitting form:", error)

@@ -21,16 +21,17 @@ export function Inventory() {
   const [items, setItems] = useState<
     {
       id: number;
-      productName: string;
+      itemName: string;
       category: string;
-      quantity: number;
-      weight: string;
+      currentQuantity: number;
+      unit: string;
+      unitWeight: string;
       dateReceived: string;
       receivedBy: {
         firstName: string;
         lastName: string;
       };
-      image: string;
+      images: string;
     }[]
   >([]);
   const [fetching, setFetching] = useState(false);
@@ -136,10 +137,10 @@ export function Inventory() {
                   }`}
                 >
                   {/* Data cells */}
-                  <td className="p-2 ">{item.productName}</td>
+                  <td className="p-2 ">{item.itemName}</td>
                   <td className="p-2 ">{item.category}</td>
-                  <td className="p-2 ">{item.quantity}</td>
-                  <td className="p-2 ">{item.weight}</td>
+                  <td className="p-2 ">{item.currentQuantity}</td>
+                  <td className="p-2 ">{item.unitWeight} {item.unit}</td>
                   <td className="p-2 ">
                     {formatDistanceToNow(new Date(item.dateReceived), {
                       addSuffix: true})
@@ -151,9 +152,9 @@ export function Inventory() {
                   <td className="p-2 inline-flex justify-center ">
                     <div className="w-[4em] h-[4em] bg-gray-300 rounded-md flex items-center justify-center cursor-pointer hover:opacity-75">
                       {' '}
-                      {item.image ? (
+                      {item.images ? (
                         <img
-                          src={`data:image/png;base64,${item.image}`}
+                          src={`data:image/png;base64,${item.images}`}
                           alt="Preview"
                           className="w-full h-full object-cover rounded-t-md"
                         />
@@ -181,9 +182,9 @@ export function Inventory() {
               {/* Image at the top */}
               <div className="w-full h-[10em] bg-gray-300 rounded-t-md flex items-center justify-center cursor-pointer hover:opacity-75">
                 {' '}
-                {item.image ? (
+                {item.images ? (
                   <img
-                    src={`data:image/png;base64,${item.image}`}
+                    src={`data:image/png;base64,${item.images}`}
                     alt="Preview"
                     className="w-full h-full object-cover rounded-t-md"
                   />
@@ -208,16 +209,19 @@ export function Inventory() {
                   </button>
                 </div>
                 {/* Data fields */}
+                <div className="mb-2 flex justify-between">
                 <h2 className="text-lg font-semibold text-gray-600">
-                  {item.productName}
+                  {item.itemName}
                 </h2>
+
+                <p className='text-sm text text-gray-500'>({item.unitWeight} {item.unit})</p>
+                </div>
                 <p className="text-sm text-gray-600">
                   Category: {item.category}
                 </p>
                 <p className="text-sm text-gray-600">
-                  Quantity: {item.quantity}
+                  Quantity: {item.currentQuantity}
                 </p>
-                <p className="text-sm text-gray-600">Weight: {item.weight}</p>
                 <p className="text-sm text-gray-600">
                   Received By: {item.receivedBy.firstName}{' '}
                   {item.receivedBy.lastName}

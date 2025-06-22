@@ -14,9 +14,6 @@ export class InventoryItem {
     category: string;
 
     @Column()
-    quantity: number;
-
-    @Column()
     unitWeight: number;
 
     @Column()
@@ -27,9 +24,6 @@ export class InventoryItem {
 
     @Column()
     zone: string;
-
-    @Column()
-    supplier: string;
 
     @Column()
     minStock: number;
@@ -57,4 +51,6 @@ export class InventoryItem {
 
     @OneToMany(() => InventoryTransaction, (transaction) => transaction.item)
     transactions: InventoryTransaction[];
+
+    currentQuantity: number
 }

@@ -15,29 +15,30 @@ export default function registerInventoryHandlers(app: Electron.App) {
   const inventoryItemRepository = AppDataSource.getRepository(InventoryItem);
   const clerkRepository = AppDataSource.getRepository(Clerk)
   const inventoryTransactionRepository = AppDataSource.getRepository(InventoryTransaction)
+
   ipcMain.handle("get-inventory", async (_event) => {
-    const querriedItems = await inventoryItemRepository
-      .createQueryBuilder("inventory")
-      .leftJoinAndSelect("inventory.receivedBy", "receivedBy")
-      .select([
-        "inventory.id",
-        "inventory.itemName",
-        "inventory.category",
-        "inventory.unitWeight",
-        "inventory.description",
-        "inventory.unit",
-        "inventory.dateReceived",
-        "receivedBy.id",
-        "receivedBy.firstName",
-        "receivedBy.lastName",
-        "inventory.image",
-      ])
-      .getMany();
+    const querriedItems = await inventoryItemRepository.find({relations: ['receivedBy', 'transactions']})
 
     const items = querriedItems.map((item) => {
       if (item.images) {
-        const imageString = getImageBase64(item.images[0], process.env.SECRET_KEY!);
-        (item.images as any) = imageString;
+        const imageList = item.images.split(";");
+        const imageString = getImageBase64(imageList[0], process.env.SECRET_KEY!);
+        if (imageString) {
+          (item.images as any) = imageString
+        }
+      }
+
+      if (item.transactions) {
+        const currentQuantity = item.transactions.reduce((acc: number, transaction: InventoryTransaction) => {
+          if (transaction.updateType === "allocation") {
+            return acc + transaction.quantity
+          } else if (transaction.updateType === "restock") {
+            return acc - transaction.quantity
+          }
+          return acc
+        }, 0)
+
+        if (currentQuantity) item.currentQuantity = currentQuantity;
       }
       return item;
     });
@@ -49,19 +50,23 @@ export default function registerInventoryHandlers(app: Electron.App) {
   ipcMain.handle("inventory:get-item-data", async (_event, id) => {
     try {
 
-      if (!id) return { passed: false, message: "Failed. Provide the id", itemData: []}
+      if (!id) return { passed: false, message: "Failed. Provide the item id", itemData: []}
 
-      const dbItem = await inventoryItemRepository.findOneBy({ id: id })
-      const currentStock = dbItem?.transactions.reduce((acc: number, transaction: InventoryTransaction) => {
-        if (transaction.updateType === "allocation") {
-          return acc - transaction.quantity
-        } else if (transaction.updateType === "restock") {
-          return acc + transaction.quantity
-        }
+      const fetchResult = await inventoryItemRepository.find({ where: { id: Number(id) }, relations: ['receivedBy', 'transactions'] });
+      const dbItem = fetchResult[0];
+      if (dbItem?.transactions) {
+        const currentStock = dbItem.transactions.reduce((acc: number, transaction: InventoryTransaction) => {
+          if (transaction.updateType === "allocation") {
+            return acc + transaction.quantity
+          } else if (transaction.updateType === "restock") {
+            return acc - transaction.quantity
+          }
+          return acc
+        }, 0)
 
-        return acc
-      }, 0)
-      return { passed: true, itemData: {currentStock: currentStock, item: dbItem} }
+        if (currentStock) dbItem.currentQuantity = currentStock;
+      }
+      return { passed: true, item: dbItem }
     } catch (err) {
       console.error(err)
       return { passed: false, message: "Encountered an error while geting data", itemData: []}
@@ -100,14 +105,14 @@ export default function registerInventoryHandlers(app: Electron.App) {
       inventoryItem.zone = zone;
       inventoryItem.minStock = minStock;
       inventoryItem.maxStock = maxStock;
-      inventoryItem.supplier = origin;
+      inventoryItem.origin = origin;
       inventoryItem.batchNumber = batchNumber;
       (inventoryItem.receivedBy as Clerk | null) = clerk;
       // Save the images and get the image strings
-      if (images.data.length > 0) {
+      if (images.length > 0) {
         let imagesArray: string[] = [];
-        images.data.forEach((image: any) => {
-          const imageString = saveFile({data: image}, "Inventory/images");
+        images.forEach((image: any) => {
+          const imageString = saveFile(image, "Inventory/images");
           imagesArray.push(imageString);
         });
         inventoryItem.images = imagesArray.join(";");
