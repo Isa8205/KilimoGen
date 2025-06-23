@@ -52,21 +52,61 @@ export default function registerInventoryHandlers(app: Electron.App) {
 
       if (!id) return { passed: false, message: "Failed. Provide the item id", itemData: []}
 
-      const fetchResult = await inventoryItemRepository.find({ where: { id: Number(id) }, relations: ['receivedBy', 'transactions'] });
-      const dbItem = fetchResult[0];
-      if (dbItem?.transactions) {
-        const currentStock = dbItem.transactions.reduce((acc: number, transaction: InventoryTransaction) => {
-          if (transaction.updateType === "allocation") {
-            return acc + transaction.quantity
-          } else if (transaction.updateType === "restock") {
-            return acc - transaction.quantity
-          }
-          return acc
-        }, 0)
+      const fetchResult = await inventoryItemRepository
+        .createQueryBuilder("item")
+        .leftJoinAndSelect("item.receivedBy", "receivedBy")
+        .leftJoinAndSelect("item.transactions", "transaction")
+        .leftJoin("transaction.clerk", "transactionReceivedBy")
+        .addOrderBy("transaction.updatedAt", "DESC")
+        .select([
+          "item.id",
+          "item.itemName",
+          "item.category",
+          "item.unit",
+          "item.location",
+          "item.zone",
+          "item.origin",
+          "item.minStock",
+          "item.maxStock",
+          "item.description",
+          "item.unitWeight",
+          "item.dateReceived",
+          "receivedBy.firstName",
+          "receivedBy.lastName",
 
-        if (currentStock) dbItem.currentQuantity = currentStock;
-      }
-      return { passed: true, item: dbItem }
+          "transaction.id",
+          "transaction.note",
+          "transaction.quantity",
+          "transaction.updatedAt",
+          "transaction.updateType",
+
+          "transactionReceivedBy.id",
+          "transactionReceivedBy.firstName",
+          "transactionReceivedBy.lastName",
+        ])
+        .where("item.id = :id", { id: Number(id) })
+        .getOneOrFail()
+        
+        if (fetchResult?.images) {
+          const imageList = fetchResult.images.split(";");
+          const imageString = imageList.map((image) => getImageBase64(image, process.env.SECRET_KEY!));
+          if (imageString) {
+            (fetchResult.images as any) = imageString;
+          }
+        }
+        if (fetchResult?.transactions) {
+          const currentStock = fetchResult.transactions.reduce((acc: number, transaction: InventoryTransaction) => {
+            if (transaction.updateType === "allocation") {
+              return acc + transaction.quantity
+            } else if (transaction.updateType === "restock") {
+              return acc - transaction.quantity
+            }
+            return acc
+          }, 0)
+          fetchResult.currentQuantity = currentStock;
+        }
+
+      return { passed: true, item: fetchResult }
     } catch (err) {
       console.error(err)
       return { passed: false, message: "Encountered an error while geting data", itemData: []}

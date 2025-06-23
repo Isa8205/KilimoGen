@@ -25,8 +25,7 @@ import { useNavigate, useParams } from "react-router-dom"
 
 interface InventoryItem {
   id: string;
-  name: string;
-  itemName?: string; // fallback support for legacy/bad data
+  itemName?: string;
   category: string;
   currentQuantity: number;
   unit: string;
@@ -37,32 +36,60 @@ interface InventoryItem {
   minStock: number;
   maxStock: number;
   description: string;
-  unitWeight?: string;
-  dateReceived?: string;
-  status?: "In Stock" | "Low Stock" | "Out of Stock" | "Reserved" | string;
+  unitWeight: string;
+  dateReceived: Date;
+  receivedBy: {
+    firstName: string;
+    lastName: string;
+  };
+  status: "In Stock" | "Low Stock" | "Out of Stock" | "Reserved" | string;
   transactions: {
     id: number;
     note: string;
     quantity: number;
     updatedAt: string;
-    updateType: "restock" | "sale" | "transfer";
-    receivedBy?: {
+    updateType: "restock" | "allocation" | "transfer";
+    clerk: {
       firstName: string;
       lastName: string;
     };
   }[];
 }
 
+const defaults: InventoryItem = {
+  id: "",
+  itemName: "",
+  category: "",
+  currentQuantity: 0,
+  unit: "",
+  location: "",
+  zone: "",
+  lastUpdated: "",
+  origin: "",
+  minStock: 0,
+  maxStock: 0,
+  description: "",
+  unitWeight: "",
+  dateReceived: new Date(),
+  receivedBy: {
+    firstName: "",
+    lastName: "",
+  },
+  status: "In Stock",
+  transactions: [],
+}
 
 export default function InventoryItemDetail() {
   const navigate = useNavigate()
   const params = useParams()
   const itemId = params.id as string
-  const [item, setItem] = useState<InventoryItem>()
+  const [item, setItem] = useState<InventoryItem>(defaults)
 
   const fetchItemData = async () => {
     const res = await window.electron.invoke("inventory:get-item-data", Number(itemId))
-    setItem(res.item)
+    if (res) {
+      setItem(res.item)
+    }
     console.log(res)
   }
 
@@ -84,7 +111,7 @@ export default function InventoryItemDetail() {
     { id: 4, type: "OUT", quantity: 150, date: "2024-05-28", reason: "Quality testing samples", user: "Ana Lopez" },
   ]
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: any) => {
     switch (status) {
       case "In Stock":
         return "bg-green-100 text-green-800"
@@ -110,7 +137,7 @@ export default function InventoryItemDetail() {
 
   useEffect(() => {
     fetchItemData()
-  })
+  }, [])
 
   return (
     <div className="min-h-screen">
@@ -194,15 +221,19 @@ export default function InventoryItemDetail() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Reception Date</label>
                     <div className="text-gray-900 flex items-center">
                       <Calendar size={16} className="mr-2 text-gray-400" />
-                      {new Date(item?.dateReceived).toLocaleDateString()}
+                      {new Date(item.dateReceived).toLocaleDateString()}
                     </div>
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
                     <div className="text-gray-900 flex items-center">
                       <Clock size={16} className="mr-2 text-gray-400" />
-                      {new Date().toLocaleDateString()}
+                      {new Date(item.transactions[0].updatedAt).toLocaleDateString()}
                     </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Received by</label>
+                    <div className="text-gray-900">{item?.receivedBy?.firstName} {item?.receivedBy?.lastName}</div>
                   </div>
                 </div>
               </div>
@@ -233,15 +264,15 @@ export default function InventoryItemDetail() {
                     </tr>
                   </thead>
                   <tbody>
-                    {item?.transactions.map((transaction) => (
+                    {item?.transactions?.map((transaction) => (
                       <tr key={transaction.id} className="border-b border-gray-100 hover:bg-gray-50">
                         <td className="py-3 px-4 text-gray-700">
                           <span
                             className={`inline-flex px-2 py-1 rounded-full text-xs text-nowrap font-medium ${
-                              transaction.updateType === "restock" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                              transaction.updateType === "allocation" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                             }`}
                           >
-                            {transaction.updateType === "restock" ? (
+                            {transaction.updateType === "allocation" ? (
                               <>
                                 Stock In
                               </>
@@ -253,13 +284,13 @@ export default function InventoryItemDetail() {
                           </span>
                         </td>
                         <td className="py-3 px-4 font-medium text-gray-600">
-                          {transaction.updateType === "restock" ? "+" : "-"}
+                          {transaction.updateType === "allocation" ? "+" : "-"}
                           {transaction.quantity} {item?.unit}
                         </td>
                         <td className="py-3 px-4 text-gray-600">{new Date(transaction.updatedAt).toLocaleDateString()}</td>
                         <td className="py-3 px-4 text-gray-600">{transaction.note}</td>
                         <td className="py-3 px-4 text-gray-600 flex items-center">
-                          {transaction.receivedBy.firstName} {transaction.receivedBy.lastName}
+                          {transaction?.clerk?.firstName} {transaction?.clerk?.lastName}
                         </td>
                       </tr>
                     ))}
@@ -370,7 +401,7 @@ export default function InventoryItemDetail() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Current Quantity: {item?.quantity} {item?.unit}
+                    Current Quantity: {item?.currentQuantity} {item?.unit}
                   </label>
                   <div className="flex items-center space-x-3">
                     <button
@@ -394,7 +425,7 @@ export default function InventoryItemDetail() {
                     </button>
                   </div>
                   <div className="text-sm text-gray-600 mt-1">
-                    New quantity: {item?.quantity + quantityUpdate} {item?.unit}
+                    New quantity: {item?.currentQuantity + quantityUpdate} {item?.unit}
                   </div>
                 </div>
 
@@ -424,7 +455,6 @@ export default function InventoryItemDetail() {
                   Cancel
                 </button>
                 <button
-                  onClick={handleQuantityUpdate}
                   disabled={quantityUpdate === 0 || !updateReason}
                   className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
