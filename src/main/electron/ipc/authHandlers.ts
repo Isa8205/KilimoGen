@@ -16,7 +16,7 @@ import { Session } from "@/main/database/src/entities/Session";
 import { Manager } from "@/main/database/src/entities/Manager";
 import { getImageBase64 } from "@/main/utils/getImageBase64";
 
-export const registerAuthHandlers = () => {
+export const registerAuthHandlers = (currentUser: any) => {
 
   ipcMain.handle("check-session", async () => {
     try {
@@ -25,6 +25,7 @@ export const registerAuthHandlers = () => {
       if (id) {
         const data: any = await sessionRepository.findOneBy({ id: id });
         const user = JSON.parse(data?.data)
+        currentUser = {...currentUser, ...user};
         return {user: user, message: `Welcome back ${user.firstName}`}
       }  else {
         return {user: false, message: 'No session available'}

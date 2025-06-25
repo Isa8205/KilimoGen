@@ -7,11 +7,7 @@ import { getImageBase64 } from "@/main/utils/getImageBase64";
 import { saveFile } from "@/main/utils/saveFile";
 import { ipcMain } from "electron";
 
-export default function registerInventoryHandlers(app: Electron.App) {
-  let user: Clerk | null = null;
-  getSessionUser().then((sessionUser) => {
-    user = sessionUser;
-  });
+export default function registerInventoryHandlers(app: Electron.App, currentUser: any) {
   const inventoryItemRepository = AppDataSource.getRepository(InventoryItem);
   const clerkRepository = AppDataSource.getRepository(Clerk)
   const inventoryTransactionRepository = AppDataSource.getRepository(InventoryTransaction)
@@ -30,9 +26,9 @@ export default function registerInventoryHandlers(app: Electron.App) {
 
       if (item.transactions) {
         const currentQuantity = item.transactions.reduce((acc: number, transaction: InventoryTransaction) => {
-          if (transaction.updateType === "allocation") {
+          if (transaction.updateType === "restock") {
             return acc + transaction.quantity
-          } else if (transaction.updateType === "restock") {
+          } else if (transaction.updateType === "allocation") {
             return acc - transaction.quantity
           }
           return acc
@@ -96,9 +92,9 @@ export default function registerInventoryHandlers(app: Electron.App) {
         }
         if (fetchResult?.transactions) {
           const currentStock = fetchResult.transactions.reduce((acc: number, transaction: InventoryTransaction) => {
-            if (transaction.updateType === "allocation") {
+            if (transaction.updateType === "restock") {
               return acc + transaction.quantity
-            } else if (transaction.updateType === "restock") {
+            } else if (transaction.updateType === "allocation") {
               return acc - transaction.quantity
             }
             return acc
@@ -131,8 +127,8 @@ export default function registerInventoryHandlers(app: Electron.App) {
         images,
       } = itemData;
 
-      if (!user) return {passed: false, message: "Please ensure you are logged in!"}
-      const clerk = await clerkRepository.findOneBy({ id: user.id });
+      if (!currentUser) return {passed: false, message: "Please ensure you are logged in!"}
+      const clerk = await clerkRepository.findOneBy({ id: currentUser.id });
 
       const inventoryItem = new InventoryItem();
       inventoryItem.itemName = name;
@@ -162,7 +158,7 @@ export default function registerInventoryHandlers(app: Electron.App) {
       inventoryTransaction.item = inventoryItem;
       inventoryTransaction.note = "Initial Stock"
       inventoryTransaction.quantity = quantity
-      inventoryTransaction.updateType = "allocation"
+      inventoryTransaction.updateType = "restock";
       inventoryTransaction.updatedAt = new Date();
       (inventoryTransaction.clerk as Clerk | null) = clerk
 
@@ -179,24 +175,22 @@ export default function registerInventoryHandlers(app: Electron.App) {
 
   ipcMain.handle("inventory:stock-update", async (_event, itemData) => {
     try {
-      const allowedActions = ["restock", "allocate"]
-      const { itemId, quantity, action, note, clerkId} = itemData;
+      const allowedActions = ["restock", "allocation"]
+      const { itemId, quantity, updateType, updateReason} = itemData;
 
-      if (!allowedActions.includes(action)) {
+      if (!allowedActions.includes(updateType)) {
         return {passed: false, message: "Only restock and allocate action permitted"}
       }
-      const clerk = await clerkRepository.findOneBy({id: Number(clerkId)})
-      const inventoryItem = await inventoryItemRepository.findOneBy({id: Number(itemId)})
 
-      if (!clerk) return { passed: false, message: "You should be logged in as a clerk"};
+      if (!currentUser) return { passed: false, message: "You should be logged in as a clerk"};
 
       const inventoryTransaction = new InventoryTransaction;
       inventoryTransaction.quantity = quantity;
-      inventoryTransaction.note = note;
-      inventoryTransaction.updateType = action;
+      inventoryTransaction.note = updateReason;
+      inventoryTransaction.updateType = updateType;
       inventoryTransaction.updatedAt = new Date();
-      (inventoryTransaction.clerk as Clerk | null) = clerk;
-      (inventoryTransaction.item as InventoryItem | null) = inventoryItem;
+      (inventoryTransaction.clerk as any) = await clerkRepository.findOneBy({ id: currentUser.id });
+      (inventoryTransaction.item as InventoryItem | null) = await inventoryItemRepository.findOneBy({ id: itemId });
 
       await inventoryTransactionRepository.save(inventoryTransaction)
       return { passed: true, message: "Transaction successfull" };

@@ -22,6 +22,11 @@ import {
   RefreshCw,
 } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
+import { set } from "date-fns";
+import { useRecoilState } from "recoil";
+import { sessionState } from "@/store/store";
+import Modal from "@/components/Modal/Modal";
+import notify from "@/utils/ToastHelper";
 
 interface InventoryItem {
   id: string;
@@ -42,7 +47,6 @@ interface InventoryItem {
     firstName: string;
     lastName: string;
   };
-  status: "In Stock" | "Low Stock" | "Out of Stock" | "Reserved" | string;
   transactions: {
     id: number;
     note: string;
@@ -75,11 +79,11 @@ const defaults: InventoryItem = {
     firstName: "",
     lastName: "",
   },
-  status: "In Stock",
   transactions: [],
 }
 
 export default function InventoryItemDetail() {
+  const user = useRecoilState(sessionState)
   const navigate = useNavigate()
   const params = useParams()
   const itemId = params.id as string
@@ -90,39 +94,67 @@ export default function InventoryItemDetail() {
     if (res) {
       setItem(res.item)
     }
-    console.log(res)
   }
 
+  // State for quantity update
+  const [updateType, setUpdateType] = useState("")
   const [quantityUpdate, setQuantityUpdate] = useState(0)
   const [updateReason, setUpdateReason] = useState("")
   const [showQuantityModal, setShowQuantityModal] = useState(false)
+  const [updateQuantityErrors, setUpdateQuantityErrors] = useState<any>({
+    quantity: "",
+    type: "",
+  })
 
-  const transactions = [
-    { id: 1, type: "IN", quantity: 500, date: "2024-06-10", reason: "New harvest batch", user: "Maria Santos" },
-    {
-      id: 2,
-      type: "OUT",
-      quantity: 250,
-      date: "2024-06-08",
-      reason: "Export order #EX-2024-045",
-      user: "Carlos Rodriguez",
-    },
-    { id: 3, type: "IN", quantity: 1000, date: "2024-06-01", reason: "Harvest delivery", user: "Juan Perez" },
-    { id: 4, type: "OUT", quantity: 150, date: "2024-05-28", reason: "Quality testing samples", user: "Ana Lopez" },
-  ]
+  const handleUpdateQuantitySubmit = async () => {
+    // validate input
+    if (quantityUpdate === 0) {
+      setUpdateQuantityErrors({...updateQuantityErrors,
+        quantity: "Must be greater than 0",
+      })
+      return
+    }
+    if (quantityUpdate > item.currentQuantity && updateType === "allocation") {
+      setUpdateQuantityErrors({...updateQuantityErrors,
+        quantity: "Cannot remove more than current stock",
+      })
+      return
+    }
+    if (updateType.trim() === "") {
+      setUpdateQuantityErrors({...updateQuantityErrors,
+        type: "Please select an action",
+      })
+    }
 
-  const getStatusColor = (status: any) => {
-    switch (status) {
-      case "In Stock":
-        return "bg-green-100 text-green-800"
-      case "Low Stock":
-        return "bg-yellow-100 text-yellow-800"
-      case "Out of Stock":
-        return "bg-red-100 text-red-800"
-      case "Reserved":
-        return "bg-blue-100 text-blue-800"
-      default:
-        return "bg-gray-100 text-gray-800"
+    setUpdateQuantityErrors({
+      quantity: "",
+      type: "",
+    })
+
+    try {
+      const res = await window.electron.invoke("inventory:stock-update", {
+        itemId: item.id,
+        quantity: quantityUpdate,
+        updateType: updateType,
+        updateReason: updateReason,
+      })
+      
+      notify(res.passed, res.message)
+      if (res.passed) {
+        setTimeout(() => {
+          fetchItemData()
+          setUpdateQuantityErrors({
+            quantity: "",
+            type: "",
+          })
+          setQuantityUpdate(0)
+          setUpdateType("")
+          setUpdateReason("")
+          setShowQuantityModal(false)
+        }, 1000)
+      }
+    } catch (error) {
+      console.error("Error updating quantity:", error)
     }
   }
 
@@ -155,9 +187,6 @@ export default function InventoryItemDetail() {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(item?.status)}`}>
-                {item?.status}
-              </span>
               <button className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors">
                 <Edit size={16} className="inline mr-2" />
                 Edit Item
@@ -176,19 +205,26 @@ export default function InventoryItemDetail() {
                   <Package className="mr-2 text-orange-600" size={20} />
                   Item Overview
                 </h2>
-                <button
-                  onClick={() => setShowQuantityModal(true)}
-                  className="px-3 py-1.5 bg-orange-50 text-orange-600 rounded-md hover:bg-orange-100 transition-colors text-sm"
-                >
-                  Update Quantity
-                </button>
+                {user && (
+                  <button
+                    onClick={() => setShowQuantityModal(true)}
+                    className="px-3 py-1.5 bg-orange-50 text-orange-600 rounded-md hover:bg-orange-100 transition-colors text-sm"
+                  >
+                    Update Quantity
+                  </button>
+                )}
               </div>
 
               <div className="flex justify-between flex-wrap gap-4">
-                <div className="flex-grow text-center p-4 bg-gray-50 rounded-lg">
+                <div className="flex-grow text-center p-4 bg-gray-100 rounded-lg">
                   <div className="text-2xl font-bold text-gray-900">{item?.currentQuantity.toLocaleString()}</div>
-                  <div className="text-sm text-gray-600">{item?.unit}</div>
                   <div className="text-xs text-gray-500 mt-1">Current Stock</div>
+                </div>
+                <div className="flex-grow text-center p-4 bg-green-50 rounded-lg">
+                  <div className="text-2xl font-bold text-green-700">{(item?.currentQuantity * Number(item?.unitWeight)).toLocaleString()}</div>
+                  <div className="text-xs text-green-500 mt-1">{item.unit}</div>
+                  <div className="text-sm text-green-600">Total Value</div>
+
                 </div>
               </div>
             </div>
@@ -228,7 +264,7 @@ export default function InventoryItemDetail() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
                     <div className="text-gray-900 flex items-center">
                       <Clock size={16} className="mr-2 text-gray-400" />
-                      {new Date(item.transactions[0].updatedAt).toLocaleDateString()}
+                      {item.transactions.length > 0 && new Date(item.transactions[0].updatedAt).toLocaleDateString()}
                     </div>
                   </div>
                   <div>
@@ -269,10 +305,10 @@ export default function InventoryItemDetail() {
                         <td className="py-3 px-4 text-gray-700">
                           <span
                             className={`inline-flex px-2 py-1 rounded-full text-xs text-nowrap font-medium ${
-                              transaction.updateType === "allocation" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                              transaction.updateType === "restock" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
                             }`}
                           >
-                            {transaction.updateType === "allocation" ? (
+                            {transaction.updateType === "restock" ? (
                               <>
                                 Stock In
                               </>
@@ -284,8 +320,8 @@ export default function InventoryItemDetail() {
                           </span>
                         </td>
                         <td className="py-3 px-4 font-medium text-gray-600">
-                          {transaction.updateType === "allocation" ? "+" : "-"}
-                          {transaction.quantity} {item?.unit}
+                          {transaction.updateType === "restock" ? "+" : "-"}
+                          {transaction.quantity}
                         </td>
                         <td className="py-3 px-4 text-gray-600">{new Date(transaction.updatedAt).toLocaleDateString()}</td>
                         <td className="py-3 px-4 text-gray-600">{transaction.note}</td>
@@ -393,61 +429,63 @@ export default function InventoryItemDetail() {
         </div>
 
         {/* Quantity Update Modal */}
-        {showQuantityModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Update Quantity</h3>
-
-              <div className="space-y-4">
+          <Modal title="Update Quantity" isOpen={showQuantityModal} onClose={() => setShowQuantityModal(false)}>
+              <div className="text-gray-700 space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Current Quantity: {item?.currentQuantity} {item?.unit}
+                    Current Quantity: {item?.currentQuantity}
                   </label>
-                  <div className="flex items-center space-x-3">
-                    <button
-                      onClick={() => setQuantityUpdate((prev) => prev - 1)}
-                      className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                    >
-                      <Minus size={16} />
-                    </button>
-                    <input
-                      type="number"
-                      value={quantityUpdate}
-                      onChange={(e) => setQuantityUpdate(Number.parseInt(e.target.value) || 0)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500 text-center"
-                      placeholder="0"
-                    />
-                    <button
-                      onClick={() => setQuantityUpdate((prev) => prev + 1)}
-                      className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50"
-                    >
-                      <Plus size={16} />
-                    </button>
+                  <div className="flex justify-between mb-4">
+                    <div>
+                      <input
+                        type="number"
+                        name="quantityUpdate"
+                        value={quantityUpdate}
+                        onChange={(e) => setQuantityUpdate(Number.parseInt(e.target.value) || 0)}
+                        className={`px-3 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500 text-center ${updateQuantityErrors.quantity ? 'border-red-500' : ''}`}
+                        placeholder="0"
+                      />
+                      {updateQuantityErrors.quantity && (
+                        <div className="text-red-500 text-sm mt-1">
+                          {updateQuantityErrors.quantity}
+                        </div>
+                      )}
+                    </div>
+
+                      <div>
+                      <select onChange={(e) => setUpdateType(e.target.value)} name="updateType" id="update-type" className={`ml-2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500 ${updateQuantityErrors.type ? 'border-red-500' : ''}`}>
+                        <option value="">Select action...</option>
+                        <option value="restock">Restock</option>
+                        <option value="allocation">Remove</option>
+                      </select>
+                      {updateQuantityErrors.type && (
+                        <div className="text-red-500 text-sm mt-1">
+                          {updateQuantityErrors.type}
+                        </div>
+                      )}
+                      </div>
                   </div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    New quantity: {item?.currentQuantity + quantityUpdate} {item?.unit}
-                  </div>
+                  {updateType && (
+                    <div className="text-sm text-gray-600 mb-2">
+                      New quantity {updateType === "restock" ? item?.currentQuantity + quantityUpdate : item?.currentQuantity - quantityUpdate}
+                    </div>
+                  )}
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Reason for update</label>
-                  <select
+                  <input
+                    type="text"
+                    name="updateReason"
+                    placeholder="Enter reason for update"
                     value={updateReason}
                     onChange={(e) => setUpdateReason(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
-                  >
-                    <option value="">Select reason...</option>
-                    <option value="New delivery">New delivery</option>
-                    <option value="Sale/Export">Sale/Export</option>
-                    <option value="Quality testing">Quality testing</option>
-                    <option value="Damage/Loss">Damage/Loss</option>
-                    <option value="Transfer">Transfer to another location</option>
-                    <option value="Inventory correction">Inventory correction</option>
-                  </select>
+                  />
                 </div>
               </div>
 
-              <div className="flex space-x-3 mt-6">
+              <div className="text-gray-700 flex space-x-3 mt-6">
                 <button
                   onClick={() => setShowQuantityModal(false)}
                   className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
@@ -455,15 +493,13 @@ export default function InventoryItemDetail() {
                   Cancel
                 </button>
                 <button
-                  disabled={quantityUpdate === 0 || !updateReason}
+                  onClick={() => handleUpdateQuantitySubmit()}
                   className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Update
                 </button>
               </div>
-            </div>
-          </div>
-        )}
+          </Modal>
       </div>
     </div>
   )

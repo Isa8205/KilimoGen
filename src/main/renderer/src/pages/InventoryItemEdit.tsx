@@ -8,18 +8,14 @@ import {
   Save,
   X,
   Upload,
-  Plus,
-  Calendar,
   MapPin,
   Package,
-  DollarSign,
-  Award,
-  BarChart3,
-  Droplets,
   AlertCircle,
   Camera,
 } from "lucide-react"
 import notify from "@/utils/ToastHelper"
+import { ToastContainer } from "react-toastify"
+import { useNavigate } from "react-router-dom"
 
 interface FormData {
   name: string
@@ -37,8 +33,7 @@ interface FormData {
   images: File[]
 }
 
-export default function InventoryItemForm({ isEdit = false }: { isEdit?: boolean; }) {
-  const [formData, setFormData] = useState<FormData>({
+const defaultFormData: FormData = {
     name:"",
     category: "",
     unitWeight: 0,
@@ -52,7 +47,11 @@ export default function InventoryItemForm({ isEdit = false }: { isEdit?: boolean
     batchNumber:"",
     origin:"",
     images: [],
-  })
+  }
+
+export default function InventoryItemForm({ isEdit = false }: { isEdit?: boolean; }) {
+  const navigate = useNavigate()
+  const [formData, setFormData] = useState<FormData>(defaultFormData)
 
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -101,7 +100,6 @@ export default function InventoryItemForm({ isEdit = false }: { isEdit?: boolean
       newErrors.maxStock = "Maximum stock level must be greater than minimum"
     }
 
-    console.log(newErrors)
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -109,9 +107,9 @@ export default function InventoryItemForm({ isEdit = false }: { isEdit?: boolean
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    // if (!validateForm()) {
-    //   return
-    // }
+    if (!validateForm()) {
+      return
+    }
 
     const images = formData.images
     const imgaeBuffers: any[] = await Promise.all(images.map(async (image) => {
@@ -126,8 +124,13 @@ export default function InventoryItemForm({ isEdit = false }: { isEdit?: boolean
 
     try {
       const res = await window.electron.invoke("inventory:add-item", sendFormData)
-      console.log("Form submitted:", sendFormData)
       notify(res.passed, res.message)
+
+      if (res.passed) {
+        (e.target as any).reset()
+        setFormData(defaultFormData)
+        setErrors({})
+      }
     } catch (error) {
       console.error("Error submitting form:", error)
     } finally {
@@ -137,12 +140,13 @@ export default function InventoryItemForm({ isEdit = false }: { isEdit?: boolean
 
   return (
     <div className="min-h-screen text-gray-800">
+      <ToastContainer/>
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+              <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                 <ArrowLeft size={20} className="text-gray-600" />
               </button>
               <div>
@@ -289,7 +293,7 @@ export default function InventoryItemForm({ isEdit = false }: { isEdit?: boolean
                 <input
                   type="number"
                   value={formData.minStock}
-                  onChange={(e) => handleInputChange("minStock", e.target.value)}
+                  onChange={(e) => handleInputChange("minStock", Number(e.target.value) || 0)}
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-orange-500 focus:border-orange-500 ${
                     errors.minStock ? "border-red-500" : "border-gray-300"
                   }`}
@@ -305,7 +309,7 @@ export default function InventoryItemForm({ isEdit = false }: { isEdit?: boolean
                   type="number"
                   min={0}
                   value={formData.maxStock}
-                  onChange={(e) => handleInputChange("maxStock", e.target.value)}
+                  onChange={(e) => handleInputChange("maxStock", Number(e.target.value) || 0)}
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-orange-500 focus:border-orange-500 ${
                     errors.maxStock ? "border-red-500" : "border-gray-300"
                   }`}

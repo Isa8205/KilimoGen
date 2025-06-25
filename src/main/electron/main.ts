@@ -26,8 +26,8 @@ import registerReportHandlers from "@/main/electron/ipc/reportHandlers";
 
 
 dotenv.config();
-const SECRET_KEY = process.env.SECRET_KEY || "secret";
 const NODE_ENV = process.env.NODE_ENV;
+const user: any = {};
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -70,14 +70,14 @@ app.whenReady().then(async () => {
     mainWindow?.close();
   });
   // Register all the ipc handlers
-  registerAuthHandlers()
+  registerAuthHandlers(user)
   registerDeliveryHandlers()
   registerHarvestHandlers()
   registerSeasonHandlers()
   registerCalenderHandlers()
   registerClerkHandlers(app)
   registerFarmerHandlers()
-  registerInventoryHandlers(app)
+  registerInventoryHandlers(app, user)
   registerPrinterHandlers(mainWindow)
   registerSettingsHandlers(app)
   registerNotificationHandlers()
@@ -88,3 +88,5 @@ app.whenReady().then(async () => {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();
 });
+
+export {user}
