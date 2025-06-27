@@ -83,7 +83,7 @@ const defaults: InventoryItem = {
 }
 
 export default function InventoryItemDetail() {
-  const user = useRecoilState(sessionState)
+  const [user] = useRecoilState(sessionState)
   const navigate = useNavigate()
   const params = useParams()
   const itemId = params.id as string
@@ -101,7 +101,10 @@ export default function InventoryItemDetail() {
   const [quantityUpdate, setQuantityUpdate] = useState(0)
   const [updateReason, setUpdateReason] = useState("")
   const [showQuantityModal, setShowQuantityModal] = useState(false)
-  const [updateQuantityErrors, setUpdateQuantityErrors] = useState<any>({
+  const [updateQuantityErrors, setUpdateQuantityErrors] = useState<{
+    quantity: string;
+    type: string;
+  }>({
     quantity: "",
     type: "",
   })

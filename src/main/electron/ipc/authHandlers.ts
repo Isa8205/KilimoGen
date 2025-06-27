@@ -1,10 +1,7 @@
 import { AppDataSource } from "@/main/database/src/data-source";
 import { Clerk } from "@/main/database/src/entities/Clerk";
-import { ipcMain, session } from "electron";
-import jwt from "jsonwebtoken";
+import { ipcMain } from "electron";
 import bcrypt from "bcrypt";
-import fs from "fs";
-import fileEncryption from "@/main/utils/fileEncryption";
 import { v4 as uuidv4 } from "uuid";
 import { createSession, destroySession } from "@/main/electron/session/sessinStore";
 import {
@@ -25,8 +22,7 @@ export const registerAuthHandlers = (currentUser: any) => {
       if (id) {
         const data: any = await sessionRepository.findOneBy({ id: id });
         const user = JSON.parse(data?.data)
-        currentUser = {...currentUser, ...user};
-        return {user: user, message: `Welcome back ${user.firstName}`}
+        Object.assign(currentUser, user);        return {user: user, message: `Welcome back ${user.firstName}`}
       }  else {
         return {user: false, message: 'No session available'}
       }

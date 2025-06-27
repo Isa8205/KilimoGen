@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from "react";
 import { ArrowLeft, Bell, Check, Filter, RefreshCcw, Trash2, X } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 // Type definition based on the provided data structure
 type Notification = {
@@ -14,27 +15,27 @@ type Notification = {
 };
 
 export default function NotificationsPage() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  // Copilot: Use React Query for notifications
+  const {
+    data: notificationsData,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["notifications"],
+    queryFn: async () => {
+      return await window.electron.invoke("get-notifications");
+    },
+  });
+
+  // Copilot: Use React Query data
+  const notifications: Notification[] = notificationsData?.notifications || [];
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showFilterMenu, setShowFilterMenu] = useState(false);
   const navigator = useNavigate();
 
-  const fetchNotifications = async () => {
-    const response = await window.electron.invoke("get-notifications");
-
-    try {
-      setNotifications(response.notifications);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
-
   // Get unique categories for filter dropdown
-  const   categories = useMemo(() => {
+  const categories = useMemo(() => {
     const uniqueCategories = new Set<string>();
     notifications.forEach((notification) =>
       uniqueCategories.add(notification.category)
@@ -58,7 +59,7 @@ export default function NotificationsPage() {
   // Mark a notification as read
   const markAsRead = async (id: number) => {
     await window.electron.invoke("notification:mark-as-read", id);
-    fetchNotifications();
+    refetch();
   };
 
   // Mark all notifications as read
@@ -72,16 +73,17 @@ export default function NotificationsPage() {
       }
     });
 
-    fetchNotifications();
+    refetch();
   };
 
   // Clear all notifications
   const clearAllNotifications = async () => {
     await window.electron.invoke("notification:delete-all");
-    fetchNotifications();
+    refetch();
     setSelectedCategory(null);
   };
 
+  // Copilot: Replace loading logic with isLoading
   return (
     <div className="bg-white min-h-screen">
       <div className="bg-white rounded-lg shadow-lg p-4 max-w-3xl mx-auto">
@@ -170,7 +172,7 @@ export default function NotificationsPage() {
             <button
               title="Refresh"
               className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full"
-              onClick={fetchNotifications}
+              onClick={() => refetch()}
             >
               <RefreshCcw size={18} />
             </button>
@@ -195,8 +197,13 @@ export default function NotificationsPage() {
           </div>
         )}
 
-        {/* Notifications list */}
-        {filteredNotifications.length > 0 ? (
+        {/* Copilot: Use isLoading for loader */}
+        {isLoading ? (
+          <div className="py-12 px-4 text-center">
+            <Bell className="text-gray-300 w-12 h-12 mx-auto mb-3 animate-spin" />
+            <h3 className="text-gray-500 text-lg font-medium mb-1">Loading notifications...</h3>
+          </div>
+        ) : filteredNotifications.length > 0 ? (
           <ul className="divide-y divide-gray-200 max-h-[70vh] overflow-y-auto">
             {filteredNotifications.map((notification) => (
               <li

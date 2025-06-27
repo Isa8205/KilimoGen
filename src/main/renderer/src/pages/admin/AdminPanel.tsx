@@ -19,6 +19,7 @@ import { AddSeasonModal } from "./AddSeasonModal" // Import AddSeasonModal compo
 import { AddHarvestModal } from "./AddHarvestModal" // Import AddHarvestModal component
 import { useRecoilState } from "recoil"
 import { sessionState } from "@/store/store"
+import { useQuery } from "@tanstack/react-query"
 
 // Interfaces
 interface Harvest {
@@ -57,14 +58,40 @@ interface Clerk {
 export default function AdminPanel() {
   const user = useRecoilState(sessionState)[0]
   const [showSeasonModal, setShowSeasonModal] = useState(false)
-  const [seasons, setSeasons] = useState<Season[]>([])
-  const [clerks, setClerks] = useState<Clerk[]>([])
   const [selectedSeasonId, setSelectedSeasonId] = useState<number | null>(null)
   const [farmersCount, setFarmersCount] = useState(0)
   const [inventoryCount, setInventoryCount] = useState(0)
   const [deliveriesCount, setDeliveriesCount] = useState(0)
   const [messagesCount, setMessagesCount] = useState(0)
   const [productionCount, setProductionCount] = useState(0)
+
+  // Copilot: Use React Query for seasons
+  const {
+    data: seasonsData,
+    isLoading: isSeasonsLoading,
+    isError: isSeasonsError,
+    refetch: refetchSeasons,
+  } = useQuery({
+    queryKey: ["seasons"],
+    queryFn: async () => {
+      return await window.electron.invoke("seasons:get-all")
+    },
+  })
+  // Copilot: Use React Query for clerks
+  const {
+    data: clerksData,
+    isLoading: isClerksLoading,
+    isError: isClerksError,
+    refetch: refetchClerks,
+  } = useQuery({
+    queryKey: ["clerks"],
+    queryFn: async () => {
+      return await window.electron.invoke("get-clerks")
+    },
+  })
+  // Copilot: Use React Query data
+  const seasons: Season[] = seasonsData?.seasons || []
+  const clerks: Clerk[] = clerksData || []
 
   // Season Card Component
   function SeasonCard({
@@ -159,30 +186,6 @@ export default function AdminPanel() {
       </div>
     )
   }
-
-  // Backend fetching of data
-  const fetchSeasons = async () => {
-    try {
-      const res = await window.electron.invoke("seasons:get-all")
-      setSeasons(res.seasons)
-    } catch (err) {
-      console.error("Error fetching seasons: ", err)
-    }
-  }
-
-  const fetchClerks = async () => {
-    try {
-      const clerks = await window.electron.invoke("get-clerks")
-      setClerks(clerks)
-    } catch (err) {
-      console.error("Error fetching clerks: ", err)
-    }
-  }
-
-  useEffect(() => {
-    fetchSeasons()
-    fetchClerks()
-  }, [])
 
   useEffect(() => {
     // Fetch data counts (replace with actual API calls)
@@ -288,7 +291,12 @@ export default function AdminPanel() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {seasons.length > 0 ? (
+            {isSeasonsLoading ? (
+              <div className="col-span-full bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
+                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary mx-auto mb-4" />
+                <p className="text-gray-600">Loading seasons...</p>
+              </div>
+            ) : seasons.length > 0 ? (
               seasons.map((season) => <SeasonCard key={season.id} season={season} />)
             ) : (
               <div className="col-span-full bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">

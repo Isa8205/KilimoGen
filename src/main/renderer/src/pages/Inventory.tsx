@@ -8,51 +8,30 @@ import errorImage from '@/assets/images/backgrounds/404_2.svg';
 import { useRecoilState } from 'recoil';
 import { sessionState } from '@/store/store';
 import { formatDistanceToNow } from 'date-fns';
+import { useQuery } from "@tanstack/react-query";
 
 export function Inventory() {
   const navigate = useNavigate();
   // Get the session data
   const user = useRecoilState(sessionState)[0];
-
   // States for the display either grid or table
   const [gridDisplay, setGridDisplay] = useState(true);
 
-  // Data state for storing after api fetching
-  const [items, setItems] = useState<
-    {
-      id: number;
-      itemName: string;
-      category: string;
-      currentQuantity: number;
-      unit: string;
-      unitWeight: string;
-      dateReceived: string;
-      receivedBy: {
-        firstName: string;
-        lastName: string;
-      };
-      images: string;
-    }[]
-  >([]);
-  const [fetching, setFetching] = useState(false);
+  // Copilot: Use React Query for data fetching
+  const {
+    data: inventoryData,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["inventory"],
+    queryFn: async () => {
+      return await window.electron.invoke('get-inventory');
+    },
+  });
 
-  // Function to fetch deliveries data
-  const fetchInventory = async () => {
-    setFetching(true); // Set fetching state
-    try {
-      const response = await window.electron.invoke('get-inventory');
-      setItems(response.items);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setFetching(false);
-    }
-  };
-
-  // Fetch data on component mount
-  useEffect(() => {
-    fetchInventory();
-  }, []);
+  // Copilot: Use React Query data
+  const items = inventoryData?.items || [];
 
   return (
     <section className="text-gray-800">
@@ -127,7 +106,7 @@ export function Inventory() {
             </tr>
           </thead>
 
-          {!fetching && (
+          {!isLoading && (
             <tbody>
               {items.map((item, index) => (
                 <tr
@@ -170,7 +149,7 @@ export function Inventory() {
         </table>
       )}
 
-      {!fetching && gridDisplay ? (
+      {!isLoading && gridDisplay ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4">
           {items.map((item, index) => (
             <div
@@ -232,7 +211,8 @@ export function Inventory() {
         </div>
       ) : null}
 
-      {fetching ? (
+      {/* Copilot: Use isLoading for loader */}
+      {isLoading ? (
         <div className="mt-2 py-[100px] w-full flex flex-col justify-center items-center">
           <Loader />
           <p className="text-gray-600">Loading.....</p>
@@ -254,7 +234,7 @@ export function Inventory() {
           </motion.div>
           <p className="text-gray-600">Ooops! No items found</p>
           <button
-            onClick={fetchInventory}
+            onClick={() => refetch}
             className="border border-gray-400 text-gray-500 hover:text-accent hover:border-accent rounded p-1 flex items-center gap-2"
           >
             Refresh

@@ -2,7 +2,7 @@ import notify from "@/utils/ToastHelper";
 import axios from "axios";
 import { AnimatePresence, motion } from "framer-motion";
 import { Settings, User, LogIn, LogOut, BellIcon, MailOpenIcon, TriangleAlert, RefreshCcw } from "lucide-react";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import Navbar from "./MainNavbar";
@@ -277,9 +277,11 @@ const Home = () => {
             </div>
 
             {/* Scrollable Content Area */}
-            <div className="content-wrapper flex-1 overflow-y-auto p-4 custom-scrollbar">
-              <Outlet />
-            </div>
+            <Suspense fallback={<div>Loading...</div>}>
+              <div className="content-wrapper flex-1 overflow-y-auto p-4 custom-scrollbar">
+                <Outlet />
+              </div>
+            </Suspense>
           </section>
         </div>
       </div>

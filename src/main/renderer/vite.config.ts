@@ -9,6 +9,23 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, '../../../dist/main/renderer'),
     emptyOutDir: true,
+    // --- Add manualChunks for better code splitting ---
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Split React and ReactDOM into a separate chunk
+          react: ['react', 'react-dom'],
+          // Split Recoil state management
+          recoil: ['recoil'],
+          // Split other heavy vendor libraries
+          vendor: [
+            'axios', 'fuse.js', 'framer-motion', 'recharts', 'styled-components',
+            'date-fns', 'dayjs', 'react-toastify', 'lucide-react'
+          ],
+        },
+      },
+    },
+    // --- End manualChunks ---
   },
   plugins: [
     react(),

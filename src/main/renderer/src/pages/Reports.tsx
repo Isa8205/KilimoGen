@@ -1,6 +1,7 @@
 "use client"
 
 import type React from "react"
+import { useQuery } from "@tanstack/react-query"
 
 import { useEffect, useMemo, useRef, useState } from "react"
 import { ArrowLeft, ArrowRight, ChevronDown, Download, Eye, Filter, RefreshCcw, Search } from "lucide-react"
@@ -12,33 +13,31 @@ import { toast } from "react-toastify"
 import { formatDate } from "date-fns"
 
 export default function ReportsComponent() {
-  const [reports, setReports] = useState<{id: number, reportName: string, dateGenerated: Date, reportType: string}[]>([])
+  // Copilot: Use React Query for reports
+  const {
+    data: reportsData,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["reports"],
+    queryFn: async () => {
+      return await window.electron.invoke("report:get-all");
+    },
+  });
+  // Copilot: Use React Query data
+  const reports = reportsData?.reports || [];
+
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState("")
   const [sortColumn, setSortColumn] = useState<'id' | 'name' | 'date' | 'type'>("date")
   const [sortDirection, setSortDirection] = useState("desc")
-  const [loading, setLoading] = useState(false)
   const [selectedReports, setSelectedReports] = useState<number[]>([])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [selectedFilter, setSelectedFilter] = useState("All")
   const [generateDropdown, setGenerateDropdown] = useState(false)
   const [deliveryGenModal, setDeliveryGenModal] = useState(false)
   const generateRef = useRef<HTMLDivElement>(null)
-
-  // Fetch data from the database
-  const fetchReports = async () => {
-    setLoading(true)
-    try {
-      const data = await window.electron.invoke("report:get-all")
-      setReports(data.reports)
-    } catch (error) {
-      console.error("Error fetching reports:", error)
-      notify(false, "Failed to fetch reports")
-    } finally {
-      setLoading(false)
-    }
-    }
-  
 
   // Pagination
   const reportsPerPage = 5
@@ -85,10 +84,6 @@ export default function ReportsComponent() {
   useClickOutside(generateRef, () => {
     setGenerateDropdown(false)
   })
-
-  useEffect(() => {
-    fetchReports()
-  }, [])
 
   return (
     <section className="text-black">
@@ -185,7 +180,7 @@ export default function ReportsComponent() {
         </div>
       )}
 
-      <table className={`bg-white ${!loading ? "shadow-md" : ""} rounded-md p-2 w-full table-auto border-collapse`}>
+      <table className={`bg-white ${!isLoading ? "shadow-md" : ""} rounded-md p-2 w-full table-auto border-collapse`}>
         <thead className="bg-gray-200 rounded-md">
           <tr className="text-center">
             <th className="p-2">No.</th>
@@ -196,7 +191,7 @@ export default function ReportsComponent() {
           </tr>
         </thead>
 
-        {!loading ? (
+        {!isLoading ? (
           <tbody>
             {paginatedReports
               .filter((item) => (selectedFilter === "All" ? true : item.reportType === selectedFilter))
@@ -224,7 +219,7 @@ export default function ReportsComponent() {
         ) : null}
       </table>
 
-      {!loading && paginatedReports.length > 0 ? (
+      {!isLoading && paginatedReports.length > 0 ? (
         <div className="flex justify-end items-center my-4">
           <div className="flex gap-2">
             {currentPage !== 1 && (
@@ -252,9 +247,10 @@ export default function ReportsComponent() {
         </div>
       ) : null}
 
-      {loading ? (
+      {/* Copilot: Use isLoading for loader */}
+      {isLoading ? (
         <div className="mt-2 py-[100px] w-full flex flex-col justify-center items-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#F65A11]"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#F65A11]" />
           <p className="text-gray-600">Loading.....</p>
         </div>
       ) : paginatedReports.length === 0 ? (
@@ -289,7 +285,7 @@ export default function ReportsComponent() {
 
             if (res.passed) {
               notify(res.passed, res.message)
-              fetchReports() // Refresh the reports list
+              refetch() // Refresh the reports list
               setTimeout(() => {
                 setDeliveryGenModal(false)
               }, 2500);

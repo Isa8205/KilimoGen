@@ -19,6 +19,7 @@ import notify from "@/utils/ToastHelper";
 import useClickOutside from "@/hooks/useClickOutside";
 import { useRecoilState } from "recoil";
 import { sessionState } from "@/store/store";
+import { useQuery } from "@tanstack/react-query";
 
 interface Advance {
   id: number;
@@ -33,8 +34,21 @@ interface Advance {
   status: string;
 }
 export default function Advances() {
-  const user = useRecoilState(sessionState)[0]
-  const [advances, setAdvances] = useState<Advance[]>([]);
+  const user = useRecoilState(sessionState)[0];
+  // Copilot: Use React Query for advances
+  const {
+    data: advancesData,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["advances"],
+    queryFn: async () => {
+      return await window.electron.invoke("advance:get-all");
+    },
+  });
+  // Copilot: Use React Query data
+  const advances: Advance[] = advancesData?.advances || [];
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -80,31 +94,13 @@ export default function Advances() {
     }
   };
 
-  const handlePay = (advanceId: number) => {
-  };
+  const handlePay = (advanceId: number) => {};
 
   // Add modal logic
   const addModalRef = useRef<HTMLFormElement>(null);
   useClickOutside(addModalRef, () => {
     setShowAddModal(false);
   });
-
-  // Data fetch from api
-  const fetchAdvances = async () => {
-    setLoading(true);
-    try {
-      const data = await window.electron.invoke("advance:get-all");
-      setAdvances(data.advances);
-    } catch (error) {
-      console.error("Error fetching advances:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  // Call fetchAdvances when the component mounts
-  useEffect(() => {
-    fetchAdvances();
-  }, []);
 
   return (
     <section className="text-gray-800">
@@ -238,7 +234,7 @@ export default function Advances() {
                   <td>{index + 1}</td>
 
                   <td className="p-2">
-                  {advance.farmer.farmerNumber > 100
+                    {advance.farmer.farmerNumber > 100
                       ? `0${advance.farmer.farmerNumber}`
                       : advance.farmer.farmerNumber > 10
                       ? `0${advance.farmer.farmerNumber}`
@@ -318,9 +314,10 @@ export default function Advances() {
         </div>
       ) : null}
 
-      {loading ? (
+      {/* Copilot: Use isLoading for loader */}
+      {isLoading ? (
         <div className="mt-2 py-[100px] w-full flex flex-col justify-center items-center">
-          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#F65A11]"></div>
+          <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[#F65A11]" />
           <p className="text-gray-600">Loading.....</p>
         </div>
       ) : paginatedAdvances.length === 0 ? (
@@ -347,14 +344,14 @@ export default function Advances() {
             e.preventDefault();
             const instance = new FormData(e.currentTarget);
             const data = Object.fromEntries(instance as any);
-            data.clerkId = user?.id
+            data.clerkId = user?.id;
 
             const response = await window.electron.invoke("advance:add", data);
             notify(response.passed, response.message);
             if (response.passed) {
               setTimeout(() => {
                 setShowAddModal(false);
-                fetchAdvances();
+                refetch(); // Copilot: Refetch advances after adding
               }, 2500);
             }
           }}

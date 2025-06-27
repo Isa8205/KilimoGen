@@ -17,48 +17,36 @@ import errorImage from "@/assets/images/backgrounds/404_2.svg";
 import Modal from "@/components/Modal/Modal";
 import { toast } from "react-toastify";
 import { properties } from "@/utils/ToastHelper";
+import { useQuery } from "@tanstack/react-query";
+
 export function Farmers() {
   // Get the session data
   const user = useRecoilState(sessionState)[0];
-
-  // Fetching farmers from the database
-  const [dbfarmers, setFarmers] = useRecoilState(farmersState);
-  const [loading, setLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
+  // Copilot: Use React Query for data fetching
   const itemsPerPage = 20;
-  const [totalPages, setTotalPages] = useState(1);
-
-  const prevPage = () => {
-    setCurrentPage((current) => Math.max(current - 1, 1));
-  };
-
-  const nextPage = () => {
-    setCurrentPage((current) => Math.min(current + 1, totalPages));
-  };
-
-  const fetchFarmers = async () => {
-    setLoading(true);
-    try {
-      const response = await window.electron.invoke("get-farmers", {
+  const [currentPage, setCurrentPage] = useState(1);
+  const {
+    data: farmersData,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
+    queryKey: ["farmers", currentPage],
+    queryFn: async () => {
+      return await window.electron.invoke("get-farmers", {
         itemsPerPage: itemsPerPage,
         page: currentPage,
       });
-      setFarmers(response.farmers);
-      setTotalPages(response.totalPages);
-      document.getElementById("totalFarmers")!.textContent =
-        response.totalFarmers;
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
+  // Copilot: Use React Query data
+  const dbfarmers = farmersData?.farmers || [];
+  const totalPages = farmersData?.totalPages || 1;
+  // Copilot: Replace prevPage/nextPage to only update currentPage
+  const prevPage = () => setCurrentPage((current: number) => Math.max(current - 1, 1));
+  const nextPage = () => setCurrentPage((current: number) => Math.min(current + 1, totalPages));
 
-  useEffect(() => {
-    fetchFarmers();
-  }, [currentPage]);
-
-  // Search functionality
+  // Copilot: Search functionality using dbfarmers
   const [query, setQuery] = useState("");
   const searcRef = useRef<HTMLInputElement>(null);
   const handleSearch = () => {
@@ -131,7 +119,7 @@ export function Farmers() {
     const checked = e.target.checked;
 
     if (checked) {
-      setselectedFarmers(farmers.map((farmer) => farmer.id.toString()));
+      setselectedFarmers(farmers.map((farmer: any) => farmer.id.toString()));
     } else {
       setselectedFarmers([]);
     }
@@ -187,7 +175,7 @@ export function Farmers() {
         <span className=" border-s-2 border-gray-400 px-6">
           <p>Total</p>
           <span className="font-bold">
-            {farmers.length}
+            {dbfarmers.length}
           </span>
         </span>
       </div>
@@ -217,7 +205,7 @@ export function Farmers() {
 
       <table
         className={`bg-white ${
-          !loading ? "shadow-md" : ""
+          !isLoading ? "shadow-md" : ""
         } rounded-md p-2 w-full table-auto border-collapse`}
       >
         <thead className="bg-gray-200 rounded-md">
@@ -232,7 +220,7 @@ export function Farmers() {
           </tr>
         </thead>
 
-        {!loading ? (
+        {!isLoading ? (
           <tbody>
             {farmers
               .filter((item) =>
@@ -288,7 +276,7 @@ export function Farmers() {
         ) : null}
       </table>
 
-      {!loading && farmers.length > 0 ? (
+      {!isLoading && farmers.length > 0 ? (
         <div className="flex justify-end items-center my-4">
           <div className="flex gap-2">
             {currentPage !== 1 && (
@@ -316,12 +304,13 @@ export function Farmers() {
         </div>
       ) : null}
 
-      {loading ? (
+      {/* Copilot: Use isLoading for loader */}
+      {isLoading ? (
         <div className="mt-2 py-[100px] w-full flex flex-col justify-center items-center">
           <Loader />
           <p className="text-gray-600">Loading.....</p>
         </div>
-      ) : farmers.length === 0 ? (
+      ) : dbfarmers.length === 0 ? (
         <div className="flex gap-3 flex-col justify-center items-center my-4">
           {/* Animate to emerge from the center as it enlearges */}
           <motion.div
@@ -337,7 +326,7 @@ export function Farmers() {
           </motion.div>
           <p className="text-gray-600">Ooops! No farmers found</p>
           <button
-            onClick={fetchFarmers}
+            onClick={() => refetch()}
             className="border border-gray-400 text-gray-500 hover:text-accent hover:border-accent rounded p-1 flex items-center gap-2"
           >
             Refresh

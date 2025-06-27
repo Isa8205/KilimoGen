@@ -1,31 +1,31 @@
-import { useEffect } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
-import Dashboard from "./pages/Dashboard";
-import Reports from "./pages/Reports";
-import { Deliveries } from "./pages/Deliveries";
-import { Inventory } from "./pages/Inventory";
-import Messaging from "./pages/Messaging";
-import Production from "./pages/Production";
-import { Farmers } from "./pages/Farmers";
-import ClerkLogin from "./pages/auth/clerks/ClerkLogin";
-import LandingPage from "./Landing";
-import ClerkRegister from "./pages/auth/clerks/ClerkRegister";
-import ManagerLogin from "./pages/auth/management/ManagerLogin";
-import ManagerRegister from "./pages/auth/management/ManagerRegister";
-import FarmerRegister from "./pages/FarmerRegister";
-import AdminPanel from "./pages/admin/AdminPanel";
-import { InventoryForm } from "./pages/InventoryAdd";
-import SettingsPage from "./pages/Settings";
+// --- Code splitting: Use React.lazy for all page-level imports (with named exports fix) ---
+import { lazy, useEffect } from "react";
+import { Routes, Route } from "react-router-dom"; // <-- re-add these imports
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Reports = lazy(() => import("./pages/Reports"));
+const Deliveries = lazy(() => import("./pages/Deliveries").then(module => ({ default: module.Deliveries })));
+const Inventory = lazy(() => import("./pages/Inventory").then(module => ({ default: module.Inventory })));
+const Production = lazy(() => import("./pages/Production"));
+const Farmers = lazy(() => import("./pages/Farmers").then(module => ({ default: module.Farmers })));
+const ClerkLogin = lazy(() => import("./pages/auth/clerks/ClerkLogin"));
+const LandingPage = lazy(() => import("./Landing"));
+const ClerkRegister = lazy(() => import("./pages/auth/clerks/ClerkRegister"));
+const ManagerLogin = lazy(() => import("./pages/auth/management/ManagerLogin"));
+const ManagerRegister = lazy(() => import("./pages/auth/management/ManagerRegister"));
+const FarmerRegister = lazy(() => import("./pages/FarmerRegister"));
+const AdminPanel = lazy(() => import("./pages/admin/AdminPanel"));
+const SettingsPage = lazy(() => import("./pages/Settings"));
+const Home = lazy(() => import("./layout/Home"));
+const FarmerProfile = lazy(() => import("./pages/FarmerProfile"));
+const NotificationsPage = lazy(() => import("./pages/Notifications"));
+const Advances = lazy(() => import("./pages/Advances"));
+const InventoryItemDetail = lazy(() => import("./pages/InventoryItemView"));
+const InventoryItemForm = lazy(() => import("./pages/InventoryItemEdit"));
+const CoffeeProduction = lazy(() => import("./pages/Production"));
+// --- End code splitting changes ---
 import { useRecoilState } from "recoil";
 import { sessionState, settingsState } from "./store/store";
-import Home from "./layout/Home";
-import FarmerProfile from "./pages/FarmerProfile";
 import { AppSettings } from "./types/appSettings";
-import NotificationsPage from "./pages/Notifications";
-import Advances from "./pages/Advances";
-import InventoryItemDetail from "./pages/InventoryItemView";
-import InventoryItemForm from "./pages/InventoryItemEdit";
-import CoffeeProduction from "./pages/Production";
 
 const defaultSettings: AppSettings = {
   general: {
@@ -72,83 +72,84 @@ function App() {
 
   return (
     <div>
-
       <div className="relative h-[100vh] overflow-auto bg-background">
-        <Routes>
-          {/* Manager admin panel */}
-          <Route path="/admin">
-            <Route path="" element={<AdminPanel />} />
-          </Route>
-
-          {/* Landing Page Route */}
-          <Route path="/" element={<LandingPage />} />
-
-          {/* Authentication Routes */}
-          <Route path="/auth">
-            {/* Clerk Authentication */}
-            <Route path="clerk">
-              <Route path="login" element={<ClerkLogin />} />
-              <Route path="register" element={<ClerkRegister />} />
+        {/* --- Wrap routes in Suspense for lazy loading --- */}
+          <Routes>
+            {/* Manager admin panel */}
+            <Route path="/admin">
+              <Route path="" element={<AdminPanel />} />
             </Route>
 
-            {/* Manager Authentication */}
-            <Route path="manager">
-              <Route path="login" element={<ManagerLogin />} />
-              <Route path="register" element={<ManagerRegister />} />
+            {/* Landing Page Route */}
+            <Route path="/" element={<LandingPage />} />
+
+            {/* Authentication Routes */}
+            <Route path="/auth">
+              {/* Clerk Authentication */}
+              <Route path="clerk">
+                <Route path="login" element={<ClerkLogin />} />
+                <Route path="register" element={<ClerkRegister />} />
+              </Route>
+
+              {/* Manager Authentication */}
+              <Route path="manager">
+                <Route path="login" element={<ManagerLogin />} />
+                <Route path="register" element={<ManagerRegister />} />
+              </Route>
+
+              {/* Password Management */}
+              <Route
+                path="forgot-password"
+                element={<div>Forgot Password</div>}
+              />
+              <Route path="reset-password" element={<div>Reset Password</div>} />
             </Route>
 
-            {/* Password Management */}
-            <Route
-              path="forgot-password"
-              element={<div>Forgot Password</div>}
-            />
-            <Route path="reset-password" element={<div>Reset Password</div>} />
-          </Route>
+            {/* Main Application Routes */}
+            <Route path="/home" element={<Home />}>
+              {/* Dashboard */}
+              <Route path="dashboard" element={<Dashboard />} />
 
-          {/* Main Application Routes */}
-          <Route path="/home" element={<Home />}>
-            {/* Dashboard */}
-            <Route path="dashboard" element={<Dashboard />} />
+              {/* Members Management */}
+              <Route path="farmers">
+                <Route path="" element={<Farmers />} />
+                <Route path="add" element={<FarmerRegister />} />
+                <Route path="edit/:id" element={<div>Edit Member Form</div>} />
+                <Route path=":id" element={<FarmerProfile />} />
+              </Route>
 
-            {/* Members Management */}
-            <Route path="farmers">
-              <Route path="" element={<Farmers />} />
-              <Route path="add" element={<FarmerRegister />} />
-              <Route path="edit/:id" element={<div>Edit Member Form</div>} />
-              <Route path=":id" element={<FarmerProfile />} />
+              {/* Production */}
+              <Route path="production" element={<Production />} />
+
+              {/* Deliveries */}
+              <Route path="deliveries" element={<Deliveries />} />
+
+              {/* Inventory Management */}
+              <Route path="inventory">
+                <Route path="" Component={Inventory} />
+                <Route path="add" Component={InventoryItemForm} />
+                <Route path="edit/:id" element={<InventoryItemForm />} />
+                <Route path=":id" element={<InventoryItemDetail />} />
+              </Route>
+
+              {/* Reports */}
+              <Route path="reports" element={<Reports />} />
+
+              {/* Advances */}
+              <Route path="advances" element={<Advances />} />
+
+              {/* Messaging */}
+              <Route path="production" element={<CoffeeProduction />} />
+
+              {/* Settings  */}
+              <Route path="settings" element={<SettingsPage />} />
             </Route>
 
-            {/* Production */}
-            <Route path="production" element={<Production />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
 
-            {/* Deliveries */}
-            <Route path="deliveries" element={<Deliveries />} />
-
-            {/* Inventory Management */}
-            <Route path="inventory">
-              <Route path="" Component={Inventory} />
-              <Route path="add" Component={InventoryItemForm} />
-              <Route path="edit/:id" element={<InventoryItemForm />} />
-              <Route path=":id" element={<InventoryItemDetail />} />
-            </Route>
-
-            {/* Reports */}
-            <Route path="reports" element={<Reports />} />
-
-            {/* Advances */}
-            <Route path="advances" element={<Advances />} />
-
-            {/* Messaging */}
-            <Route path="production" element={<CoffeeProduction />} />
-
-            {/* Settings  */}
-            <Route path="settings" element={<SettingsPage />} />
-          </Route>
-
-          <Route path="/notifications" element={<NotificationsPage />} />
-
-          <Route path="/settings" element={<SettingsPage />} />
-        </Routes>
+            <Route path="/settings" element={<SettingsPage />} />
+          </Routes>
+        {/* --- End Suspense wrapper --- */}
       </div>
     </div>
   );
