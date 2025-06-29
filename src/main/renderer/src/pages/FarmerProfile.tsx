@@ -6,7 +6,7 @@ import { sessionState } from "@/store/store";
 import notify from "@/utils/ToastHelper";
 import { formatDate } from "date-fns";
 import { AtSign, Phone, User, X } from "lucide-react";
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, Suspense } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { useRecoilState } from "recoil";

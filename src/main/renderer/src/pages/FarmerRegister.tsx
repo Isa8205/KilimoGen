@@ -1,5 +1,5 @@
 import { ArrowLeft } from "lucide-react";
-import { useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { ToastContainer, toast, ToastOptions } from "react-toastify";

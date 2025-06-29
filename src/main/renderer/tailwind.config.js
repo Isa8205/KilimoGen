@@ -7,6 +7,8 @@ export const theme = {
       secondary: "#6A6D69",
       background: "#EFEDE7",
       accent: "#F65A11",
+      border: "hsl(var(--border))",
+      foreground: "hsl(var(--foreground))"
     },
     fontFamily: {
       sans: ['Inter', 'sans-serif'],

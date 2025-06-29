@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { ArrowLeft, Home, EyeIcon, EyeOff } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { Suspense, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import notify from '@/utils/ToastHelper';
@@ -32,6 +32,7 @@ export default function ClerkLogin() {
   };
 
   return (
+    <Suspense>
     <div className="min-h-screen flex items-center justify-center bg-gray-100 text-gray-900">
       <ToastContainer />
 
@@ -134,5 +135,6 @@ export default function ClerkLogin() {
         </form>
       </div>
     </div>
+    </Suspense>
   );
 }

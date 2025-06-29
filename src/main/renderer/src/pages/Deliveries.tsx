@@ -6,7 +6,7 @@ import {
   RefreshCcw,
   X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Fuse, { FuseResult } from "fuse.js";
 import axios from "axios";
 import notify from "../utils/ToastHelper";

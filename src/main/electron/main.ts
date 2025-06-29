@@ -23,6 +23,8 @@ import { registerPrinterHandlers } from "@/main/electron/ipc/printHandlers";
 import registerSettingsHandlers from "@/main/electron/ipc/settingsHandlers";
 import registerAdvanceHandlers from "@/main/electron/ipc/advanceHandlers";
 import registerReportHandlers from "@/main/electron/ipc/reportHandlers";
+import registerAdminHandlers from "@/main/electron/ipc/adminHandlers";
+import registerStoreHandlers from "@/main/electron/ipc/storeHandlers";
 
 
 dotenv.config();
@@ -83,6 +85,8 @@ app.whenReady().then(async () => {
   registerNotificationHandlers()
   registerAdvanceHandlers()
   registerReportHandlers(app)
+  registerAdminHandlers(app)
+  registerStoreHandlers(user)
 });
 
 app.on("window-all-closed", () => {

@@ -18,7 +18,7 @@ export function OverviewCard({ title, count, icon, link, color }: OverviewCardPr
       <div className="p-4">
         <div className={`w-12 h-12 ${color} rounded-lg flex items-center justify-center mb-3`}>{icon}</div>
         <h3 className="text-lg font-medium text-primary">{title}</h3>
-        <p className="text-2xl font-bold text-primary mt-1">{count.toLocaleString()}</p>
+        <p className="text-2xl font-bold text-primary mt-1">{count}</p>
       </div>
     </NavLink>
   )

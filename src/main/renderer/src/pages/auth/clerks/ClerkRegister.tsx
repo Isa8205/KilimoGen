@@ -1,5 +1,5 @@
 import { ArrowLeft, EyeIcon, EyeOff, Home, Upload, X } from "lucide-react";
-import { useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import defaultImage from "@/assets/images/defaultUser.png";

@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Edit, Grid, List, MoreHorizontal, RefreshCcw, View } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Loader from '../components/Loaders/Loader1';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -234,7 +234,7 @@ export function Inventory() {
           </motion.div>
           <p className="text-gray-600">Ooops! No items found</p>
           <button
-            onClick={() => refetch}
+            onClick={() => refetch()}            
             className="border border-gray-400 text-gray-500 hover:text-accent hover:border-accent rounded p-1 flex items-center gap-2"
           >
             Refresh

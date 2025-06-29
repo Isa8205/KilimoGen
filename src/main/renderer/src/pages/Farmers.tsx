@@ -6,7 +6,7 @@ import {
   RefreshCcw,
   Search,
 } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import Loader from "../components/Loaders/Loader1";
 import { NavLink } from "react-router-dom";
 import Fuse from "fuse.js";

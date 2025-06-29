@@ -13,6 +13,7 @@ import { Session } from "@/main/database/src/entities/Session";
 import { DataSource } from "typeorm";
 import { Report } from '@/main/database/src/entities/Report';
 import { InventoryTransaction } from '@/main/database/src/entities/InventoryTransaction';
+import { StorageFacility } from '@/main/database/src/entities/StorageFacility';
 
 export const AppDataSource = new DataSource({
   type: "sqlite",
@@ -32,7 +33,8 @@ export const AppDataSource = new DataSource({
     Session,
     Manager,
     Report,
-    InventoryTransaction
+    InventoryTransaction,
+    StorageFacility
   ],
   migrations: [],
   subscribers: [],

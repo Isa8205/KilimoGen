@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { Suspense, useEffect, useState } from "react";
 import axios from "axios";
 import { ToastContainer } from "react-toastify";
 import notify from "../utils/ToastHelper";
@@ -61,7 +61,7 @@ export function InventoryForm() {
   };
 
   return (
-    <div className="p-6 text-gray-700">
+    <section className="p-6 text-gray-700">
       <ToastContainer />
       <form
         onSubmit={handleSubmit}
@@ -216,6 +216,6 @@ export function InventoryForm() {
           </button>
         </div>
       </form>
-    </div>
+    </section>
   );
 }

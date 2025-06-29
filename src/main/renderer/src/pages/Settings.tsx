@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
   User,
   Eye,
@@ -64,7 +64,7 @@ export default function SettingsPage() {
   }, []);
 
   return (
-    <div className="w-full bg-white rounded-lg shadow-sm overflow-hidden">
+    <section className="w-full bg-white rounded-lg shadow-sm overflow-hidden">
       <ToastContainer/>
       <div className="border-b border-gray-200">
         <div className="p-4">
@@ -954,6 +954,6 @@ export default function SettingsPage() {
           </div>
         </form>
       </Modal>
-    </div>
+    </section>
   );
 }

@@ -1,5 +1,5 @@
 // --- Code splitting: Use React.lazy for all page-level imports (with named exports fix) ---
-import { lazy, useEffect } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route } from "react-router-dom"; // <-- re-add these imports
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Reports = lazy(() => import("./pages/Reports"));
@@ -74,6 +74,7 @@ function App() {
     <div>
       <div className="relative h-[100vh] overflow-auto bg-background">
         {/* --- Wrap routes in Suspense for lazy loading --- */}
+        <Suspense>
           <Routes>
             {/* Manager admin panel */}
             <Route path="/admin">
@@ -129,7 +130,7 @@ function App() {
                 <Route path="" Component={Inventory} />
                 <Route path="add" Component={InventoryItemForm} />
                 <Route path="edit/:id" element={<InventoryItemForm />} />
-                <Route path=":id" element={<InventoryItemDetail />} />
+                <Route path=":id" element={<InventoryItemDetail />} />                
               </Route>
 
               {/* Reports */}
@@ -149,6 +150,7 @@ function App() {
 
             <Route path="/settings" element={<SettingsPage />} />
           </Routes>
+        </Suspense>
         {/* --- End Suspense wrapper --- */}
       </div>
     </div>

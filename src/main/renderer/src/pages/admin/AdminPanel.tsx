@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import {
   Plus,
   Calendar,
@@ -11,6 +11,7 @@ import {
   Truck,
   MessageSquare,
   BarChart2,
+  Warehouse,
 } from "lucide-react"
 import { NavLink } from "react-router-dom"
 import { formatDate } from "date-fns"
@@ -20,6 +21,11 @@ import { AddHarvestModal } from "./AddHarvestModal" // Import AddHarvestModal co
 import { useRecoilState } from "recoil"
 import { sessionState } from "@/store/store"
 import { useQuery } from "@tanstack/react-query"
+import Loader from "@/components/Loaders/Loader1"
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuGroup, DropdownMenuLabel, DropdownMenuPortal, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from "@radix-ui/react-dropdown-menu"
+import { DropdownMenuShortcut } from "@/components/ui/dropdown-menu"
+import { Button } from "@/components/ui/button"
+import { AddStoreModal } from "./AddStoreModal"
 
 // Interfaces
 interface Harvest {
@@ -58,12 +64,8 @@ interface Clerk {
 export default function AdminPanel() {
   const user = useRecoilState(sessionState)[0]
   const [showSeasonModal, setShowSeasonModal] = useState(false)
+  const [ showStoreModal, setShowStoreModal ] = useState(false)
   const [selectedSeasonId, setSelectedSeasonId] = useState<number | null>(null)
-  const [farmersCount, setFarmersCount] = useState(0)
-  const [inventoryCount, setInventoryCount] = useState(0)
-  const [deliveriesCount, setDeliveriesCount] = useState(0)
-  const [messagesCount, setMessagesCount] = useState(0)
-  const [productionCount, setProductionCount] = useState(0)
 
   // Copilot: Use React Query for seasons
   const {
@@ -187,204 +189,209 @@ export default function AdminPanel() {
     )
   }
 
-  useEffect(() => {
-    // Fetch data counts (replace with actual API calls)
-    setFarmersCount(120) // Example data
-    setInventoryCount(45)
-    setDeliveriesCount(30)
-    setMessagesCount(15)
-    setProductionCount(20)
-  }, [])
+  // Get the item overviews
+  const {
+    data: totalOverviews,
+    isLoading: isOverviewsLoading,
+    isError: isOverviewsError, 
+  } = useQuery({
+    queryKey: ["overviews"],
+    queryFn: async() => {
+      const res = await window.electron.invoke("admin:get-overview")
+      return res.data
+    }
+  })
 
   return (
-    <div className="min-h-screen overflow-auto bg-background text-primary">
-      {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-          <NavLink to="/home/dashboard" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-              <Wheat className="w-5 h-5 text-white" />
-            </div>
-            <h1 className="text-2xl font-bold text-primary">Kilimogen Admin</h1>
-          </NavLink>
-
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center">
-              <img src={`data:image/png;base64, ${user?.avatar}`} className="w-8 h-8 rounded-full" alt="avatar" />
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
-          <h2 className="text-2xl font-bold mb-2 sm:mb-0">Dashboard Overview</h2>
-          <div className="flex gap-2">
-            <button
-              className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
-              onClick={() => setShowSeasonModal(true)}
-            >
-              <Plus size={18} />
-              <span>New Season</span>
-            </button>
-            <button
-              className="px-4 py-2 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors flex items-center gap-2"
-              onClick={() => (window.location.href = "/auth/clerk/register")}
-            >
-              <Plus size={18} />
-              <span>New Clerk</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Overview Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
-          <OverviewCard
-            title="Farmers"
-            count={farmersCount}
-            icon={<User className="w-6 h-6 text-white" />}
-            link="/home/farmers"
-            color="bg-primary"
-          />
-          <OverviewCard
-            title="Inventory"
-            count={inventoryCount}
-            icon={<Package className="w-6 h-6 text-white" />}
-            link="/home/inventory"
-            color="bg-accent"
-          />
-          <OverviewCard
-            title="Deliveries"
-            count={deliveriesCount}
-            icon={<Truck className="w-6 h-6 text-white" />}
-            link="/home/deliveries"
-            color="bg-primary"
-          />
-          <OverviewCard
-            title="Messages"
-            count={messagesCount}
-            icon={<MessageSquare className="w-6 h-6 text-white" />}
-            link="/home/messaging"
-            color="bg-accent"
-          />
-          <OverviewCard
-            title="Production"
-            count={productionCount}
-            icon={<BarChart2 className="w-6 h-6 text-white" />}
-            link="/home/production"
-            color="bg-primary"
-          />
-        </div>
-
-        {/* Seasons Grid */}
-        <div className="mb-10">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Seasons</h2>
-            <button
-              className="text-accent hover:text-accent/80 inline-flex items-center gap-2 transition-colors"
-              onClick={() => setShowSeasonModal(true)}
-            >
-              <PlusCircle size={20} />
-              <span className="font-medium">Add Season</span>
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {isSeasonsLoading ? (
-              <div className="col-span-full bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
-                <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary mx-auto mb-4" />
-                <p className="text-gray-600">Loading seasons...</p>
+      <div className="min-h-screen overflow-auto bg-background text-primary">
+        {/* Header */}
+        <header className="bg-white shadow-sm sticky top-0 z-10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+            <NavLink to="/home/dashboard" className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                <Wheat className="w-5 h-5 text-white" />
               </div>
-            ) : seasons.length > 0 ? (
-              seasons.map((season) => <SeasonCard key={season.id} season={season} />)
-            ) : (
-              <div className="col-span-full bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
-                <div className="mx-auto w-16 h-16 bg-background rounded-full flex items-center justify-center mb-4">
-                  <Calendar className="w-8 h-8 text-primary/60" />
-                </div>
-                <h3 className="text-xl font-medium text-primary mb-2">No Seasons Yet</h3>
-                <p className="text-secondary mb-4">Create your first season to start tracking harvests</p>
-                <button
-                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors inline-flex items-center gap-2"
-                  onClick={() => setShowSeasonModal(true)}
+              <h1 className="text-2xl font-bold text-primary">Kilimogen Admin</h1>
+            </NavLink>
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-background flex items-center justify-center">
+                <img src={`data:image/png;base64, ${user?.avatar}`} className="w-8 h-8 rounded-full" alt="avatar" />
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+            <h2 className="text-2xl font-bold mb-2 sm:mb-0">Dashboard Overview</h2>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
                 >
                   <Plus size={18} />
-                  <span>Add Season</span>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Display the clerks in tabular form */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Clerks</h2>
-            <button
-              className="text-accent hover:text-accent/80 inline-flex items-center gap-2 transition-colors"
-              onClick={() => (window.location.href = "/auth/clerk/register")}
-            >
-              <PlusCircle size={20} />
-              <span className="font-medium">Add Clerk</span>
-            </button>
+                  <span>New</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-40 bg-white p-2 shadow-md">
+                <DropdownMenuItem onClick={() => setShowSeasonModal(true)}>Season</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => (window.location.href = "/auth/clerk/register")}>Clerk</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowStoreModal(true)}>Store</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
-            <div className="overflow-x-auto">
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-primary text-white">
-                    <th className="px-6 py-3 text-center text-sm font-medium">Name</th>
-                    <th className="px-6 py-3 text-center text-sm font-medium">Email</th>
-                    <th className="px-6 py-3 text-center text-sm font-medium">Phone</th>
-                    <th className="px-6 py-3 text-center text-sm font-medium">Avatar</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {clerks.length > 0 ? (
-                    clerks.map((clerk) => (
-                      <tr key={clerk.id} className="hover:bg-background/50 transition-colors text-center">
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="font-medium">
-                            {clerk.firstName} {clerk.lastName}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-secondary">{clerk.email}</td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                         0{clerk.phone}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="flex justify-center">
-                             <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20">
-                               <img
-                                 className="w-full h-full object-cover"
-                                 src={`data:image/png;base64,${clerk.avatar}`}
-                                 alt={`${clerk.firstName} ${clerk.lastName}`}
-                               />
-                             </div>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan={4} className="px-6 py-8 text-center text-secondary">
-                        No clerks found. Add your first clerk to get started.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+          {/* Overview Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
+            <OverviewCard
+              title="Farmers"
+              count={totalOverviews?.farmers}
+              icon={<User className="w-6 h-6 text-white" />}
+              link="/home/farmers"
+              color="bg-primary"
+            />
+            <OverviewCard
+              title="Inventory"
+              count={totalOverviews?.inventory}
+              icon={<Package className="w-6 h-6 text-white" />}
+              link="/home/inventory"
+              color="bg-accent"
+            />
+            <OverviewCard
+              title="Deliveries"
+              count={totalOverviews?.deliveries}
+              icon={<Truck className="w-6 h-6 text-white" />}
+              link="/home/deliveries"
+              color="bg-primary"
+            />
+            <OverviewCard
+              title="Messages"
+              count={20}
+              icon={<MessageSquare className="w-6 h-6 text-white" />}
+              link="/home/messaging"
+              color="bg-accent"
+            />
+            <OverviewCard
+              title="Stores "
+              count={totalOverviews?.stores}
+              icon={<Warehouse className="w-6 h-6 text-white" />}
+              link="#"
+              color="bg-primary"
+            />
+          </div>
+
+          {/* Seasons Grid */}
+          <div className="mb-10">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Seasons</h2>
+              <button
+                className="text-accent hover:text-accent/80 inline-flex items-center gap-2 transition-colors"
+                onClick={() => setShowSeasonModal(true)}
+              >
+                <PlusCircle size={20} />
+                <span className="font-medium">Add Season</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {isSeasonsLoading ? (
+                <div className="col-span-full bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
+                  <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary mx-auto mb-4" />
+                  <p className="text-gray-600">Loading seasons...</p>
+                </div>
+              ) : seasons.length > 0 ? (
+                seasons.map((season) => <SeasonCard key={season.id} season={season} />)
+              ) : (
+                <div className="col-span-full bg-white p-8 rounded-xl shadow-sm border border-gray-100 text-center">
+                  <div className="mx-auto w-16 h-16 bg-background rounded-full flex items-center justify-center mb-4">
+                    <Calendar className="w-8 h-8 text-primary/60" />
+                  </div>
+                  <h3 className="text-xl font-medium text-primary mb-2">No Seasons Yet</h3>
+                  <p className="text-secondary mb-4">Create your first season to start tracking harvests</p>
+                  <button
+                    className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors inline-flex items-center gap-2"
+                    onClick={() => setShowSeasonModal(true)}
+                  >
+                    <Plus size={18} />
+                    <span>Add Season</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      </main>
 
-      {/* Modals */}
-      {showSeasonModal && <AddSeasonModal onClose={() => setShowSeasonModal(false)} />}
+          {/* Display the clerks in tabular form */}
+          <div className="mb-8">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Clerks</h2>
+              <button
+                className="text-accent hover:text-accent/80 inline-flex items-center gap-2 transition-colors"
+                onClick={() => (window.location.href = "/auth/clerk/register")}
+              >
+                <PlusCircle size={20} />
+                <span className="font-medium">Add Clerk</span>
+              </button>
+            </div>
 
-      {selectedSeasonId && <AddHarvestModal seasonId={selectedSeasonId} onClose={() => setSelectedSeasonId(null)} />}
-    </div>
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+              <div className="overflow-x-auto">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-primary text-white">
+                      <th className="px-6 py-3 text-center text-sm font-medium">Name</th>
+                      <th className="px-6 py-3 text-center text-sm font-medium">Email</th>
+                      <th className="px-6 py-3 text-center text-sm font-medium">Phone</th>
+                      <th className="px-6 py-3 text-center text-sm font-medium">Avatar</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {clerks.length > 0 ? (
+                      clerks.map((clerk) => (
+                        <tr key={clerk.id} className="hover:bg-background/50 transition-colors text-center">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="font-medium">
+                              {clerk.firstName} {clerk.lastName}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-secondary">{clerk.email}</td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                          0{clerk.phone}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex justify-center">
+                              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary/20">
+                                <img
+                                  className="w-full h-full object-cover"
+                                  src={`data:image/png;base64,${clerk.avatar}`}
+                                  alt={`${clerk.firstName} ${clerk.lastName}`}
+                                />
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-8 text-center text-secondary">
+                          No clerks found. Add your first clerk to get started.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </main>
+
+        {/* Modals */}
+        { showStoreModal && <AddStoreModal onClose={() => setShowStoreModal(false)} /> }
+        {showSeasonModal && <AddSeasonModal onClose={() => setShowSeasonModal(false)} />}
+
+        {selectedSeasonId && <AddHarvestModal seasonId={selectedSeasonId} onClose={() => setSelectedSeasonId(null)} />}
+      </div>
   )
 }
