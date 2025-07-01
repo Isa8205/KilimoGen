@@ -1,6 +1,7 @@
 import { PrimaryGeneratedColumn, Column, Entity, ManyToOne, OneToMany } from "typeorm";
 import { Clerk } from "./Clerk";
 import { InventoryTransaction } from "@/main/database/src/entities/InventoryTransaction";
+import { StorageFacility } from "@/main/database/src/entities/StorageFacility";
 
 @Entity('inventory_items', { name: "InventoryItem" })
 export class InventoryItem {
@@ -19,9 +20,7 @@ export class InventoryItem {
     @Column()
     unit: string;
 
-    @Column()
-    location: string;
-
+    
     @Column()
     zone: string;
 
@@ -36,21 +35,24 @@ export class InventoryItem {
 
     @Column({ length: 150, nullable: true })
     description: string;
-
+    
     @Column()
     batchNumber: string;
-
+    
     @Column()
     origin: string;
-
+    
     @Column("varchar",{ nullable: true })
     images: string;
-
+    
     @ManyToOne(() => Clerk)
     receivedBy: Clerk;
-
+    
     @OneToMany(() => InventoryTransaction, (transaction) => transaction.item)
     transactions: InventoryTransaction[];
+
+    @ManyToOne(() => StorageFacility, { nullable: true, onDelete: "SET NULL" })
+    location: StorageFacility | null;
 
     currentQuantity: number
 }

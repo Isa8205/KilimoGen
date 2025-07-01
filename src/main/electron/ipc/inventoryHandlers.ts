@@ -2,6 +2,7 @@ import { AppDataSource } from "@/main/database/src/data-source";
 import { Clerk } from "@/main/database/src/entities/Clerk";
 import { InventoryItem } from "@/main/database/src/entities/InventoryItem";
 import { InventoryTransaction } from "@/main/database/src/entities/InventoryTransaction";
+import { StorageFacility } from "@/main/database/src/entities/StorageFacility";
 import getSessionUser from "@/main/electron/session/getSessionUser";
 import { getImageBase64 } from "@/main/utils/getImageBase64";
 import { saveFile } from "@/main/utils/saveFile";
@@ -11,6 +12,7 @@ export default function registerInventoryHandlers(app: Electron.App, currentUser
   const inventoryItemRepository = AppDataSource.getRepository(InventoryItem);
   const clerkRepository = AppDataSource.getRepository(Clerk)
   const inventoryTransactionRepository = AppDataSource.getRepository(InventoryTransaction)
+  const storesRepository = AppDataSource.getRepository(StorageFacility)
 
   ipcMain.handle("get-inventory", async (_event) => {
     const querriedItems = await inventoryItemRepository.find({relations: ['receivedBy', 'transactions']})
@@ -52,6 +54,7 @@ export default function registerInventoryHandlers(app: Electron.App, currentUser
         .createQueryBuilder("item")
         .leftJoinAndSelect("item.receivedBy", "receivedBy")
         .leftJoinAndSelect("item.transactions", "transaction")
+        .leftJoinAndSelect("item.location", "location")
         .leftJoin("transaction.clerk", "transactionReceivedBy")
         .addOrderBy("transaction.updatedAt", "DESC")
         .select([
@@ -59,7 +62,6 @@ export default function registerInventoryHandlers(app: Electron.App, currentUser
           "item.itemName",
           "item.category",
           "item.unit",
-          "item.location",
           "item.zone",
           "item.origin",
           "item.minStock",
@@ -69,6 +71,9 @@ export default function registerInventoryHandlers(app: Electron.App, currentUser
           "item.dateReceived",
           "receivedBy.firstName",
           "receivedBy.lastName",
+
+          "location.id",
+          "location.name",
 
           "transaction.id",
           "transaction.note",
@@ -137,7 +142,7 @@ export default function registerInventoryHandlers(app: Electron.App, currentUser
       inventoryItem.unitWeight = Number(unitWeight);
       inventoryItem.description = description;
       inventoryItem.dateReceived = new Date();
-      inventoryItem.location = location;
+      inventoryItem.location = await storesRepository.findOneBy({ id: Number(location) });
       inventoryItem.zone = zone;
       inventoryItem.minStock = minStock;
       inventoryItem.maxStock = maxStock;
@@ -197,6 +202,35 @@ export default function registerInventoryHandlers(app: Electron.App, currentUser
     } catch (err) {
       console.error(err);
       return { passed: false, message: "Failed to update item", error: err };
+    }
+  });
+
+  ipcMain.handle("inventory:move-item", async (_event, itemData) => {
+    try {
+      const { itemId, newLocationId, newSection } = itemData;
+
+      if (!currentUser) return { passed: false, message: "You should be logged in as a clerk" };
+
+      const item = await inventoryItemRepository.findOneBy({ id: itemId });
+
+      if (!item) {
+        return { passed: false, message: "Item not found" };
+      }
+
+      const newLocation = await storesRepository.findOneBy({ id: newLocationId });
+
+      if (!newLocation) {
+        return { passed: false, message: "New location not found" };
+      }
+
+      item.location = newLocation;
+      item.zone = newSection;
+      await inventoryItemRepository.save(item);
+
+      return { passed: true, message: "Item moved successfully" };
+    } catch (err) {
+      console.error(err);
+      return { passed: false, message: "Failed to move item", error: err };
     }
   });
 

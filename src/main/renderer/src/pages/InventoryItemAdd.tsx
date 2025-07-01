@@ -62,7 +62,6 @@ const defaultFormData: FormData = {
   export default function InventoryItemForm({ isEdit = false }: { isEdit?: boolean; }) {
     const navigate = useNavigate()
     const [formData, setFormData] = useState<FormData>(defaultFormData)
-    const [selectedStore, setSelectedStore] = useState<Store | null>(null)
 
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [isSubmitting, setIsSubmitting] = useState(false)
@@ -367,7 +366,7 @@ const defaultFormData: FormData = {
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
                 >
                   <option value="">Select zone...</option>
-                  {Array.from(storageFacilities.find((store: Store) => store.id === Number(formData.location))?.sections || []).map((section: any) => (
+                  {isFetchedStorageFacilities &&Array.from(storageFacilities.find((store: Store) => store.id === Number(formData.location))?.sections || []).map((section: any) => (
                     <option key={section} value={section}>
                       {section}
                     </option>

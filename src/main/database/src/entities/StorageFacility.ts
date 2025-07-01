@@ -4,7 +4,7 @@ import { Column, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typ
 @Entity("stores", {name: "StorageFacility"})
 export class StorageFacility {
     @PrimaryGeneratedColumn()
-    id: string;
+    id: number;
 
     @Column()
     name: string;

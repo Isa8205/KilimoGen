@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import {
   ArrowLeft,
   Package,
@@ -9,8 +9,6 @@ import {
   Edit,
   Trash2,
   Move,
-  Plus,
-  Minus,
   BarChart3,
   Thermometer,
   Droplets,
@@ -22,11 +20,11 @@ import {
   RefreshCw,
 } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
-import { set } from "date-fns";
 import { useRecoilState } from "recoil";
 import { sessionState } from "@/store/store";
 import Modal from "@/components/Modal/Modal";
 import notify from "@/utils/ToastHelper";
+import { useQuery } from "@tanstack/react-query";
 
 interface InventoryItem {
   id: string;
@@ -34,7 +32,7 @@ interface InventoryItem {
   category: string;
   currentQuantity: number;
   unit: string;
-  location: string;
+  location: {id:number, name: string} | null;
   zone: string;
   lastUpdated: string;
   origin: string;
@@ -66,7 +64,7 @@ const defaults: InventoryItem = {
   category: "",
   currentQuantity: 0,
   unit: "",
-  location: "",
+  location: null,
   zone: "",
   lastUpdated: "",
   origin: "",
@@ -88,6 +86,22 @@ export default function InventoryItemDetail() {
   const params = useParams()
   const itemId = params.id as string
   const [item, setItem] = useState<InventoryItem>(defaults)
+
+  const [showMoveModal, setShowMoveModal] = useState(false)
+  const [newLocationId, setNewLocation] = useState("")
+  const [newSection, setNewSection] = useState("")
+
+    const {
+      data: storageFacilities,
+      isLoading,
+      isFetched: isFetchedStorageFacilities,
+    } = useQuery({
+      queryKey: ["stores"],
+      queryFn: async() => { 
+        const res = await window.electron.invoke("stores:get-all")
+        return res.data
+      }
+    })
 
   const fetchItemData = async () => {
     const res = await window.electron.invoke("inventory:get-item-data", Number(itemId))
@@ -351,7 +365,7 @@ export default function InventoryItemDetail() {
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Warehouse</label>
-                  <div className="text-gray-900">{item?.location}</div>
+                  <div className="text-gray-900">{item?.location?.name}</div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Zone/Section</label>
@@ -370,7 +384,9 @@ export default function InventoryItemDetail() {
                     </span>
                   </div>
                 </div>
-                <button className="w-full px-3 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-sm flex items-center justify-center">
+                <button 
+                  onClick={() => setShowMoveModal(true)} 
+                  className="w-full px-3 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors text-sm flex items-center justify-center">
                   <Move size={16} className="mr-2" />
                   Move to Different Location
                 </button>
@@ -502,6 +518,81 @@ export default function InventoryItemDetail() {
                   Update
                 </button>
               </div>
+          </Modal>
+
+          {/* Move to a new location */}
+          <Modal title="Move Item" isOpen={showMoveModal} onClose={() => setShowMoveModal(false)}>
+            <form onSubmit={(e) => {
+              e.preventDefault()
+              if (newLocationId && newSection) {
+                window.electron.invoke("inventory:move-item", {
+                  itemId: item.id,
+                  newLocationId: Number(newLocationId),
+                  newSection: newSection,
+                }).then((res) => {
+                  notify(res.passed, res.message)
+                  if (res.passed) {
+                    setTimeout(() => {
+                      fetchItemData()
+                      setShowMoveModal(false)
+                      setNewLocation("")
+                      setNewSection("")
+                    }, 2500)
+                  }
+                })
+              } else {
+                notify(false, "Please select a location and section")
+              }
+            }}>
+              <div className="text-gray-700 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">New Location</label>
+                  <select
+                    value={newLocationId}
+                    onChange={(e) => setNewLocation(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+                  >
+                    <option value="">Select a location...</option>
+                    {isFetchedStorageFacilities && storageFacilities?.map((store: any) => (
+                      <option key={store.id} value={store.id}>
+                        {store.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">New Section/Zone</label>
+                  <select
+                    value={newSection}
+                    onChange={(e) => setNewSection(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+                  >
+                    <option value="">Select zone...</option>
+                    {isFetchedStorageFacilities && Array.from(storageFacilities.find((store: any) => store.id === Number(newLocationId))?.sections || []).map((section: any) => (
+                      <option key={section} value={section}>
+                        {section}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="text-gray-700 flex space-x-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowMoveModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Move
+                </button>
+              </div>
+            </form>
           </Modal>
       </div>
     </div>
