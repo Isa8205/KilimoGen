@@ -7,9 +7,12 @@ export default function registerStoreHandlers(user: any) {
     const storesRepository = AppDataSource.getRepository(StorageFacility)
     const clerkRepository = AppDataSource.getRepository(Clerk)
 
-    ipcMain.handle("stores:get-all", () => {
-        const data = storesRepository.find()
-        return { passed: true, stores: data}    
+    ipcMain.handle("stores:get-all", async() => {
+        const dbData = await storesRepository.find()
+        const resData = dbData.map((store) => {
+            return {...store, sections: store.sections.split(";"), asignee: store.asignee ? store.asignee.firstName : "Unassigned" }
+        })
+        return { passed: true, data: resData }
     })
 
     ipcMain.handle("stores:add", async(_event, data, user) => {

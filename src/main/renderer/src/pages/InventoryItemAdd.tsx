@@ -16,6 +16,7 @@ import {
 import notify from "@/utils/ToastHelper"
 import { ToastContainer } from "react-toastify"
 import { useNavigate } from "react-router-dom"
+import { useQuery } from "@tanstack/react-query"
 
 interface FormData {
   name: string
@@ -31,6 +32,14 @@ interface FormData {
   batchNumber: string
   origin: string
   images: File[]
+}
+
+interface Store {
+  id: number;
+  name: string;
+  description: string;
+  sections: string[];
+  asignee: string;
 }
 
 const defaultFormData: FormData = {
@@ -49,25 +58,32 @@ const defaultFormData: FormData = {
     images: [],
   }
 
-export default function InventoryItemForm({ isEdit = false }: { isEdit?: boolean; }) {
-  const navigate = useNavigate()
-  const [formData, setFormData] = useState<FormData>(defaultFormData)
+  
+  export default function InventoryItemForm({ isEdit = false }: { isEdit?: boolean; }) {
+    const navigate = useNavigate()
+    const [formData, setFormData] = useState<FormData>(defaultFormData)
+    const [selectedStore, setSelectedStore] = useState<Store | null>(null)
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
+    const [errors, setErrors] = useState<Record<string, string>>({})
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    
+    const categories = ["Equipment", "Fertilizers", "Pesticides", "Seeds", "Packaging Materials"]
+    const units = ["kg", "ml", "g", "bags", "tons", "pieces"]
 
-  const categories = ["Equipment", "Fertilizers", "Pesticides", "Seeds", "Packaging Materials"]
-  const units = ["kg", "ml", "g", "bags", "tons", "pieces"]
-  const locations = [
-    "Warehouse A",
-    "Warehouse B",
-    "Processing Facility",
-    "Drying Patio",
-    "Storage Room 1",
-    "Storage Room 2",
-  ]
+    const {
+      data: storageFacilities,
+      isLoading,
+      isFetched: isFetchedStorageFacilities,
+    } = useQuery({
+      queryKey: ["stores"],
+      queryFn: async() => { 
+        const res = await window.electron.invoke("stores:get-all")
+        return res.data
+      }
+    })
 
-  const handleInputChange = (field: string, value: any) => {
+
+    const handleInputChange = (field: string, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }))
@@ -323,30 +339,40 @@ export default function InventoryItemForm({ isEdit = false }: { isEdit?: boolean
                 <label className="block text-sm font-medium text-gray-700 mb-2">Location *</label>
                 <select
                   value={formData.location}
-                  onChange={(e) => handleInputChange("location", e.target.value)}
+                  onChange={(e) => {
+                    handleInputChange("location", e.target.value);
+                  }}
                   className={`w-full px-3 py-2 border rounded-lg focus:ring-orange-500 focus:border-orange-500 ${
                     errors.location ? "border-red-500" : "border-gray-300"
                   }`}
                 >
                   <option value="">Select location...</option>
-                  {locations.map((location) => (
-                    <option key={location} value={location}>
-                      {location}
+                  {isFetchedStorageFacilities && Array.from(storageFacilities).map((store: any) => (
+                    <option key={store.id} value={store.id}>
+                      {store.name}
                     </option>
                   ))}
+                  {isLoading && <option>Loading...</option>}
+                  {!isFetchedStorageFacilities && !isLoading && (
+                    <option value="">No storage facilities available</option>
+                  )}
                 </select>
                 {errors.location && <p className="text-red-500 text-sm mt-1">{errors.location}</p>}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Zone/Section</label>
-                <input
-                  type="text"
-                  value={formData.zone}
+                <select
                   onChange={(e) => handleInputChange("zone", e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
-                  placeholder="e.g., Section 3-B"
-                />
+                >
+                  <option value="">Select zone...</option>
+                  {Array.from(storageFacilities.find((store: Store) => store.id === Number(formData.location))?.sections || []).map((section: any) => (
+                    <option key={section} value={section}>
+                      {section}
+                    </option>
+                  ))}
+                </select>
               </div>
 
             </div>

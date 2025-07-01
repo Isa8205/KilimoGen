@@ -193,7 +193,8 @@ export default function AdminPanel() {
   const {
     data: totalOverviews,
     isLoading: isOverviewsLoading,
-    isError: isOverviewsError, 
+    isError: isOverviewsError,
+    refetch: refetchOvervies
   } = useQuery({
     queryKey: ["overviews"],
     queryFn: async() => {
@@ -388,7 +389,7 @@ export default function AdminPanel() {
         </main>
 
         {/* Modals */}
-        { showStoreModal && <AddStoreModal onClose={() => setShowStoreModal(false)} /> }
+        { showStoreModal && <AddStoreModal fetchFn={() => refetchOvervies()} onClose={() => setShowStoreModal(false)} /> }
         {showSeasonModal && <AddSeasonModal onClose={() => setShowSeasonModal(false)} />}
 
         {selectedSeasonId && <AddHarvestModal seasonId={selectedSeasonId} onClose={() => setSelectedSeasonId(null)} />}

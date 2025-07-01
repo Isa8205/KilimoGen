@@ -10,6 +10,7 @@ import { useQuery } from "@tanstack/react-query";
 
 interface AddStoreModalProps {
   onClose: () => void;
+  fetchFn: () => void;
 }
 
 /**
@@ -17,7 +18,7 @@ interface AddStoreModalProps {
  *
  * @param onClose - The function to call when the modal is closed.
  */
-export function AddStoreModal({ onClose }: AddStoreModalProps) {
+export function AddStoreModal({ onClose, fetchFn }: AddStoreModalProps) {
   const [sending, setSending] = useState(false);
   const [sectionsCount, setSectionCount] = useState(1);
 
@@ -49,6 +50,7 @@ export function AddStoreModal({ onClose }: AddStoreModalProps) {
       notify(res.passed, res.message);
 
       if (res.passed) {
+        fetchFn()
         onClose();
       }
     } catch (err) {

@@ -20,7 +20,7 @@ const FarmerProfile = lazy(() => import("./pages/FarmerProfile"));
 const NotificationsPage = lazy(() => import("./pages/Notifications"));
 const Advances = lazy(() => import("./pages/Advances"));
 const InventoryItemDetail = lazy(() => import("./pages/InventoryItemView"));
-const InventoryItemForm = lazy(() => import("./pages/InventoryItemEdit"));
+const InventoryItemForm = lazy(() => import("./pages/InventoryItemAdd"));
 const CoffeeProduction = lazy(() => import("./pages/Production"));
 // --- End code splitting changes ---
 import { useRecoilState } from "recoil";
