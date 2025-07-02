@@ -24,7 +24,7 @@ import { useRecoilState } from "recoil";
 import { sessionState } from "@/store/store";
 import Modal from "@/components/Modal/Modal";
 import notify from "@/utils/ToastHelper";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 interface InventoryItem {
   id: string;
@@ -83,6 +83,7 @@ const defaults: InventoryItem = {
 export default function InventoryItemDetail() {
   const [user] = useRecoilState(sessionState)
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const params = useParams()
   const itemId = params.id as string
   const [item, setItem] = useState<InventoryItem>(defaults)
@@ -176,8 +177,10 @@ export default function InventoryItemDetail() {
   }
 
   const handleItemDelete = async (id: string) => {
+    window.prompt
     const response = await window.electron.invoke("inventory:remove", id)
-    if (response.success) {
+    if (response.passed) {
+      queryClient.invalidateQueries({ queryKey: ["inventory"] })
       navigate("/home/inventory")
     } else {
       alert("Failed to delete item")

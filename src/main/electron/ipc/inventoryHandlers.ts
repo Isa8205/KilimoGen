@@ -7,6 +7,9 @@ import getSessionUser from "@/main/electron/session/getSessionUser";
 import { getImageBase64 } from "@/main/utils/getImageBase64";
 import { saveFile } from "@/main/utils/saveFile";
 import { ipcMain } from "electron";
+import { BrowserWindow, dialog } from "electron/main";
+import fs from "fs"
+import path from "path";
 
 export default function registerInventoryHandlers(app: Electron.App, currentUser: any) {
   const inventoryItemRepository = AppDataSource.getRepository(InventoryItem);
@@ -236,10 +239,35 @@ export default function registerInventoryHandlers(app: Electron.App, currentUser
 
   ipcMain.handle("inventory:remove", async (_event, itemId) => {
     try {
+      const focusedWindow = BrowserWindow.getFocusedWindow();
+      if (!focusedWindow) {
+        return { passed: false, message: "No active window to show confirmation dialog." };
+      }
+      const confirmed = await dialog.showMessageBox(focusedWindow, {
+        type: "warning",
+        buttons: ["Yes", "No"],
+        defaultId: 1,
+        title: "Confirmation",
+        message: "Are you sure you want to remove this item?",
+      })
+
+      if (!confirmed) {
+        return
+      }
+
       const item = await inventoryItemRepository.findOneBy({ id: itemId });
-  
+
       if (!item) {
         return { passed: false, message: "Item not found" };
+      }
+
+      if (item.images) {
+        const imageList = Array.from(item.images.split(";"));
+        imageList.forEach((image) => {
+          if (fs.existsSync(image)) {
+            fs.unlinkSync(image);
+          } 
+        })
       }
   
       await inventoryItemRepository.remove(item);

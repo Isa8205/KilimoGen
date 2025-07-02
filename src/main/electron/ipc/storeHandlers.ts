@@ -8,9 +8,13 @@ export default function registerStoreHandlers(user: any) {
     const clerkRepository = AppDataSource.getRepository(Clerk)
 
     ipcMain.handle("stores:get-all", async() => {
-        const dbData = await storesRepository.find()
+        const dbData = await storesRepository.find({ relations: ["asignee"] })
         const resData = dbData.map((store) => {
-            return {...store, sections: store.sections.split(";"), asignee: store.asignee ? store.asignee.firstName : "Unassigned" }
+            return {
+                ...store,
+                sections: store.sections.split(";"),
+                asignee: store.asignee?.firstName || "Unassigned"
+            }
         })
         return { passed: true, data: resData }
     })

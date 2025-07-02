@@ -22,7 +22,7 @@ export function Inventory() {
     data: inventoryData,
     isLoading,
     isError,
-    refetch,
+    refetch: inventoryRefetchFn,
   } = useQuery({
     queryKey: ["inventory"],
     queryFn: async () => {
