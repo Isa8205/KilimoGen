@@ -177,7 +177,6 @@ export default function InventoryItemDetail() {
   }
 
   const handleItemDelete = async (id: string) => {
-    window.prompt
     const response = await window.electron.invoke("inventory:remove", id)
     if (response.passed) {
       queryClient.invalidateQueries({ queryKey: ["inventory"] })

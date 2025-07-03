@@ -1,9 +1,10 @@
-import OnlyAdmin from "@/components/auth/OnlyAdmin";
+import OnlyAllowed from "@/components/auth/OnlyAllowed";
 import Modal from "@/components/Modal/Modal";
 import useClickOutside from "@/hooks/useClickOutside";
 import getFarmer from "@/services/fetchFarmer";
-import { sessionState } from "@/store/store";
+import { sessionState, settingsState } from "@/store/store";
 import notify from "@/utils/ToastHelper";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { AtSign, Phone, User, X } from "lucide-react";
 import React, { useState, useRef, useEffect, Suspense } from "react";
@@ -18,13 +19,11 @@ type Delivery = {
   deliveryDate: string;
   quantity: number;
   berryType: string;
-  servedBy?:
-    | {
-        id: number;
-        firstName: string;
-        lastName: string;
-      }
-    | string;
+  servedBy?: {
+      id: number;
+      firstName: string;
+      lastName: string;
+    } | string;
 };
 
 type Advance = {
@@ -49,6 +48,8 @@ type Farmer = {
 };
 
 const FarmerProfile: React.FC = () => {
+  const queryClient = useQueryClient()
+  const settings = useRecoilState(settingsState)[0]
   const [activeTab, setActiveTab] = useState<"deliveries" | "advances">(
     "deliveries"
   );
@@ -56,7 +57,6 @@ const FarmerProfile: React.FC = () => {
     null
   );
   const user = useRecoilState(sessionState)[0]
-  const [farmerInfo, setFarmerInfo] = useState<Farmer | null>(null);
   const [showDeliveryMoadal, setShowDeliveryModal] = useState(false);
   const [showAdvanceModal, setShowAdvanceModal] = useState(false)
 
@@ -74,28 +74,38 @@ const FarmerProfile: React.FC = () => {
     if (!params.id) return;
     const id = Number(params.id);
     const data = await getFarmer(id);
-    if (data) setFarmerInfo(data);
+    return data
   }
 
-  useEffect(() => {
-    getFarmerData()
-  }, [params.id]);
+  const {
+    data: farmerInfo,
+    isLoading,
+    isFetched
+  } = useQuery<Farmer>({
+    queryKey: [`farmer-${params.id}-info`],
+    queryFn: async() => {
+      console.log("Fetching data now")
+      if (params.id) {
+        return  await window.electron.invoke("get-farmer", {id: params.id})
+      }
+      return null
+    }
+  })
 
   const deliveries = farmerInfo?.deliveries || [];
   const advances = farmerInfo?.advances || [];
 
   const AddDeliveryModal = () => {
-    const user = useRecoilState(sessionState)[0];
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const formData = new FormData(e.currentTarget);
       const data = Object.fromEntries(formData as any);
-      data.servedBy = user?.id;
       data.farmerNumber = farmerInfo?.farmerNumber;
 
-      const res = await window.electron.invoke("add-delivery", data);
+      const res = await window.electron.invoke("add-delivery", {deliveryData: data, harvestName: settings.farm.currentHarvest, printerToUse: settings.printing.defaultReceiptPrinter});
       notify(res.passed, res.message);
       if (res.passed) {
+        queryClient.invalidateQueries({ queryKey: [`farmer-${params.id}-info`]})
         setTimeout(() => {
           setShowDeliveryModal(false);
         }, 1500);
@@ -249,12 +259,14 @@ const FarmerProfile: React.FC = () => {
             <h2 className="text-2xl font-semibold text-primary">
               Delivery Records
             </h2>
-            <button
-              onClick={() => setShowDeliveryModal(true)}
-              className="px-4 py-2 bg-accent text-white font-medium rounded shadow hover:bg-opacity-90 transition"
-            >
-              + Add Delivery
-            </button>
+            <OnlyAllowed levels={["Clerk", "Manager"]}>
+              <button
+                onClick={() => setShowDeliveryModal(true)}
+                className="px-4 py-2 bg-accent text-white font-medium rounded shadow hover:bg-opacity-90 transition"
+              >
+                + Add Delivery
+              </button>
+            </OnlyAllowed>
           </div>
 
           {deliveries.length ? (
@@ -266,9 +278,9 @@ const FarmerProfile: React.FC = () => {
                     "Quantity",
                     "Grade",
                     "Served By",
-                    <OnlyAdmin key="edit">
+                    <OnlyAllowed levels={["Clerk", "Manager"]}>
                       <span>Edit</span>
-                    </OnlyAdmin>,
+                    </OnlyAllowed>
                   ].map((h, i) => (
                     <th
                       key={i}
@@ -292,14 +304,18 @@ const FarmerProfile: React.FC = () => {
                         ? `${d.servedBy.firstName} ${d.servedBy.lastName}`
                         : "Unknown"}
                     </td>
+                    <OnlyAllowed levels={["Clerk", "Manager"]}>
                     <td className="px-4 py-3">
-                      <button
-                        className="text-accent hover:underline"
-                        onClick={() => setEditDelivery(d)}
-                      >
-                        Edit
-                      </button>
+                      {(new Date() - new Date(d.deliveryDate)) <= 24 * 3600 * 1000 && (
+                        <button
+                          className="text-accent hover:underline"
+                          onClick={() => setEditDelivery(d)}
+                        >
+                          Edit
+                        </button>
+                      )}
                     </td>
+                    </OnlyAllowed>
                   </tr>
                 ))}
               </tbody>
@@ -316,16 +332,18 @@ const FarmerProfile: React.FC = () => {
             <h2 className="text-2xl font-semibold text-primary">
               Advance Payments
             </h2>
-            <button onClick={() => setShowAdvanceModal(true)} className="px-4 py-2 bg-accent text-white font-medium rounded shadow hover:bg-opacity-90 transition">
-              + Add Advance
-            </button>
+            <OnlyAllowed levels={["Clerk", "Manager"]} key="Add">              
+              <button onClick={() => setShowAdvanceModal(true)} className="px-4 py-2 bg-accent text-white font-medium rounded shadow hover:bg-opacity-90 transition">
+                + Add Advance
+              </button>
+            </OnlyAllowed>
           </div>
 
           {advances.length ? (
             <table className="w-full divide-y divide-secondary">
               <thead className="bg-secondary bg-opacity-10">
                 <tr>
-                  {["Given", "Due", "Amount", "Reason", "Status", "Edit"].map(
+                  {["Given", "Amount", "Reason", "Status"].map(
                     (h, i) => (
                       <th
                         key={i}
@@ -341,7 +359,6 @@ const FarmerProfile: React.FC = () => {
                 {advances.map((a, idx) => (
                   <tr key={idx} className="hover:bg-background transition">
                     <td className="px-4 py-3">{formatDate(new Date(a.dateGiven), "dd/mm/yyyy")}</td>
-                    <td className="px-4 py-3">{formatDate(new Date(a.dateExpected), "dd/mm/yyyy")}</td>
                     <td className="px-4 py-3">
                       Ksh {a.amount.toLocaleString()}
                     </td>
@@ -358,11 +375,6 @@ const FarmerProfile: React.FC = () => {
                       >
                         {a.status}
                       </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <button className="text-accent hover:underline">
-                        Edit
-                      </button>
                     </td>
                   </tr>
                 ))}

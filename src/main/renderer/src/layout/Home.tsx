@@ -11,7 +11,7 @@ import { sessionState } from "@/store/store";
 import defaultAvatar from "@/assets/images/defaultUser.png"
 import useClickOutside from "@/hooks/useClickOutside";
 import { formatDistanceToNow } from "date-fns";
-import OnlyAdmin from "@/components/auth/OnlyAdmin";
+import OnlyAllowed from "@/components/auth/OnlyAllowed";
 
 interface DropdownMenuProps {}
 
@@ -104,14 +104,14 @@ const Home = () => {
                       Settings
                     </button>
                   </NavLink>
-                  <OnlyAdmin>
+                  <OnlyAllowed>
                     <NavLink to="/admin">
                       <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none">
                         <User className="mr-2 h-4 w-4" />
                         Admin Panel
                       </button>
                     </NavLink>
-                  </OnlyAdmin>
+                  </OnlyAllowed>
                   {!user &&(
                     <NavLink to="/auth/clerk/login" state={{ from: location }}>
                       <button className="w-full flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none">

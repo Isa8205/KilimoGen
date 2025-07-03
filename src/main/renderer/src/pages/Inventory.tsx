@@ -10,6 +10,10 @@ import { sessionState } from '@/store/store';
 import { formatDistanceToNow } from 'date-fns';
 import { useQuery } from "@tanstack/react-query";
 
+interface InventoryItem {
+  id: number;
+}
+
 export function Inventory() {
   const navigate = useNavigate();
   // Get the session data
@@ -22,7 +26,7 @@ export function Inventory() {
     data: inventoryData,
     isLoading,
     isError,
-    refetch: inventoryRefetchFn,
+    refetch
   } = useQuery({
     queryKey: ["inventory"],
     queryFn: async () => {
@@ -31,7 +35,7 @@ export function Inventory() {
   });
 
   // Copilot: Use React Query data
-  const items = inventoryData?.items || [];
+  const items: InventoryItem = inventoryData?.items || [];
 
   return (
     <section className="text-gray-800">

@@ -73,7 +73,7 @@ app.whenReady().then(async () => {
   });
   // Register all the ipc handlers
   registerAuthHandlers(user)
-  registerDeliveryHandlers()
+  registerDeliveryHandlers(user)
   registerHarvestHandlers()
   registerSeasonHandlers()
   registerCalenderHandlers()

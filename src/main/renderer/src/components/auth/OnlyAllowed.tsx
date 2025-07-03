@@ -2,13 +2,14 @@ import { sessionState } from "@/store/store"
 import React, { ReactElement } from "react"
 import { useRecoilState } from "recoil"
 
-interface OnlyAdminProps {
+interface OnlyAllowedProps {
+    levels: string[]
     children: ReactElement
 }
-const OnlyAdmin: React.FC<OnlyAdminProps> = ({children}) => {
+const OnlyAdmin: React.FC<OnlyAllowedProps> = ({children, levels}) => {
     const user = useRecoilState(sessionState)[0]
 
-    if (user?.role !== "Manager") {
+    if (!levels.includes(user?.role as any)) {
         return
     }
 

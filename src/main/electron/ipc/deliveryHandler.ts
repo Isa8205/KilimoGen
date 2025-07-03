@@ -11,7 +11,7 @@ import printReceipt from "@/main/utils/printReceipt";
 import sendSms from "@/main/utils/sendSms";
 import { ipcMain } from "electron";
 
-export default function registerDeliveryHandlers() {
+export default function registerDeliveryHandlers(user: any) {
   ipcMain.handle("get-deliveries", async (event, data) => {
     const harvestName = data.harvestName;
     const seasonName = data.seasonName;
@@ -106,7 +106,7 @@ export default function registerDeliveryHandlers() {
       const clerkRepository = AppDataSource.getRepository(Clerk);
       const seasonRepository = AppDataSource.getRepository(Season);
 
-      const clerkId = deliveryData.servedBy;
+      const clerkId = user.id;
       const servedBy = await clerkRepository.findOneBy({ id: clerkId });
       if (!servedBy) {
         const res = { passed: false, message: "You should be logged in!" };
@@ -184,7 +184,7 @@ export default function registerDeliveryHandlers() {
       return res;
     } catch (err) {
       console.log(err);
-      const res = { passed: false, error: err, message: "Failed. Try again" };
+      const res = { passed: false, error: err, message: "Encounterd an error. Try again" };
       return res;
     }
   });

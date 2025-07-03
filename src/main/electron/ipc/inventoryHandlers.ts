@@ -251,8 +251,8 @@ export default function registerInventoryHandlers(app: Electron.App, currentUser
         message: "Are you sure you want to remove this item?",
       })
 
-      if (!confirmed) {
-        return
+      if (confirmed.response !== 0) {
+        return { passed: false, message: "Item deletion cancelled." }
       }
 
       const item = await inventoryItemRepository.findOneBy({ id: itemId });
@@ -262,12 +262,22 @@ export default function registerInventoryHandlers(app: Electron.App, currentUser
       }
 
       if (item.images) {
-        const imageList = Array.from(item.images.split(";"));
-        imageList.forEach((image) => {
-          if (fs.existsSync(image)) {
-            fs.unlinkSync(image);
-          } 
-        })
+        const imageList = item.images.split(";");
+        for (const imagePath of imageList) {
+          // Validate path is within expected directory for security
+          if (!path.isAbsolute(imagePath) || !imagePath.includes('Inventory/images')) {
+            console.warn(`Skipping invalid image path: ${imagePath}`);
+            continue;
+          }
+
+          try {
+            if (fs.existsSync(imagePath)) {
+              fs.unlinkSync(imagePath);
+            }
+          } catch (error) {
+            console.error(`Failed to delete image file ${imagePath}:`, error);
+          }
+        }
       }
   
       await inventoryItemRepository.remove(item);
