@@ -4,6 +4,9 @@ import { Season } from "@/main/database/src/entities/Seasons";
 import { ipcMain } from "electron";
 
 function registerHarvestHandlers() {
+  const harvestRepository = AppDataSource.getRepository(Harvest);
+  const seasonRepository = AppDataSource.getRepository(Season);
+
   ipcMain.handle("get-harvests", async () => {
     const harvestRepository = AppDataSource.getRepository(Harvest);
     const harvests = await harvestRepository.find({
@@ -11,23 +14,33 @@ function registerHarvestHandlers() {
     });
     return harvests;
   });
-  
+
   ipcMain.handle("add-harvest", async (event, harvestData) => {
-    const { name, startDate, endDate, seasonId, target, description } =
-      harvestData;
-    const harvestRepository = AppDataSource.getRepository(Harvest);
-    const seasonRepository = AppDataSource.getRepository(Season);
-
-    const harvest = new Harvest();
-    harvest.name = name;
-    (harvest.season as any) = await seasonRepository.findOneBy({
-      id: parseInt(seasonId),
-    });
-    harvest.startDate = startDate;
-    harvest.endDate = endDate;
-    harvest.target = target;
-
     try {
+      const { name, startDate, endDate, seasonId, target, description } =
+        harvestData;
+
+      const lastHarvest = await harvestRepository
+        .createQueryBuilder("harvest")
+        .where("harvest.endDate IS NULL")
+        .andWhere("harvest.seasonId = :seasonId", { seasonId })
+        .orderBy("harvest.startDate", "DESC")
+        .getOne();
+      if (lastHarvest && lastHarvest.endDate === null) {
+        lastHarvest.endDate = new Date();
+        await harvestRepository.save(lastHarvest);
+      }
+      const parentSeason = await seasonRepository.findOneBy({
+        id: parseInt(seasonId),
+      });
+      const harvest = new Harvest();
+      harvest.name = name;
+      harvest.season = parentSeason!;
+      harvest.startDate = startDate;
+        harvest.endDate = endDate ? endDate : null;
+      harvest.target = target;
+      harvest.description = description;
+
       await harvestRepository.save(harvest);
       const res = { passed: true, message: "Harvest added successfully" };
       return res;
@@ -39,4 +52,4 @@ function registerHarvestHandlers() {
   });
 }
 
-export default registerHarvestHandlers
+export default registerHarvestHandlers;

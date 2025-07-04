@@ -6,6 +6,7 @@ import { useState } from "react"
 import { X } from "lucide-react"
 import { ToastContainer } from "react-toastify"
 import notify from "@/utils/ToastHelper"
+import { useQueryClient } from "@tanstack/react-query"
 
 interface AddHarvestModalProps {
   seasonId: number | null
@@ -14,6 +15,7 @@ interface AddHarvestModalProps {
 
 export function AddHarvestModal({ seasonId, onClose }: AddHarvestModalProps) {
   const [sending, setSending] = useState(false)
+  const queryClient = useQueryClient()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -28,6 +30,7 @@ export function AddHarvestModal({ seasonId, onClose }: AddHarvestModalProps) {
       notify(res.passed, res.message)
 
       if (res.passed) {
+        queryClient.invalidateQueries({ queryKey: ["seasons"] })
         onClose()
       }
     } catch (err) {

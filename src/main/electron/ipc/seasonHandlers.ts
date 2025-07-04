@@ -3,6 +3,8 @@ import { Season } from "@/main/database/src/entities/Seasons";
 import { ipcMain } from "electron";
 
 function registerSeasonHandlers() {
+  const seasonRepository = AppDataSource.getRepository(Season);
+
   ipcMain.handle("seasons:get-all", async () => {
     try {
       const seasonRepository = AppDataSource.getRepository(Season);
@@ -24,15 +26,19 @@ function registerSeasonHandlers() {
   });
 
   ipcMain.handle("seasons:add", async (event, seasonData) => {
-    const seasonRepository = AppDataSource.getRepository(Season);
-    const season = new Season();
-    season.name = seasonData.seasonName;
-    season.startDate = seasonData.startDate;
-    season.endDate = seasonData.endDate;
-    season.target = seasonData.target;
-    season.description = seasonData.description;
-
     try {
+      const lastSeason = await seasonRepository.createQueryBuilder("season").where("season.endDate IS NULL").orderBy("season.startDate", "DESC").getOne();
+      if (lastSeason && lastSeason.endDate === null) {
+        lastSeason.endDate = new Date()
+        await seasonRepository.save(lastSeason)
+      }
+      const season = new Season();
+      season.name = seasonData.seasonName;
+      season.startDate = seasonData.startDate;
+      season.endDate = seasonData.endDate ? seasonData.endDate : null;
+      season.target = seasonData.target;
+      season.description = seasonData.description;
+
       await seasonRepository.save(season);
       const res = { passed: true, message: "Seson created successfuly" };
       return res;

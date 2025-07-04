@@ -10,10 +10,10 @@ export class Season {
     name: string;
 
     @Column()
-    startDate: number;
+    startDate: Date;
 
-    @Column()
-    endDate: number;
+    @Column({nullable: true})
+    endDate: Date;
 
     @Column({nullable: true})
     target: number;

@@ -8,7 +8,7 @@ src/main/database2
 .env
 
 # Files
-database.sqlite
+db.sqlite
 test.html
 
 # Logs

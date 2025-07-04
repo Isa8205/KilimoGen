@@ -12,11 +12,14 @@ export class Harvest {
     @Column()
     startDate: Date;
 
-    @Column()
+    @Column({nullable: true, default: null})
     endDate: Date;
 
     @Column({nullable: true})
     target: number;
+
+    @Column({nullable: true})
+    description: string;
 
     @ManyToOne(() => Season, season => season.harvests)
     season: Season

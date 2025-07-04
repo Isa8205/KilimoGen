@@ -1,17 +1,27 @@
 import "dotenv/config";
 import { AppDataSource } from "@/main/database/src/data-source";
-import { Clerk } from "@/main/database/src/entities/Clerk";
 import { ipcMain } from "electron";
-import bcrypt from "bcrypt";
-import path from "path";
 import fs from "fs";
 import fileEncryption from "@/main/utils/fileEncryption";
+import { User } from "@/main/database/src/entities/auth/User";
 
 const registerClerkHandlers = (app: Electron.App) => {
-  ipcMain.handle("get-clerks", async () => {
+  const userRepository = AppDataSource.getRepository(User)
+
+  ipcMain.handle("clerks:get-all", async () => {
     try {
-      const clerkRepository = AppDataSource.getRepository(Clerk);
-      const clerks = await clerkRepository.find({select: ["id", "firstName", "lastName", "email", "avatar", "phone"]});
+      const clerks = await userRepository.createQueryBuilder("user")
+      .leftJoinAndSelect("user.role", "role")
+      .select([
+        "user.id",
+        "user.firstName",
+        "user.lastName",
+        "user.email",
+        "user.avatar",
+        "user.phone"
+      ])
+      .where("role.name = :roleName", {roleName: "Clerk"})
+      .getMany()
 
       const data = clerks.map((clerk) => {
         if (clerk.avatar) {
@@ -29,51 +39,6 @@ const registerClerkHandlers = (app: Electron.App) => {
       return [];
     }
   })
-  
-  ipcMain.handle("add-clerk", async (event, clerkData) => {
-    try {
-      const filename = Date.now().toString();
-      let profilePath = "";
-      if (clerkData.avatar.data.length > 0) {
-        const savePath = path.join(
-          app.getPath("userData"),
-          `uploads/data/Clerks`
-        );
-        const buffer = Buffer.from(clerkData.avatar.data);
-        const encryptedBuffer = fileEncryption.encryptFile(buffer, process.env.SECRET_KEY!);
-  
-        if (!fs.existsSync(savePath)) {
-          fs.mkdirSync(savePath, { recursive: true });
-        }
-  
-        const filePath = path.join(savePath, `${filename}.png`);
-        fs.writeFileSync(filePath, encryptedBuffer);
-        profilePath = filePath;
-      }
-  
-      // Hashing of the password
-      const saltRounds = 10;
-      const hashPassword = await bcrypt.hash(clerkData.password, saltRounds);
-  
-      const clerkRepository = AppDataSource.getRepository(Clerk);
-      const clerk = new Clerk();
-      clerk.firstName = clerkData.firstName;
-      clerk.middleName = clerkData.middleName;
-      clerk.lastName = clerkData.lastName;
-      clerk.username = clerkData.username;
-      clerk.email = clerkData.email;
-      clerk.phone = clerkData.phone;
-      clerk.gender = clerkData.gender;
-      clerk.password = hashPassword;
-      clerk.avatar = profilePath;
-  
-      const res = await clerkRepository.save(clerk);
-      return { passed: true, message: "Clerk added successfully" };
-    } catch (err) {
-      console.log(err);
-      return { passed: false, message: "Failed. Check details and try again" };
-    }
-  });
 };
 
 export default registerClerkHandlers

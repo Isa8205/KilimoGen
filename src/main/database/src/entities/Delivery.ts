@@ -2,6 +2,7 @@ import { PrimaryGeneratedColumn, Column, Entity, ManyToOne } from "typeorm";
 import { Clerk } from "./Clerk";
 import { Farmer } from "@/main/database/src/entities/Farmer";
 import { Harvest } from "@/main/database/src/entities/Harverst";
+import { User } from "@/main/database/src/entities/auth/User";
 
 @Entity('deliveries', {name: "Delivery"})
 export class Delivery {
@@ -12,7 +13,7 @@ export class Delivery {
     deliveryCode: string
 
     @Column({type: 'date'})
-    deliveryDate: string
+    deliveryDate: Date
 
     @Column()
     quantity: number
@@ -21,10 +22,7 @@ export class Delivery {
     berryType: string
 
     @ManyToOne(() => Clerk)
-    servedBy: Clerk;
-
-    @Column()
-    farmerNumber: number;
+    servedBy: User;
   
     @ManyToOne(() => Farmer, farmer => farmer.deliveries)
     farmer: Farmer;

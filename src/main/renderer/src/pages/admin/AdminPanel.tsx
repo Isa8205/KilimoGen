@@ -88,7 +88,7 @@ export default function AdminPanel() {
   } = useQuery({
     queryKey: ["clerks"],
     queryFn: async () => {
-      return await window.electron.invoke("get-clerks")
+      return await window.electron.invoke("clerks:get-all")
     },
   })
   // Copilot: Use React Query data
@@ -112,7 +112,7 @@ export default function AdminPanel() {
           <p className="text-sm opacity-90">{season.description}</p>
         </div>
 
-        <div className="p-6">
+        <div className="p-6 max-h-[300px] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <h3 className="font-medium text-primary">Harvests</h3>
             <button
@@ -161,7 +161,7 @@ export default function AdminPanel() {
                       </li>
                       <li className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-primary/60"></span>
-                        End date: {formatDate(harvest.endDate, "dd-MMM-yyy")}
+                        End date: {harvest.endDate instanceof Date ? formatDate(harvest.endDate, "dd-MMM-yyy") : "current"}
                       </li>
                       <li className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-primary/60"></span>
@@ -196,7 +196,7 @@ export default function AdminPanel() {
     isError: isOverviewsError,
     refetch: refetchOvervies
   } = useQuery({
-    queryKey: ["overviews"],
+    queryKey: ["admin-panel-overviews"],
     queryFn: async() => {
       const res = await window.electron.invoke("admin:get-overview")
       return res.data

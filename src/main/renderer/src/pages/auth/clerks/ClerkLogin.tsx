@@ -32,7 +32,6 @@ export default function ClerkLogin() {
   };
 
   return (
-    <Suspense>
     <div className="min-h-screen flex items-center justify-center bg-gray-100 text-gray-900">
       <ToastContainer />
 
@@ -74,6 +73,7 @@ export default function ClerkLogin() {
               Username or email
             </label>
             <input
+              autoFocus
               type="text"
               name="username"
               id="username"
@@ -135,6 +135,5 @@ export default function ClerkLogin() {
         </form>
       </div>
     </div>
-    </Suspense>
   );
 }

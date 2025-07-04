@@ -14,6 +14,8 @@ import { DataSource } from "typeorm";
 import { Report } from '@/main/database/src/entities/Report';
 import { InventoryTransaction } from '@/main/database/src/entities/InventoryTransaction';
 import { StorageFacility } from '@/main/database/src/entities/StorageFacility';
+import { User } from '@/main/database/src/entities/auth/User';
+import { Role } from '@/main/database/src/entities/auth/Role';
 
 export const AppDataSource = new DataSource({
   type: "sqlite",
@@ -21,6 +23,8 @@ export const AppDataSource = new DataSource({
   synchronize: true,
   logging: true,
   entities: [
+    User,
+    Role,
     Advance,
     Clerk,
     Delivery,

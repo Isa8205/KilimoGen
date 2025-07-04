@@ -33,12 +33,14 @@ export default function ClerkRegister() {
 
     setIsSubmitting(true);
 
-    const res = await window.electron.invoke("add-clerk", data);
+    const res = await window.electron.invoke("auth:register-clerk", data);
 
-    if (res) {
-      notify(res.passed, res.message);
-      setIsSubmitting(false);
+    notify(res.passed, res.message);
+    if (res.passed) {
+      document.querySelector("form")?.reset()
+      setProfileImage(null)
     }
+    setIsSubmitting(false);
   };
 
   // Handle Profile Image Upload
@@ -209,7 +211,7 @@ export default function ClerkRegister() {
                 id="phone"
                 placeholder="7123456789"
                 required
-                className="mt-1 bg-white border border-gray-300 border-l-0 rounded-r-md p-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
+                className="mt-1 flex-1 bg-white border border-gray-300 border-l-0 rounded-r-md p-2 focus:border-orange-500 focus:ring-1 focus:ring-orange-500"
               />
             </div>
           </div>

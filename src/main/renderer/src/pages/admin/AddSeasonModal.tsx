@@ -6,6 +6,7 @@ import { useState } from "react"
 import { X } from "lucide-react"
 import { ToastContainer } from "react-toastify"
 import notify from "@/utils/ToastHelper"
+import { useQueryClient } from "@tanstack/react-query"
 
 interface AddSeasonModalProps {
   onClose: () => void
@@ -13,6 +14,7 @@ interface AddSeasonModalProps {
 
 export function AddSeasonModal({ onClose }: AddSeasonModalProps) {
   const [sending, setSending] = useState(false)
+  const queryClient = useQueryClient()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -26,6 +28,7 @@ export function AddSeasonModal({ onClose }: AddSeasonModalProps) {
       notify(res.passed, res.message)
 
       if (res.passed) {
+        queryClient.invalidateQueries({ queryKey: ["seasons"] })
         onClose()
       }
     } catch (err) {
@@ -75,7 +78,6 @@ export function AddSeasonModal({ onClose }: AddSeasonModalProps) {
                 type="date"
                 name="endDate"
                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                required
               />
             </div>
           </div>

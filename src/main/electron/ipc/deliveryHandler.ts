@@ -1,4 +1,5 @@
 import { AppDataSource } from "@/main/database/src/data-source";
+import { User } from "@/main/database/src/entities/auth/User";
 import { Clerk } from "@/main/database/src/entities/Clerk";
 import { Delivery } from "@/main/database/src/entities/Delivery";
 import { Farmer } from "@/main/database/src/entities/Farmer";
@@ -11,7 +12,12 @@ import printReceipt from "@/main/utils/printReceipt";
 import sendSms from "@/main/utils/sendSms";
 import { ipcMain } from "electron";
 
-export default function registerDeliveryHandlers(user: any) {
+export default function registerDeliveryHandlers(user: any) {  
+  const farmerRepository = AppDataSource.getRepository(Farmer);
+  const deliveryRepository = AppDataSource.getRepository(Delivery);
+  const userRepository = AppDataSource.getRepository(User);
+  const seasonRepository = AppDataSource.getRepository(Season);
+  
   ipcMain.handle("get-deliveries", async (event, data) => {
     const harvestName = data.harvestName;
     const seasonName = data.seasonName;
@@ -101,13 +107,9 @@ export default function registerDeliveryHandlers(user: any) {
       const deliveryData = data.deliveryData;
       const printerToUse = data.printerToUse;
       const harvestName = data.harvestName;
-      const farmerRepository = AppDataSource.getRepository(Farmer);
-      const deliveryRepository = AppDataSource.getRepository(Delivery);
-      const clerkRepository = AppDataSource.getRepository(Clerk);
-      const seasonRepository = AppDataSource.getRepository(Season);
 
       const clerkId = user.id;
-      const servedBy = await clerkRepository.findOneBy({ id: clerkId });
+      const servedBy = await userRepository.findOneBy({ id: clerkId });
       if (!servedBy) {
         const res = { passed: false, message: "You should be logged in!" };
         return res;
@@ -130,14 +132,13 @@ export default function registerDeliveryHandlers(user: any) {
       const date = new Date();
 
       if (farmer) {
-        (delivery.deliveryCode = generateCode()),
-          (delivery.deliveryDate = date.toISOString());
+        delivery.deliveryCode = generateCode(),
+        delivery.deliveryDate = new Date();
         delivery.quantity = parseInt(deliveryData.quantity);
         delivery.berryType = deliveryData.berryType;
-        delivery.farmerNumber = farmerNumber;
         delivery.farmer = farmer;
         delivery.servedBy = servedBy;
-        (delivery.harvest as any) = harverst;
+        delivery.harvest = harverst;
 
         await deliveryRepository.save(delivery);
         const farmerDeliveries = await farmerRepository
@@ -147,7 +148,8 @@ export default function registerDeliveryHandlers(user: any) {
           .setParameter("farmerNumber", farmerNumber)
           .getOne();
         const receiptData = {
-          date: delivery.deliveryDate
+          date: new Date(delivery.deliveryDate)
+            .toISOString()
             .slice(0, 10)
             .split("-")
             .reverse()

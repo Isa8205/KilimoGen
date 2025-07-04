@@ -57,7 +57,8 @@ const FarmerRegister = () => {
         if (passed) {
           setSendingState(false);
           notify(passed, message);
-          form.reset();
+          document.querySelector("form")?.reset();
+          
         } else {
           setSendingState(false);
           notify(passed, message);
