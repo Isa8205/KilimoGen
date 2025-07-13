@@ -6,18 +6,28 @@ import {
   RefreshCcw,
   Search,
 } from "lucide-react";
-import React, { Suspense, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Loader from "../components/Loaders/Loader1";
 import { NavLink } from "react-router-dom";
 import Fuse from "fuse.js";
 import { motion } from "framer-motion";
 import { useRecoilState } from "recoil";
-import { farmersState, sessionState } from "@/store/store";
+import { sessionState } from "@/store/store";
 import errorImage from "@/assets/images/backgrounds/404_2.svg";
 import Modal from "@/components/Modal/Modal";
 import { toast } from "react-toastify";
 import { properties } from "@/utils/ToastHelper";
 import { useQuery } from "@tanstack/react-query";
+
+interface Farmer {
+  id: number;
+  firstName: string;
+  lastName: string;
+  farmerNumber: number;
+  phone: string;
+  totalDeliveries: number;
+  avatar?: string; // Base64 encoded image
+}
 
 export function Farmers() {
   // Get the session data
@@ -54,7 +64,7 @@ export function Farmers() {
   };
   const fuse = new Fuse(dbfarmers, { keys: ["firstName", "lastName", "id"] });
   const filteredFarmers = fuse.search(query).map((result) => result.item);
-  const farmers = query ? filteredFarmers : dbfarmers;
+  const farmers: Farmer[] = query ? filteredFarmers : dbfarmers;
 
   // Filter dropdown and functionality
   const [selectedFilter, setSelectedFilter] = useState("All");

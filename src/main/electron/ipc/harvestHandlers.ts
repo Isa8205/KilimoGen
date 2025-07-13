@@ -8,7 +8,6 @@ function registerHarvestHandlers() {
   const seasonRepository = AppDataSource.getRepository(Season);
 
   ipcMain.handle("get-harvests", async () => {
-    const harvestRepository = AppDataSource.getRepository(Harvest);
     const harvests = await harvestRepository.find({
       relations: ["season"],
     });

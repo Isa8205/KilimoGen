@@ -132,8 +132,7 @@ export default function registerDeliveryHandlers(user: any) {
       const date = new Date();
 
       if (farmer) {
-        delivery.deliveryCode = generateCode(),
-        delivery.deliveryDate = new Date();
+        delivery.deliveryCode = generateCode();        delivery.deliveryDate = new Date();
         delivery.quantity = parseInt(deliveryData.quantity);
         delivery.berryType = deliveryData.berryType;
         delivery.farmer = farmer;

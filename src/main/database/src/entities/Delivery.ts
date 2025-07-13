@@ -21,7 +21,7 @@ export class Delivery {
     @Column()
     berryType: string
 
-    @ManyToOne(() => Clerk)
+    @ManyToOne(() => User)
     servedBy: User;
   
     @ManyToOne(() => Farmer, farmer => farmer.deliveries)

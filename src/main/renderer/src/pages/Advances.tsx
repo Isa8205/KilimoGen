@@ -252,7 +252,7 @@ export default function Advances() {
                     </td>
                     <td className="p-2">
                       <button
-                        onClick={() => handlePay(advance.id)}
+                        onClick={() => handlePay()}
                         className={`inline-flex items-center gap-1 p-1 ${
                           advance.status === "Paid"
                             ? "text-gray-400 cursor-not-allowed"

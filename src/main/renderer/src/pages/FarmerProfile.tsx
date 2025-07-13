@@ -306,7 +306,7 @@ const FarmerProfile: React.FC = () => {
                     </td>
                     <OnlyAllowed levels={["Clerk", "Manager"]}>
                     <td className="px-4 py-3">
-                      {(new Date() - new Date(d.deliveryDate)) <= 24 * 3600 * 1000 && (
+                      {(new Date().getTime() - new Date(d.deliveryDate).getTime()) <= 24 * 3600 * 1000 && (
                         <button
                           className="text-accent hover:underline"
                           onClick={() => setEditDelivery(d)}

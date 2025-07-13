@@ -1,30 +1,33 @@
 {
-    "appId": "com.codversetech.kilimogen",
-    "productName": "Kilimogen",	
-    "directories": {
-      "output": "release",
-      "buildResources": "assets"
-    },
-    "files": [
-      "dist/main/**/*",
-      "dist/renderer/**/*",
-      "node_modules/**/*",
-      "package.json"
-    ],
-    "extraResources": [
-      {
-        "from": "database.sqlite",
-        "to": "database.sqlite"
-      }
-    ],
-    "win": {
-      "target": "nsis"
-    },
-    "mac": {
-      "target": "dmg"
-    },
-    "linux": {
-      "target": "AppImage"
+  "appId": "com.codversetech.kilimogen",
+  "productName": "Kilimogen",
+  "directories": {
+    "output": "release",
+    "buildResources": "assets"
+  },
+  "files": [
+    "dist/**/*",
+    "dist/renderer/**/*",
+    "node_modules/**/*",
+    "package.json"
+  ],
+  "asarUnpack": [
+    "node_modules/better-sqlite3/build/Release/*.node"
+  ],
+  "extraResources": [
+    {
+      "from": "node_modules/better-sqlite3/build/Release/",
+      "to": "resources/better-sqlite3/",
+      "filter": ["*.node"]
     }
+  ],
+  "win": {
+    "target": "nsis"
+  },
+  "mac": {
+    "target": "dmg"
+  },
+  "linux": {
+    "target": "AppImage"
   }
-  
+}

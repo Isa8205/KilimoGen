@@ -2,10 +2,25 @@
 import { AppSettings } from "@/types/appSettings";
 import { atom } from "recoil";
 
+const defaultSettings: AppSettings = {
+  general: {
+    theme: 'dark',
+  },
+  farm: {
+    currentHarvest: '',
+    currentSeason: '',
+  },
+  printing: {
+    defaultReceiptPrinter: '',
+    defaultReportPrinter: '',
+  }
+
+}
+
 // Settings
 export const settingsState = atom<AppSettings>({
   key: 'settings',
-  default: JSON.parse(localStorage.getItem('userSettings') as any)
+  default: defaultSettings,
 })
 
 // Session data 

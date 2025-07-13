@@ -531,7 +531,7 @@ export default function InventoryItemDetail() {
                   itemId: item.id,
                   newLocationId: Number(newLocationId),
                   newSection: newSection,
-                }).then((res) => {
+                }).then((res: {passed: boolean; message: string}) => {
                   notify(res.passed, res.message)
                   if (res.passed) {
                     setTimeout(() => {

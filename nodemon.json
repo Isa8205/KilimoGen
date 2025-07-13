@@ -1,5 +1,5 @@
 {
-    "ext": "js,ts",
+    "ext": "js,ts,.env",
     "ignore": ["dist", "node_modules", "src/main/renderer"],
     "exec": "tsc && tsc-alias && electron ."
   }

@@ -3,21 +3,28 @@
 import type React from "react"
 import { useQuery } from "@tanstack/react-query"
 
-import { Suspense, useEffect, useMemo, useRef, useState } from "react"
-import { ArrowLeft, ArrowRight, ChevronDown, Download, Eye, Filter, RefreshCcw, Search } from "lucide-react"
-import { report } from "process"
+import { useMemo, useRef, useState } from "react"
+import { ArrowLeft, ArrowRight, ChevronDown, Download, Filter, RefreshCcw, Search } from "lucide-react"
 import useClickOutside from "@/hooks/useClickOutside"
 import Modal from "@/components/Modal/Modal"
 import notify, { properties } from "@/utils/ToastHelper"
 import { toast } from "react-toastify"
 import { formatDate } from "date-fns"
 
+interface Report {
+  id: number;
+  reportName: string;
+  reportType: string; // e.g., "Financial", "Inventory", etc.
+  dateGenerated: string; // ISO date string
+  name: string;
+  date: string;
+  status: string;
+}
 export default function ReportsComponent() {
   // Copilot: Use React Query for reports
   const {
     data: reportsData,
     isLoading,
-    isError,
     refetch,
   } = useQuery({
     queryKey: ["reports"],
@@ -26,12 +33,10 @@ export default function ReportsComponent() {
     },
   });
   // Copilot: Use React Query data
-  const reports = reportsData?.reports || [];
+  const reports: Report[] = reportsData?.reports || [];
 
   const [currentPage, setCurrentPage] = useState(1)
   const [searchQuery, setSearchQuery] = useState("")
-  const [sortColumn, setSortColumn] = useState<'id' | 'name' | 'date' | 'type'>("date")
-  const [sortDirection, setSortDirection] = useState("desc")
   const [selectedReports, setSelectedReports] = useState<number[]>([])
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [selectedFilter, setSelectedFilter] = useState("All")

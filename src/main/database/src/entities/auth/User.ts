@@ -1,5 +1,5 @@
 import { Role } from "@/main/database/src/entities/auth/Role";
-import { Column, Entity, JoinTable, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity("users", {name: "User"})
 export class User {
@@ -33,7 +33,7 @@ export class User {
     @Column({unique: true})
     phone: number
 
-    @ManyToOne(() => Role, role => role.users)
+    @ManyToMany(() => Role, role => role.users)
     @JoinTable()
     role: Role    
 }

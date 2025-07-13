@@ -11,17 +11,17 @@
     "build": "vite build && npm run build:main",
     "build:main": "node esbuild.config.js",
     "dev": "nodemon",
-    "package": "cross-env NODE_ENV=production electron-builder"
+    "package": "tsc -b && tsc-alias && cross-env NODE_ENV=production electron-builder"
   },
   "dependencies": {
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^3.0.2",
+    "better-sqlite3": "^11.10.0",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "nodemon": "^3.1.9",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "reflect-metadata": "^0.1.14",
-    "sqlite3": "^5.1.7",
     "typeorm": "^0.3.21",
     "uuid": "^11.1.0"
   },
@@ -42,7 +42,6 @@
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.15",
     "typescript": "^5.8.3",
-    "vite": "^6.2.4",
     "wait-on": "^8.0.3"
   }
 }

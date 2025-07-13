@@ -1,8 +1,5 @@
-// build.js
-require("dotenv").config();
 const esbuild = require("esbuild");
 const path = require("path");
-const { types } = require("util");
 
 const isProd = process.env.NODE_ENV === "production";
 

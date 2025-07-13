@@ -1,7 +1,7 @@
 import { AppDataSource } from "@/main/database/src/data-source";
 import { Clerk } from "@/main/database/src/entities/Clerk";
 import { BrowserWindow, ipcMain } from "electron";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { createSession, destroySession } from "@/main/electron/session/sessinStore";
 import {
@@ -142,15 +142,48 @@ export const registerAuthHandlers = (currentUser: any, app: Electron.App) => {
   // --------------------------
   //  Admin related logic
   // --------------------------
-  ipcMain.handle("admin-register", async (event, data) => {
+  ipcMain.handle("auth:manager-register", async (event, managerData) => {
     try {
-      const clerkRepository = AppDataSource.getRepository(Clerk);
-      const clerk = clerkRepository.create(data);
-      await clerkRepository.save(clerk);
-      return { message: "Clerk added successfully", success: true };
+       const role = await roleRepository.findOneBy({name: "Manager"})
+      const filename = Date.now().toString();
+      let profilePath = "";
+      if (managerData.avatar.data.length > 0) {
+        const savePath = path.join(
+          app.getPath("userData"),
+          `uploads/data/Managers`
+        );
+        const buffer = Buffer.from(managerData.avatar.data);
+        const encryptedBuffer = fileEncryption.encryptFile(buffer, process.env.SECRET_KEY!);
+  
+        if (!fs.existsSync(savePath)) {
+          fs.mkdirSync(savePath, { recursive: true });
+        }
+  
+        const filePath = path.join(savePath, `${filename}.png`);
+        fs.writeFileSync(filePath, encryptedBuffer);
+        profilePath = filePath;
+      }
+  
+      // Hashing of the password
+      const saltRounds = 10;
+      const hashPassword = await bcrypt.hash(managerData.password, saltRounds);
+
+      const manager = new User();
+      manager.firstName = managerData.firstName;
+      manager.middleName = managerData.middleName;
+      manager.lastName = managerData.lastName;
+      manager.username = managerData.username;
+      manager.email = managerData.email;
+      manager.phone = managerData.phone;
+      manager.gender = managerData.gender;
+      manager.password = hashPassword;
+      manager.avatar = profilePath;
+      manager.role = role!
+
+      await userRepository.save(manager)
     } catch (err) {
       console.log(err);
-      return { message: "Failed to add clerk", success: false };
+      return { message: "Failed to add manger. Try again", success: false };
     }
   });
 

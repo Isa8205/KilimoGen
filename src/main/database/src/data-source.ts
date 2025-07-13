@@ -16,12 +16,26 @@ import { InventoryTransaction } from '@/main/database/src/entities/InventoryTran
 import { StorageFacility } from '@/main/database/src/entities/StorageFacility';
 import { User } from '@/main/database/src/entities/auth/User';
 import { Role } from '@/main/database/src/entities/auth/Role';
+import { config } from 'dotenv';
+import { app } from 'electron';
+import path from 'path';
+import fs from 'fs';
+
+config();
+
+const dbPath = path.join(app.getPath("userData"), "db")
+// Ensure the directory exists
+app.on('ready', () => {
+  fs.mkdirSync(dbPath, { recursive: true });
+});
+const dbFilePath = path.join(dbPath, 'db.sqlite');
 
 export const AppDataSource = new DataSource({
-  type: "sqlite",
-  database: "db.sqlite",
+  type: "better-sqlite3",
+  database: dbFilePath,
   synchronize: true,
-  logging: true,
+  logging: process.env.NODE_ENV !== 'production',
+  driver: require('better-sqlite3'),
   entities: [
     User,
     Role,

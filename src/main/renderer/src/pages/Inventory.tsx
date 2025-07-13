@@ -12,6 +12,28 @@ import { useQuery } from "@tanstack/react-query";
 
 interface InventoryItem {
   id: number;
+  itemName: string;
+  category: string;
+  currentQuantity: number;
+  unit: string;
+  location: { id: number; name: string } | null;
+  zone: string;
+  lastUpdated: string;
+  origin: string;
+  minStock: number;
+  maxStock: number;
+  description: string;
+  unitWeight: string;
+  dateReceived: Date;
+  receivedBy: { firstName: string; lastName: string };
+  images?: string; // Base64 encoded image
+  transactions: {
+    id: number;
+    note: string;
+    quantity: number;
+    updatedAt: string;
+    updateType: "restock" | "allocation" | "transfer";
+  }[]; 
 }
 
 export function Inventory() {
@@ -35,7 +57,7 @@ export function Inventory() {
   });
 
   // Copilot: Use React Query data
-  const items: InventoryItem = inventoryData?.items || [];
+  const items: InventoryItem[] = inventoryData?.items || [];
 
   return (
     <section className="text-gray-800">

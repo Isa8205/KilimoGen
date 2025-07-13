@@ -1,5 +1,5 @@
 import { User } from "@/main/database/src/entities/auth/User";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity("roles", {name: "Role"})
 export class Role {
@@ -12,6 +12,6 @@ export class Role {
     @Column({default: false})
     isDeleted: boolean;
 
-    @OneToMany(() => User, user => user.role)
+    @ManyToMany(() => User, user => user.role)
     users: User[];
 }
